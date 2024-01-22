@@ -20,9 +20,9 @@ There is also a [user interface configuration](Plugins/org.joinmastodon/ui-confi
 
 Finally, there is the JavaScript that implements the plug-in. The most complex example is the one used for [Mastodon](Plugins/org.joinmastodon/plugin.js) (138 lines). A simpler example checks the [USGS Earthquake Summary](Plugins/gov.usgs.earthquake/plugin.js) (41 lines).
 
-We feel confident that this simple API can be used to handle any information on the public Internet. ([Even XML!](Plugins/xml.feed/plugin.js)
+We feel confident that this simple API can be used to handle any information on the public Internet. ([Even XML!](Plugins/xml.feed/plugin.js))
 
-Ideally, these plug-ins should be user installable. For example, if you have custom built Raspberry Pi monitoring your garden's water tank, it could be added to Tapestry. The challenge to accomplish that goal is building a secure distribution system.
+Ideally, these plug-ins should be user installable. For example, if you have custom built Raspberry Pi monitoring your garden's water tank, it could be added to Tapestry to give periodic updates in a timeline. The challenge to accomplish that goal is building a secure distribution system for plug-ins.
 
 ## Kickstarter
 
