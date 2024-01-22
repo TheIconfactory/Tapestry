@@ -4,11 +4,15 @@
 
 This public repository contains information about the Project Tapestry prototype. It does not contain the source code for the app.
 
+Note also that this is a **work-in-progress** and details are certain to change.
+
 ## Documentation
 
 A JavaScript-based API is used by Tapestry to gather information from the public Internet.
 
 [This document](Documentation/API.md) explains the variables, objects, actions, and functions that are available for JavaScript development. A section at the end explains how plug-ins are configured.
+
+There is also a PDF with the [prototype architecture](Documentation/Architecture.pdf). Everything in dark blue is covered in the document above.
 
 ## Plugins
 
