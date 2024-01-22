@@ -1,0 +1,7 @@
+{
+	"id": "com.gocomics",
+	"display_name": "GoComics",
+	"needsVerification": true,
+	"providesAttachments": true,
+	"check_interval": 300
+}

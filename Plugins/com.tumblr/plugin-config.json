@@ -1,0 +1,12 @@
+{
+	"id": "com.tumblr",
+	"display_name": "Tumblr",
+	"oauth_authorize": "https://www.tumblr.com/oauth2/authorize",
+	"oauth_token": "https://api.tumblr.com/v2/oauth2/token",
+	"oauth_type": "code",
+	"oauth_code_key": "code",
+	"oauth_scope": "basic+offline_access",
+	"oauth_grant_type": "authorization_code",
+	"oauth_http_redirect": true,
+	"check_interval": 300
+}

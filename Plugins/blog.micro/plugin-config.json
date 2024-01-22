@@ -1,0 +1,12 @@
+{
+	"id": "blog.micro",
+	"display_name": "Micro.blog",
+	"oauth_authorize": "/indieauth/auth",
+	"oauth_token": "/indieauth/token",
+	"oauth_type": "code",
+	"oauth_code_key": "code",
+	"oauth_scope": "create",
+	"oauth_grant_type": "authorization_code",
+	"canPost": true,
+	"check_interval": 300
+}

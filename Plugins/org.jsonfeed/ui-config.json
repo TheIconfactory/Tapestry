@@ -1,0 +1,11 @@
+{
+	"inputs": [
+		{
+			"name": "site",
+			"type": "url",
+			"prompt": "Feed URL",
+			"validate_as": "url",
+			"placeholder": "https://foo.com/feed.json"
+		}
+	]
+}

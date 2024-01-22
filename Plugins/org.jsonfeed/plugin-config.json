@@ -1,0 +1,6 @@
+{
+	"id": "org.jsonfeed",
+	"display_name": "JSON Feed",
+	"needsVerification": true,
+	"check_interval": 300
+}

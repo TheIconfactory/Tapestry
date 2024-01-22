@@ -1,0 +1,7 @@
+{
+	"id": "social.bsky",
+	"display_name": "Bluesky",
+	"jwt_authorize": "/xrpc/com.atproto.server.createSession",
+	"jwt_refresh": "/xrpc/com.atproto.server.refreshSession",
+	"check_interval": 300
+}

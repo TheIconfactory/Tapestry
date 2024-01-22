@@ -1,0 +1,5 @@
+{
+	"id": "gov.noaa.nesdis.star",
+	"display_name": "NOAA Satellite",
+	"check_interval": 300
+}

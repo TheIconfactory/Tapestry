@@ -1,0 +1,14 @@
+{
+	"id": "org.joinmastodon",
+	"display_name": "Mastodon",
+	"register": "/api/v1/apps",
+	"oauth_authorize": "/oauth/authorize",
+	"oauth_token": "/oauth/token",
+	"oauth_type": "code",
+	"oauth_code_key": "code",
+	"oauth_scope": "read+write+push",
+	"oauth_grant_type": "authorization_code",
+	"providesAttachments": true,
+	"canPost": true,
+	"check_interval": 300
+}

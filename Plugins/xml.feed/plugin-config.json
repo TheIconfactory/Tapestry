@@ -1,0 +1,6 @@
+{
+	"id": "xml.feed",
+	"display_name": "Blog Feed",
+	"needsVerification": true,
+	"check_interval": 300
+}

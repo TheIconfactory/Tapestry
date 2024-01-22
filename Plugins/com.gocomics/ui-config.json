@@ -1,0 +1,10 @@
+{
+	"inputs": [
+		{
+			"name": "comicId",
+			"type": "text",
+			"prompt": "Comic ID",
+			"placeholder": "nancy"
+		},
+	]
+}
