@@ -16,7 +16,7 @@ function identify() {
 
 // https://bsky.social/xrpc/app.bsky.feed.getTimeline?algorithm=reverse-chronological&limit=22
 
-const uriPrefix = "https://staging.bsky.app";
+const uriPrefix = "https://bsky.app";
 
 function load() {
 	sendRequest(site + "/xrpc/app.bsky.feed.getTimeline?algorithm=reverse-chronological&limit=22")
@@ -28,7 +28,7 @@ function load() {
 		for (const item of items) {
 			const author = item.post.author;
 			const authorUri = uriPrefix + "/profile/" + author.handle;
-			const name = author.displayName
+			const name = author.displayName;
 			const creator = Creator.createWithUriName(authorUri, name);
 			creator.avatar = author.avatar;
 			
@@ -36,7 +36,22 @@ function load() {
 			
 			const date = new Date(record.createdAt);
 			
-			const content = record.text;
+			var content = record.text.replaceAll("\n", "\n\r");
+			
+			if (record.facets != null) {
+				// NOTE: Done in reverse order because we're modifying string in place.
+				for (const facet of record.facets.reverse()) {
+					if (facet.features.length > 0 && facet.features[0].$type == "app.bsky.richtext.facet#link") {
+						const prefix = content.substring(0, facet.index.byteStart);
+						const suffix = content.substring(facet.index.byteEnd);
+						const text = content.substring(facet.index.byteStart, facet.index.byteEnd);
+						const link = "<a href=\"" + facet.features[0].uri + "\">" + text + "</a>";
+						content = prefix + link + suffix;
+					}
+				}
+			}
+
+			content = "<p>" + content.replaceAll("\n\r", "<br/>") + "</p>";
 
 			var attachments = null;
 			if (item.post.embed != null) {
