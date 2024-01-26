@@ -51,7 +51,7 @@ function load() {
 				}
 			}
 
-			content = "<p>" + content.replaceAll("\n\r", "<br/>") + "</p>";
+			content = "<p>" + content.replaceAll("\n\r\n\r", "<br/>") + "</p>";
 
 			var attachments = null;
 			if (item.post.embed != null) {
