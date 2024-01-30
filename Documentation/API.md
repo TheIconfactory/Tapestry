@@ -7,6 +7,8 @@ The following document describes the JavaScript API that Tapestry uses to proces
 
 This is a work-in-progress and details are certain to change.
 
+Note that JavaScript in plug-ins must conform to the [ECMA-262 specification](http://www.ecma-international.org/publications/standards/Ecma-262.htm). This specification defines the language and it's basic [functions](https://262.ecma-international.org/14.0/#sec-function-properties-of-the-global-object) and [objects](https://262.ecma-international.org/14.0/#sec-constructor-properties-of-the-global-object). Additions that support the Document Object Model (DOM) and other browser functions are not available.
+
 ## Variables
 
 Any variables that have been specified in `ui-config.json` are set before the script is executed. For example, the Mastodon plug-in specifies the following inputs:
