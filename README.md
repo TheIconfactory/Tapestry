@@ -28,6 +28,10 @@ We feel confident that this simple API can be used to handle any information on 
 
 Ideally, these plug-ins should be user installable. For example, if you have custom built Raspberry Pi monitoring your garden's water tank, it could be added to Tapestry to give periodic updates in a timeline. The challenge to accomplish that goal is building a secure distribution system for plug-ins.
 
+## Tapestry Loom
+
+You can use the plug-ins above with our developer tool: [Tapestry Loom](https://files.iconfactory.net/software/beta/Tapestry-Loom.zip). Download the macOS app and copy the plug-ins above to the `plugins` folder (click the "Open Plugins…" button to get there quickly). You can also add your own plug-ins to that folder and restart the app to test them out. 
+
 ## Kickstarter
 
-We are running a Kickstarter to fund a native iOS app based on this prototype. If the idea of a configurable and customizable Internet excites you, please check it out!
+We are running a [Kickstarter](https://iconfactory.com/kickstarter) to fund a native iOS app based on this prototype. If the idea of a configurable and customizable Internet excites you, please [check it out](https://iconfactory.com/kickstarter)!
