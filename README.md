@@ -32,6 +32,10 @@ Ideally, these plug-ins should be user installable. For example, if you have cus
 
 You can use the plug-ins above with our developer tool: [Tapestry Loom](https://files.iconfactory.net/software/beta/Tapestry-Loom.zip). Download the macOS app and copy the plug-ins above to the `plugins` folder (click the "Open Plugins…" button to get there quickly). You can also add your own plug-ins to that folder and restart the app to test them out. 
 
+## Screencast
+
+For an in-depth look at what you can do with these files, take a moment to watch [Project Tapestry - Weaving An API](https://www.youtube.com/watch?v=H5C2_zwy8cQ) on YouTube. This 30 minute video will help you get set up, show some tip and tricks, and give you a demo of how they're used in an iOS app.
+
 ## Kickstarter
 
 We are running a [Kickstarter](https://iconfactory.com/kickstarter) to fund a native iOS app based on this prototype. If the idea of a configurable and customizable Internet excites you, please [check it out](https://iconfactory.com/kickstarter)!
