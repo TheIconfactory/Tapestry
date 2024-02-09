@@ -1,0 +1,5 @@
+{
+	"id": "org.nginx",
+	"display_name": "NGINX",
+	"check_interval": 300
+}

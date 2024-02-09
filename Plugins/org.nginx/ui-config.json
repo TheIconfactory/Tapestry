@@ -1,0 +1,11 @@
+{
+	"inputs": [
+		{
+			"name": "site",
+			"type": "url",
+			"prompt": "Status URL",
+			"validate_as": "url",
+			"placeholder": "https://example.com/basic_status"
+		}
+	]
+}
