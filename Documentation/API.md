@@ -37,7 +37,7 @@ See the Configuration section below for the specification of `ui-config.json` an
 
 ## Objects
 
-The following objects are used to create content for the app:
+The following objects are used to create content for the Tapestry app:
 
 
 ### Post
@@ -129,7 +129,7 @@ A string that provides a placeholder image.
 
 ## Actions
 
-The app will call the following functions in `plugin.js` when it needs the script to read or write data. If no implementation is provided, no action will be performed. For example, a read-only feed does not need to specify `send(post)`.
+The Tapestry app will call the following functions in `plugin.js` when it needs the script to read or write data. If no implementation is provided, no action will be performed. For example, some sources will not need to `identify()` themselves.
 
 All actions are performed asynchronously (using one or more JavaScript Promise objects). An action indicates that it has completed using the `processResults`, `processError`, and `setIdentifier` functions specified below.
 
@@ -170,16 +170,16 @@ _NOTE:_ The `url` is assumed to be properly encoded. Use JavaScript’s `encodeU
   
 ```json
 {
-	"status": 404,
-	"headers": {
+	status: 404,
+	headers: {
 		"last-modified": "Thu, 02 Mar 2023 21:46:29 GMT",
 		"content-length": "15287",
-		"...": "..."
+		...
 	}
 }
 ```
 
-  * For all other successful requests, the string contains the response body. Typically this will be HTML text or a JSON payload. Regular expressions can be used on HTML and `JSON.parse` can be used to build queryable object. In both cases, the data extracted will be returned to the app.
+  * For all other successful requests, the string contains the response body. Typically this will be HTML text or a JSON payload. Regular expressions can be used on HTML and `JSON.parse` can be used to build queryable object. In both cases, the data extracted will be returned to the Tapestry app.
   
 #### EXAMPLE
 
@@ -205,7 +205,7 @@ _NOTE:_ The JavaScript code doesn’t have access to the bearer token (for secur
 
 ### processResults(results, complete)
 
-Sends any data that’s retrieved to the app for display.
+Sends any data that’s retrieved to the Tapestry app for display.
 
   * results: `Array` with `Post` or `Creator` objects.
   * complete: `Boolean` with a flag that indicates that result collection is complete and can be displayed in the app timeline (default is true).
@@ -213,7 +213,7 @@ Sends any data that’s retrieved to the app for display.
 
 ### processError(error)
 
-Sends any error to the app for display
+Sends any error to the Tapestry app for display
 
   * error: `Error` which indicates what went wrong. Will be displayed in the user interface.
 
@@ -363,7 +363,7 @@ Required properties:
 
 Optional properties:
 
-  * register: `String` with endpoint to register app (e.g. "/api/v1/apps").
+  * register: `String` with endpoint to register the Tapestry app (e.g. "/api/v1/apps").
   * oauth\_authorize: `String` with endpoint to authorize account (e.g. "/oauth/authorize").
   * oauth\_token: `String` with endpoint to get bearer token (e.g. "/oauth/token").
   * oauth\_type: `String` with response type parameter (currently, only "code" is supported).
@@ -371,6 +371,9 @@ Optional properties:
   * oauth\_scope: `String` with scope used to register and get token (e.g. "read+write+push").
   * oauth\_grant\_type: `String` with grant type (currently, only "authorization_code" is supported).
   * oauth\_http\_redirect: `Boolean`, with true, the OAuth redirect URI will be "https://iconfactory.com/muxer", otherwise "muxer://oauth" is used.
+  * oauth\_extra\_parameters: `String` with extra parameters for authorization request (e.g. "&duration=permanent&foo=bar")
+  * oauth\_basic\_auth: `Boolean`, with true, the client id and secret will be added to a Basic authentication header when generating or refreshing tokens.
+  * header\_api\_key: `Boolean`, with true, the client id will be used in an X-Api-Key header for all requests.
   * jwt\_authorize: `String` with endpoint to authorize account (e.g. "/xrpc/createSession").
   * jwt\_refresh: `String` with endpoint to refresh account (e.g. "/xrpc/refreshSession").
   * needs\_verification: `Boolean` with true if verification is needed (by calling `identify()`)
@@ -414,7 +417,7 @@ The configuration for the JSON Feed connector is:
  
 ### ui-config.json
 
-The user interface in the app is configured with this file. A connector plug-in can have any number of inputs, specified as an `Array`. Each input has the these required properties:
+The user interface in the Tapestry app is configured with this file. A connector plug-in can have any number of inputs, specified as an `Array`. Each input has the these required properties:
 
   * name: `String` with the name of the input. This value is used to generate variables for `plugin.js`.
   * type: `String` with the type of input (currently, everything is a `String` value).
@@ -508,5 +511,5 @@ function load() {
 }
 ```
 
-This connector took about an hour to write with no prior knowledge of the API or data formats involved. All of the connectors in the current version of the app range in length from about 50 to 200 lines of code (including comments).
+This connector took about an hour to write with no prior knowledge of the API or data formats involved. All of the connectors in the current version of the Tapestry app range in length from about 50 to 200 lines of code (including comments).
 
