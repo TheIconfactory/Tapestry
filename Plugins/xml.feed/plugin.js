@@ -71,10 +71,13 @@ function load() {
 					}
 				}
 			}
-			else {
-				if (feedAttributes.rel == "alternate") {
-					feedUrl = feedAttributes.href;
-				}
+			else if (feedAttributes.rel == "alternate") {
+				feedUrl = feedAttributes.href;
+			} else if (
+				jsonObject.feed.id.startsWith("http://") ||
+				jsonObject.feed.id.startsWith("https://")
+			) {
+				feedUrl = jsonObject.feed.id
 			}
 			const feedName = jsonObject.feed.title;
 			var creator = Creator.createWithUriName(feedUrl, feedName)
