@@ -1,0 +1,6 @@
+{
+	"id": "xml.podcast",
+	"display_name": "Podcast Feed",
+	"needsVerification": true,
+	"check_interval": 300
+}
