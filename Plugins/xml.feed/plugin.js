@@ -114,7 +114,13 @@ function load() {
 				}
 
 				const url = entryUrl;
-				const date = new Date(entry.published); // could also be "entry.updated"
+				let date = null;
+				if (entry.published) {
+					date =  new Date(entry.published);
+				}
+				else if (entry.updated) {
+					date =  new Date(entry.updated);
+				}
 				const content = entry.content;
 				const post = Post.createWithUriDateContent(url, date, content);
 				post.creator = creator;
