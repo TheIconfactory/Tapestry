@@ -1,0 +1,6 @@
+{
+	"id": "com.youtube",
+	"display_name": "YouTube Channel",
+	"needsVerification": true,
+	"check_interval": 300
+}
