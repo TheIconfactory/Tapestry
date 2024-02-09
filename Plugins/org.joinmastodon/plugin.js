@@ -36,7 +36,7 @@ function postForItem(item, date = null) {
 
 	var attachments = null;
 	const mediaAttachments = item["media_attachments"];
-	if (mediaAttachments != null) {
+	if (mediaAttachments != null && mediaAttachments.length > 0) {
 		attachments = []
 		for (const mediaAttachment of mediaAttachments) {
 			const media = mediaAttachment["url"]
@@ -90,7 +90,40 @@ function load() {
 	})
 	.catch((requestError) => {
 		processError(requestError);
-	});	
+	});
+	
+	// NOTE: There needs to be something like the Web Storage API where data (like the account id) can be persisted
+	// across launches of the app. Having to verify the credentials each time to get information that doesn't change
+	// doesn't make sense. This local storage may also be useful for timeline backfills (e.g. to track last ID returned).
+	
+	sendRequest(site + "/api/v1/accounts/verify_credentials")
+	.then((text) => {
+		const jsonObject = JSON.parse(text);
+		
+		const userId = jsonObject["id"];
+
+		sendRequest(site + "/api/v1/accounts/" + userId + "/statuses?limit=30", "GET")
+		.then((text) => {
+			const jsonObject = JSON.parse(text);
+			var results = [];
+			for (const item of jsonObject) {
+				var postItem = item;
+
+				const post = postForItem(postItem);
+
+				results.push(post);
+			}
+			processResults(results, true);
+		})
+		.catch((requestError) => {
+			processError(requestError);
+		});
+
+	})
+	.catch((requestError) => {
+		processError(requestError);
+	});
+
 }
 
 function sendPost(parameters) {
