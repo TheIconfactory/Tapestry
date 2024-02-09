@@ -96,11 +96,16 @@ function load() {
 				let entryUrl = null;
 				if (entryAttributes instanceof Array) {
 					for (const entryAttribute of entryAttributes) {
-					if (entryAttribute.rel == "alternate") {
-						entryUrl = entryAttribute.href;
-						break;
+						if (entryAttribute.rel == "alternate") {
+							entryUrl = entryAttribute.href;
+							break;
+						}
 					}
-				}
+					// Posts need to have a link and if we didn't find one
+					// with rel == "alternate" then we'll use the first link.
+					if (!entryUrl && entryAttributes.length > 0) {
+						entryUrl = entryAttributes[0].href;
+					}
 				}
 				else {
 					if (entryAttributes.rel == "alternate") {
