@@ -69,7 +69,12 @@ function load() {
 				}
 			}
 
-			content = "<p>" + content.replaceAll("\n\n", "<br/>") + "</p>";
+			var finalContent = "";
+			const paragraphs = content.split("\n\n")
+			for (const paragraph of paragraphs) {
+				
+				finalContent += "<p>" + paragraph.replaceAll("\n", "<br/>") + "</p>";
+			}
 
 			var attachments = null;
 			if (item.post.embed != null) {
@@ -94,7 +99,7 @@ function load() {
 			const itemIdentifier = item.post.uri.split("/").pop();
 			const postUri = uriPrefix + "/profile/" + author.handle + "/post/" + itemIdentifier;
 			
-			const post = Post.createWithUriDateContent(postUri, date, content);
+			const post = Post.createWithUriDateContent(postUri, date, finalContent);
 			post.creator = creator;
 			if (attachments != null) {
 				post.attachments = attachments
@@ -140,7 +145,7 @@ function bytesToString(bytes) {
 	// map all integer bytes to their percent escape equivalents
 	const hexes = bytes.map((element) => {
 		return "%" + element.toString(16).padStart(2, "0").toUpperCase();
-	})
+	});
 	const text = hexes.join("");
 
 	// convert the percent escaped UTF-8 to UTF-16
