@@ -71,10 +71,13 @@ function load() {
 					}
 				}
 			}
-			else {
-				if (feedAttributes.rel == "alternate") {
-					feedUrl = feedAttributes.href;
-				}
+			else if (feedAttributes.rel == "alternate") {
+				feedUrl = feedAttributes.href;
+			} else if (
+				jsonObject.feed.id.startsWith("http://") ||
+				jsonObject.feed.id.startsWith("https://")
+			) {
+				feedUrl = jsonObject.feed.id
 			}
 			const feedName = jsonObject.feed.title;
 			var creator = Creator.createWithUriName(feedUrl, feedName)
@@ -93,11 +96,16 @@ function load() {
 				let entryUrl = null;
 				if (entryAttributes instanceof Array) {
 					for (const entryAttribute of entryAttributes) {
-					if (entryAttribute.rel == "alternate") {
-						entryUrl = entryAttribute.href;
-						break;
+						if (entryAttribute.rel == "alternate") {
+							entryUrl = entryAttribute.href;
+							break;
+						}
 					}
-				}
+					// Posts need to have a link and if we didn't find one
+					// with rel == "alternate" then we'll use the first link.
+					if (!entryUrl && entryAttributes.length > 0) {
+						entryUrl = entryAttributes[0].href;
+					}
 				}
 				else {
 					if (entryAttributes.rel == "alternate") {
@@ -106,10 +114,32 @@ function load() {
 				}
 
 				const url = entryUrl;
-				const date = new Date(entry.published); // could also be "entry.updated"
+				let date = null;
+				if (entry.published) {
+					date =  new Date(entry.published);
+				}
+				else if (entry.updated) {
+					date =  new Date(entry.updated);
+				}
 				const content = entry.content;
 				const post = Post.createWithUriDateContent(url, date, content);
 				post.creator = creator;
+				post.attachments = entryAttributes
+				.filter(e => {
+					if (e.type) {
+						// Check for a MIME type that suggests this is an image, e.g. image/jpeg.
+						return e.type.startsWith("image/");
+					} else {
+						return false;
+					}
+				})
+				// Tapestry supports at most four images.
+				.slice(0, 4)
+				.map(link => {
+					const attachment = Attachment.createWithMedia(link.href)
+					attachment.text = link.title || link.text
+					return attachment
+				})
 			
 				results.push(post);
 			}
