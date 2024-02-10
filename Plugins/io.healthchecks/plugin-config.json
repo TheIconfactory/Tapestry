@@ -1,6 +1,6 @@
 {
-	"id": "io.healthchecks",
-	"display_name": "Healthchecks",
-	"check_interval": 300,
-	"header_api_key": true
+  "id": "io.healthchecks",
+  "display_name": "Healthchecks",
+  "check_interval": 300,
+  "header_api_key": true
 }
