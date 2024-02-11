@@ -1,0 +1,18 @@
+{
+  "inputs": [
+    {
+      "name": "creator_username",
+      "type": "text",
+      "prompt": "Creator",
+      "value": "iconfactory",
+      "placeholder": "username"
+    },
+    {
+      "name": "project_slug",
+      "type": "text",
+      "prompt": "Project",
+      "value": "project-tapestry",
+      "placeholder": "slug"
+    }
+  ]
+}
