@@ -83,12 +83,11 @@ function load() {
 			var creator = Creator.createWithUriName(feedUrl, feedName)
 			const feedAvatar = jsonObject.feed.icon;
 			if (feedAvatar != null) {
-				creator.avatar = feedAvatar
+				creator.avatar = feedAvatar;
 			}
 			else {
-				// TODO: This will be more successful if it does not use intermediate paths
-				// e.g. "example.com/favicon.ico" instead of "example.com/feed/favicon.ico"
-				creator.avatar = feedUrl + "/favicon.ico";
+				let baseUrl = feedUrl.split("/").splice(0,3).join("/");
+				creator.avatar = baseUrl + "/favicon.ico";
 			}
 		
 			const entries = jsonObject.feed.entry;
@@ -163,9 +162,8 @@ function load() {
 				creator.avatar = feedAvatar;
 			}
 			else {
-				// TODO: This will be more successful if it does not use intermediate paths
-				// e.g. "example.com/favicon.ico" instead of "example.com/feed/favicon.ico"
-				creator.avatar = feedUrl + "/favicon.ico";
+				let baseUrl = feedUrl.split("/").splice(0,3).join("/");
+				creator.avatar = baseUrl + "/favicon.ico";
 			}
 
 			const items = jsonObject.rss.channel.item;
