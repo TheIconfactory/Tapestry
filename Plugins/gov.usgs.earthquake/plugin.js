@@ -26,7 +26,7 @@ function load() {
 			const longitude = coordinates[0];
 			const mapsUrl = "http://maps.apple.com/?ll=" + latitude + "," + longitude + "&spn=15.0";
 			
-			const content = "<p>" + text + " <a href=\"" + mapsUrl + "\">Open Map</a><p>"
+			const content = "<p>" + text + " <a href=\"" + mapsUrl + "\">Open Map</a></p>"
 			
 			let post = Post.createWithUriDateContent(url, date, content);
 			post.creator = creator;

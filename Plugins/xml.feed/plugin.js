@@ -86,6 +86,8 @@ function load() {
 				creator.avatar = feedAvatar
 			}
 			else {
+				// TODO: This will be more successful if it does not use intermediate paths
+				// e.g. "example.com/favicon.ico" instead of "example.com/feed/favicon.ico"
 				creator.avatar = feedUrl + "/favicon.ico";
 			}
 		
@@ -124,7 +126,7 @@ function load() {
 				const content = entry.content;
 				const post = Post.createWithUriDateContent(url, date, content);
 				post.creator = creator;
-				post.attachments = entryAttributes
+				const attachments = entryAttributes
 				.filter(e => {
 					if (e.type) {
 						// Check for a MIME type that suggests this is an image, e.g. image/jpeg.
@@ -140,7 +142,9 @@ function load() {
 					attachment.text = link.title || link.text
 					return attachment
 				})
-			
+				if (attachments.length > 0) {
+					post.attachments = attachments;
+				}
 				results.push(post);
 			}
 
@@ -159,6 +163,8 @@ function load() {
 				creator.avatar = feedAvatar;
 			}
 			else {
+				// TODO: This will be more successful if it does not use intermediate paths
+				// e.g. "example.com/favicon.ico" instead of "example.com/feed/favicon.ico"
 				creator.avatar = feedUrl + "/favicon.ico";
 			}
 

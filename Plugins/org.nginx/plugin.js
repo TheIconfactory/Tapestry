@@ -48,14 +48,14 @@ function load() {
 		var content = "";
 		content += "<p>Connections: " + currentConnections + "</p>";
 		content += "<p>";
-  		content += 		"Reading: <strong>" + readingConnections + "</strong> (" + toPercentage(readingConnections / currentConnections) + ")" + "<br/>";
- 		content += 		"Writing: <strong>" + writingConnections + "</strong> (" + toPercentage(writingConnections / currentConnections) + ")" + "<br/>";
- 		content += 		"Waiting: <strong>" + waitingConnections + "</strong> (" + toPercentage(waitingConnections / currentConnections) + ")";
+		content += 		"Reading: <strong>" + readingConnections + "</strong> (" + toPercentage(readingConnections / currentConnections) + ")" + "<br/>";
+		content += 		"Writing: <strong>" + writingConnections + "</strong> (" + toPercentage(writingConnections / currentConnections) + ")" + "<br/>";
+		content += 		"Waiting: <strong>" + waitingConnections + "</strong> (" + toPercentage(waitingConnections / currentConnections) + ")";
 		content += "</p>";
 		content += "<p>";
 		content += 		"Total Accepted: <strong>" + acceptedConnections + "</strong><br/>";
- 		content += 		"Total Handled: <strong>" + handledConnections + "</strong> (" + toPercentage(handledConnections / acceptedConnections) + ")" + "<br/>";
- 		content += 		"Requests per Connection: <strong>" + (requests / handledConnections).toFixed(2) + "</strong>";
+		content += 		"Total Handled: <strong>" + handledConnections + "</strong> (" + toPercentage(handledConnections / acceptedConnections) + ")" + "<br/>";
+		content += 		"Requests per Connection: <strong>" + (requests / handledConnections).toFixed(2) + "</strong>";
 		content += "</p>";
 
 		const url = site + "?date=" + date.valueOf();
@@ -67,6 +67,6 @@ function load() {
 	})
 	.catch((requestError) => {
 		processError(requestError);
-	});	
+	});
 
 }
