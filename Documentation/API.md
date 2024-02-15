@@ -559,7 +559,7 @@ As a part of the step to create the timeline preview, images can automatically b
 
 For example, if your plugin provides this content:
 ```
-<p>In this blog post, I will explain our watermark</p>
+<p>In this blog post, I will explain our watermark.</p>
 <p><img src="https://iconfactory.com/images-v8/if_watermark.png"/></p>
 ```
 
