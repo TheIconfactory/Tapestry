@@ -61,7 +61,7 @@ The date and time when the post was created.
 
 #### content: String (required)
 
-Text with HTML formatting that will be displayed for the post.
+Text with HTML formatting that will be displayed for the post. See the end of this document for how this content and its formatting is used.
 
 #### creator: Creator
 
@@ -373,12 +373,11 @@ Optional properties:
   * oauth\_http\_redirect: `Boolean`, with true, the OAuth redirect URI will be "https://iconfactory.com/muxer", otherwise "muxer://oauth" is used.
   * oauth\_extra\_parameters: `String` with extra parameters for authorization request (e.g. "&duration=permanent&foo=bar")
   * oauth\_basic\_auth: `Boolean`, with true, the client id and secret will be added to a Basic authentication header when generating or refreshing tokens.
-  * header\_api\_key: `Boolean`, with true, the client id will be used in an X-Api-Key header for all requests.
   * jwt\_authorize: `String` with endpoint to authorize account (e.g. "/xrpc/createSession").
   * jwt\_refresh: `String` with endpoint to refresh account (e.g. "/xrpc/refreshSession").
   * needs\_verification: `Boolean` with true if verification is needed (by calling `identify()`)
   * can\_post: `Boolean` with true if connector can post.
-  * provides\_attachments: `Boolean` with true if connector generates attachments, otherwise post-processing of HTML content will be used to capture images & video.
+  * provides\_attachments: `Boolean` with true if connector generates attachments directly, otherwise post-processing of HTML content will be used to capture images & video.
   * check\_interval: `Number` with number of seconds between load requests (currently unimplemented).
  
 _NOTE:_ The oauth\_authorize, oauth\_token, jwt\_authorize, and jwt\_refresh endpoints can be relative or absolute URLs. Relative paths use the `site` variable in `ui-config.json` as a base (allowing a single connector to support multiple federated servers, like with Mastodon). Absolute paths allow different domains to be used for the initial authorize and token generation (as with Tumblr).
@@ -512,4 +511,63 @@ function load() {
 ```
 
 This connector took about an hour to write with no prior knowledge of the API or data formats involved. All of the connectors in the current version of the Tapestry app range in length from about 50 to 200 lines of code (including comments).
+
+## HTML Content
+
+### How Tapestry uses HTML
+
+Tapestry's `Post` object uses HTML as its native content type. The `content` property will be used in two ways:
+
+  1. To preview the post in the main timeline. A limited number of words (100-200) in the content will be displayed as formatted text. HTML tags can be used to influence this formatting (e.g. `<strong>` making bold text). Any content that won’t fit in the available space will end with "More…".
+  2. The post’s detail view will display the full HTML content with styling provided by Tapestry’s current theme (e.g. dark vs. light). This content will be displayed as a web view.
+
+Some HTML tags won’t appear in the preview. Things like `<table>`, `<ul>`, or `<hr/>` will only appear in the detail view. Our hope is that for most use cases, this will be fine. It’s rare to begin HTML with these kinds of tags, so previewing them is unnecessary. Additionally, the detail view will use a full WebKit rendering engine, so it can display any content not in the preview.
+
+### HTML Preview Tags
+
+In the first case, speed is of the essence. Timeline scrolling peformance can only be achieved with a subset of HTML that is converted to formatted text. In this context, think of your content text more like Markdown formatting than full HTML formatting.
+
+The following tags are supported:
+
+  * `<p>` to start a paragraph.
+  * `<strong>, <b>` for **strongly emphasized** text.
+  * `<em>, <i>` for _emphasized_ text.
+  * `<a>` for [linked](https://example.com) text.
+  * `<img>` for inline attachments (see below).
+  * `<blockquote>` for quoted text.
+  * `<br>` for a newline in the context of a paragraph. Ignored outside a paragraph.
+
+For example, if your plugin provides the following `content`:
+
+```
+<p><b>Bold</b>, <i>italic</i>, <b><i>both</i></b>,<br/> and <a href="#">link</a>.</p>`
+```
+
+Tapestry will render a preview and detail view like this:
+
+
+> **Bold**, _italic_, **_both_**,
+> and [link](#).
+
+As with all HTML, unclosed tags will provide unpredictable results. Close your tags.
+
+### HTML Inline Attachments
+
+Some attachments are easier to deal with as inline content. For example, a blog feed may contain several `<img>` tags that you want to see as images in the timeline.
+
+As a part of the step to create the timeline preview, images can automatically be extracted from the HTML content and assigned as `Attachment` objects.
+
+For example, if your plugin provides this content:
+```
+<p>In this blog post, I will explain our watermark</p>
+<p><img src="https://iconfactory.com/images-v8/if_watermark.png"/></p>
+```
+
+Tapestry will create an attachment for this image:
+
+<img width="46" height="46" src="https://iconfactory.com/images-v8/if_watermark.png"/>
+
+If the `<img>` tag includes an `alt` attribute, that text will be included in the attachment and used to improve accessibility in the timeline.
+
+This behavior can be disabled with `"providesAttachments": true` in `plugin-config.json`. The Mastodon plug-in is an example of where this is used because the API provides media attachments directly.
 
