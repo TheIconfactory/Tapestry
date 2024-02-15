@@ -1,0 +1,24 @@
+{
+  "inputs": [
+    {
+      "name": "site",
+      "type": "url",
+      "prompt": "Site",
+      "validate_as": "url",
+      "value": "https://healthchecks.io",
+      "placeholder": "https://domain.tld"
+    },
+    {
+      "name": "project_api_key",
+      "type": "text",
+      "prompt": "Project API key",
+      "placeholder": "uuid"
+    },
+    {
+      "name": "uuid",
+      "type": "text",
+      "prompt": "Check UUID",
+      "placeholder": "uuid"
+    }
+  ]
+}
