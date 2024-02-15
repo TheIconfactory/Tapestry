@@ -32,7 +32,7 @@ Ideally, these plug-ins should be user installable. For example, if you have cus
 
 You can use the plug-ins above with our developer tool: [Tapestry Loom](https://files.iconfactory.net/software/beta/Tapestry-Loom.zip). Download the macOS app and copy the plug-ins above to the `plugins` folder (click the "Open Plugins…" button to get there quickly). You can also add your own plug-ins to that folder and restart the app to test them out. 
 
-For more help, we suggest watching the screencast below then reviewing the [Tapestry Loom - User Guide](Documentation/Tapestry+Loom+-+User+Guide.md).
+For more help, we suggest watching the screencast below then reviewing the [Tapestry Loom - User Guide](Documentation/Tapestry%20Loom%20-%20User%20Guide.md).
 
 ## Screencast
 
