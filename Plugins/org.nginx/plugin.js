@@ -46,16 +46,16 @@ function load() {
 		creator.avatar = avatar;
 
 		var content = "";
-		content += "<p>Connections: " + currentConnections + "</p>";
-		content += "<p>";
-		content += 		"Reading: <strong>" + readingConnections + "</strong> (" + toPercentage(readingConnections / currentConnections) + ")" + "<br/>";
-		content += 		"Writing: <strong>" + writingConnections + "</strong> (" + toPercentage(writingConnections / currentConnections) + ")" + "<br/>";
-		content += 		"Waiting: <strong>" + waitingConnections + "</strong> (" + toPercentage(waitingConnections / currentConnections) + ")";
-		content += "</p>";
-		content += "<p>";
-		content += 		"Total Accepted: <strong>" + acceptedConnections + "</strong><br/>";
-		content += 		"Total Handled: <strong>" + handledConnections + "</strong> (" + toPercentage(handledConnections / acceptedConnections) + ")" + "<br/>";
-		content += 		"Requests per Connection: <strong>" + (requests / handledConnections).toFixed(2) + "</strong>";
+		content += "<p>Connections: " + currentConnections + "</p>\n";
+		content += "<p>\n";
+		content += "	Reading: <strong>" + readingConnections + "</strong> (" + toPercentage(readingConnections / currentConnections) + ")" + "<br/>\n";
+		content += "	Writing: <strong>" + writingConnections + "</strong> (" + toPercentage(writingConnections / currentConnections) + ")" + "<br/>\n";
+		content += "	Waiting: <strong>" + waitingConnections + "</strong> (" + toPercentage(waitingConnections / currentConnections) + ")\n";
+		content += "</p>\n";
+		content += "<p>\n";
+		content += "	Total Accepted: <strong>" + acceptedConnections + "</strong><br/>\n";
+		content += "	Total Handled: <strong>" + handledConnections + "</strong> (" + toPercentage(handledConnections / acceptedConnections) + ")" + "<br/>\n";
+		content += "	Requests per Connection: <strong>" + (requests / handledConnections).toFixed(2) + "</strong>\n";
 		content += "</p>";
 
 		const url = site + "?date=" + date.valueOf();
