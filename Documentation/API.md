@@ -546,7 +546,7 @@ For example, if your plugin provides the following `content`:
 Tapestry will render a preview and detail view like this:
 
 
-> **Bold**, _italic_, **_both_**,
+> **Bold**, _italic_, **_both_**,<br/>
 > and [link](#).
 
 As with all HTML, unclosed tags will provide unpredictable results. Close your tags.
