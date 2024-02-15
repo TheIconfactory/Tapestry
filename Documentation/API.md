@@ -174,7 +174,7 @@ _NOTE:_ The `url` is assumed to be properly encoded. Use JavaScript’s `encodeU
 	headers: {
 		"last-modified": "Thu, 02 Mar 2023 21:46:29 GMT",
 		"content-length": "15287",
-		...
+		"...": "..."
 	}
 }
 ```
