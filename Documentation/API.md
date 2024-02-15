@@ -540,7 +540,7 @@ The following tags are supported:
 For example, if your plugin provides the following `content`:
 
 ```
-<p><b>Bold</b>, <i>italic</i>, <b><i>both</i></b>,<br/> and <a href="#">link</a>.</p>`
+<p><b>Bold</b>, <i>italic</i>, <b><i>both</i></b>,<br/> and <a href="#">link</a>.</p>
 ```
 
 Tapestry will render a preview and detail view like this:
