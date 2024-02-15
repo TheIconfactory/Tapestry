@@ -170,8 +170,8 @@ _NOTE:_ The `url` is assumed to be properly encoded. Use JavaScript’s `encodeU
   
 ```json
 {
-	status: 404,
-	headers: {
+	"status": 404,
+	"headers": {
 		"last-modified": "Thu, 02 Mar 2023 21:46:29 GMT",
 		"content-length": "15287",
 		"...": "..."
