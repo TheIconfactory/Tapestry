@@ -63,7 +63,7 @@ This list shows the results returned after calling the `load()` action in the pl
 
 ## Post Details
 
-The details of the currently selected `Post` in the results is displayed below the list. The post’s `Creator` and `Attachment`’s are also displayed.
+The details of the currently selected `Post` in the results is displayed below the list. The post’s `Creator` and `Attachment`’s are also displayed.
 
 When appropriate, a button is displayed to open links in your browser. A thumbnail preview of any image is also provided when possible.	
 
