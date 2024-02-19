@@ -1,6 +1,8 @@
 
 // xml.podcast
 
+// Apple requirements: https://podcasters.apple.com/support/823-podcast-requirements
+
 function identify() {
 	console.log("identify")
 	sendRequest(site)
