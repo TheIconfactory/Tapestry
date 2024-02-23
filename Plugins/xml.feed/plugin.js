@@ -125,24 +125,26 @@ function load() {
 				const content = entry.content;
 				const post = Post.createWithUriDateContent(url, date, content);
 				post.creator = creator;
-				const attachments = entryAttributes
-				.filter(e => {
-					if (e.type) {
-						// Check for a MIME type that suggests this is an image, e.g. image/jpeg.
-						return e.type.startsWith("image/");
-					} else {
-						return false;
+				if (entryAttributes instanceof Array) {
+					const attachments = entryAttributes
+					.filter(e => {
+						if (e.type) {
+							// Check for a MIME type that suggests this is an image, e.g. image/jpeg.
+							return e.type.startsWith("image/");
+						} else {
+							return false;
+						}
+					})
+					// Tapestry supports at most four images.
+					.slice(0, 4)
+					.map(link => {
+						const attachment = Attachment.createWithMedia(link.href)
+						attachment.text = link.title || link.text
+						return attachment
+					})
+					if (attachments.length > 0) {
+						post.attachments = attachments;
 					}
-				})
-				// Tapestry supports at most four images.
-				.slice(0, 4)
-				.map(link => {
-					const attachment = Attachment.createWithMedia(link.href)
-					attachment.text = link.title || link.text
-					return attachment
-				})
-				if (attachments.length > 0) {
-					post.attachments = attachments;
 				}
 				results.push(post);
 			}
