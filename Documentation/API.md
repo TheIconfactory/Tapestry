@@ -370,7 +370,7 @@ Optional properties:
   * oauth\_code\_key: `String` with code result from authorize endpoint (e.g "code").
   * oauth\_scope: `String` with scope used to register and get token (e.g. "read+write+push").
   * oauth\_grant\_type: `String` with grant type (currently, only "authorization_code" is supported).
-  * oauth\_http\_redirect: `Boolean`, with true, the OAuth redirect URI will be "https://iconfactory.com/muxer", otherwise "muxer://oauth" is used.
+  * oauth\_http\_redirect: `Boolean`, with true, the OAuth redirect URI will be "https://iconfactory.com/tapestry-oauth", otherwise "tapestry://oauth" is used.
   * oauth\_extra\_parameters: `String` with extra parameters for authorization request (e.g. "&duration=permanent&foo=bar")
   * oauth\_basic\_auth: `Boolean`, with true, the client id and secret will be added to a Basic authentication header when generating or refreshing tokens.
   * jwt\_authorize: `String` with endpoint to authorize account (e.g. "/xrpc/createSession").
