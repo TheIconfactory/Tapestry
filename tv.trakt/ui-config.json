@@ -1,0 +1,32 @@
+{
+  "inputs": [
+    {
+      "name": "website",
+      "type": "url",
+      "prompt": "Website",
+      "validate_as": "url",
+      "value": "https://trakt.tv",
+      "placeholder": "https://domain.tld"
+    },
+    {
+      "name": "site",
+      "type": "url",
+      "prompt": "API",
+      "validate_as": "url",
+      "value": "https://api.trakt.tv",
+      "placeholder": "https://api.domain.tld"
+    },
+    {
+      "name": "traktApiKey",
+      "type": "text",
+      "prompt": "Trakt API key",
+      "placeholder": "client_id"
+    },
+    {
+      "name": "tmdbApiKey",
+      "type": "text",
+      "prompt": "TMDB API key",
+      "placeholder": "key"
+    }
+  ]
+}
