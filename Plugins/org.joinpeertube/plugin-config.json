@@ -1,0 +1,5 @@
+{
+	"id": "org.joinpeertube",
+	"display_name": "PeerTube",
+	"register": "/api/v1/apps"
+}
