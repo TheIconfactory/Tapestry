@@ -5,7 +5,7 @@ function identify() {
 }
 
 function load() {
-	sendRequest(site + "/api/v1/videos?channelId=" + channelID + "&perPage=2&page=1")
+	sendRequest(site + "/api/v1/videos?channelId=" + channelID + "&perPage=20&page=1")
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		
