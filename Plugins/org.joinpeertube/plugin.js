@@ -17,11 +17,11 @@ function load() {
 			const date = new Date(video.createdAt);
 			const content = video.name + "<br><p>" + video.description + "</p>";
 			
-			const displayName = video.account.displayName;
-			const accountURL = video.account.url;
+			const displayName = video.channel.displayName;
+			const channelURL = video.channel.url;
 			
-			const creator = Creator.createWithUriName(accountURL, displayName);
-			creator.avatar = "https://" + video.account.host + video.account.avatars[1].path;
+			const creator = Creator.createWithUriName(channelURL, displayName);
+			creator.avatar = "https://" + video.channel.host + video.channel.avatars[1].path;
 			
 			var post = Post.createWithUriDateContent(url, date, content);
 			
