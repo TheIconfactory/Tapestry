@@ -15,7 +15,7 @@ function load() {
 		for (const video of videos) {
 			const url = video.url;
 			const date = new Date(video.createdAt);
-			const content = video.name + "\n\n" + video.description;
+			const content = video.name + "<br><p>" + video.description + "</p>";
 			
 			const displayName = video.account.displayName;
 			const accountURL = video.account.url;
