@@ -128,12 +128,12 @@ A string that provides a placeholder image.
 
 #### authorizationHeader: String
 
-This string provides a template for accessing the `media` defined above. The following items in the string will be replaced with values managed by the Tapestry app:
+This string provides an authorization template for accessing protected `media`. If a value is provided, the "Authorization" header will be set with the following items being replaced with values managed by the Tapestry app:
 
   * `__ACCESS_TOKEN__` The access token returned when authenticating with OAuth or JWT.
   * `__CLIENT_ID__` The client ID used to identify the plugin with the API.
   
-For example, you could set a string value of `Bearer __ACCESS_TOKEN__` and an "Authorization: Bearer 1234-dead-beef-5678" header would be used when retrieving a `media` image.
+For example, you could set a string value of `Bearer __ACCESS_TOKEN__` and an "Authorization: Bearer dead-beef-1234" header would be used when retrieving a `media` image.
 
 ## Actions
 
@@ -188,7 +188,14 @@ _NOTE:_ The `url` is assumed to be properly encoded. Use JavaScript’s `encodeU
 ```
 
   * For all other successful requests, the string contains the response body. Typically this will be HTML text or a JSON payload. Regular expressions can be used on HTML and `JSON.parse` can be used to build queryable object. In both cases, the data extracted will be returned to the Tapestry app.
-  
+
+_NOTE:_ The `parameters` string can contain patterns that will be replaced with values managed by the Tapestry app:
+
+  * `__ACCESS_TOKEN__` The access token returned when authenticating with OAuth or JWT.
+  * `__CLIENT_ID__` The client ID used to identify the plugin with the API.
+
+For example, if you need to "POST" the client ID, you would use "client=\_\_CLIENT\_ID\_\_&foo=1&bar=something".
+
 #### EXAMPLE
 
 A Mastodon user’s identity is determined by sending a request to verify credentials:
@@ -377,9 +384,24 @@ Required properties:
   * id: `String` with reverse domain name for uniqueness (e.g. org.joinmastodon or blog.micro)
   * displayName: `String` with name that will be displayed in user interface
 
+Recommended properties:
+
+  * site: `String` with the primary endpoint for the plugin's API. This parameter is used several different contexts:
+  
+  	- If not provided, the user will be prompted for a URL during setup. If you are accessing an API with a single endpoint, please provide a value. In cases where each instance of the source will need its own site, for example a Mastodon instance or an RSS feed, do not provide a value and let the user can set it up.
+  	- The value will also be used as a base URL for relative URLs (see the _NOTE_ below).
+  	- The configured value or a value provided by the user will be provided as as JavaScript variable.
+  	- The configured value or a value provided by the user will be used to control when Tapestry sends an "Authorization" HTTP header. If the request's scheme is "https" on the default port (443) and the same domain or subdomain of `site`, the header will be included. 
+  
 Optional properties:
 
-  * site: `String` with the primary endpoint for the plugin's API. If not provided, the user will be prompted for a URL during setup. If you are accessing an API with a single endpoint, please provide this property. In cases where each instance of the source will need its own site, for example Mastodon or an RSS feed, do not provide a value. This value may also be used as a base URL as explained in the NOTE below.
+  * needs\_verification: `Boolean` with true if verification is needed (by calling `identify()`)
+  * provides\_attachments: `Boolean` with true if connector generates attachments directly, otherwise post-processing of HTML content will be used to capture images & video.
+  * authorization\_header: `String` with a template for the authorization header. If no value is specified, "Bearer \_\_ACCESS\_TOKEN\_\_" will be used. See below for options
+  * check\_interval: `Number` with number of seconds between load requests (currently unimplemented).
+
+Optional OAuth properties:
+
   * register: `String` with endpoint to register the Tapestry app (e.g. "/api/v1/apps").
   * oauth\_authorize: `String` with endpoint to authorize account (e.g. "/oauth/authorize").
   * oauth\_token: `String` with endpoint to get bearer token (e.g. "/oauth/token").
@@ -391,14 +413,22 @@ Optional properties:
   * oauth\_basic\_auth: `Boolean`, with true, the client id and secret will be added to a Basic authentication header when generating or refreshing tokens.
   * oauth\_extra\_parameters: `String` with extra parameters for authorization request (e.g. "&duration=permanent&foo=bar")
   * needs\_api\_keys: `Boolean`, with true, user interface will prompt for OAuth API keys and store them securely in the user's keychain. Ignored if a `register` endpoint is specified or if there is no `oauth\_authorize` endpoint.
+
+Optional JWT properties:
+
   * jwt\_authorize: `String` with endpoint to authorize account (e.g. "/xrpc/createSession").
   * jwt\_refresh: `String` with endpoint to refresh account (e.g. "/xrpc/refreshSession").
-  * needs\_verification: `Boolean` with true if verification is needed (by calling `identify()`)
-  * can\_post: `Boolean` with true if connector can post.
-  * provides\_attachments: `Boolean` with true if connector generates attachments directly, otherwise post-processing of HTML content will be used to capture images & video.
-  * check\_interval: `Number` with number of seconds between load requests (currently unimplemented).
  
 _NOTE:_ The oauth\_authorize, oauth\_token, jwt\_authorize, and jwt\_refresh endpoints can be relative or absolute URLs. Relative paths use the `site` variable above as a base (allowing a single connector to support multiple federated servers, like with Mastodon). Absolute paths allow different domains to be used for the initial authorize and token generation (as with Tumblr).
+
+_NOTE:_ The authorization\_header string provides a template for the API endpoints. The following items in the string will be replaced with values managed by the Tapestry app:
+
+  * `__ACCESS_TOKEN__` The access token returned when authenticating with OAuth or JWT.
+  * `__CLIENT_ID__` The client ID used to identify the plugin with the API.
+  
+For example, you could set a string value of `OAuth oauth_consumer_key="__CLIENT_ID__", oauth_token="__ACCESS_TOKEN__"` and the following header would be generated:
+
+	Authorization: OAuth oauth_consumer_key="dead-beef-1234" oauth_token="feed-face-5678"
 
 #### EXAMPLES
 
