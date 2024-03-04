@@ -1,0 +1,17 @@
+{
+	"inputs": [
+		{
+			"name": "site",
+			"type": "url",
+			"prompt": "Instance",
+			"validate_as": "url",
+			"placeholder": "https://neat.tube"
+		},
+		{
+			"name": "channelID",
+			"type": "text",
+			"prompt": "Channel ID",
+			"placeholder": "techlore"
+		}
+	]
+}
