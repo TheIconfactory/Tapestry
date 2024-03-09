@@ -5,7 +5,7 @@
 			"type": "url",
 			"prompt": "Channel URL",
 			"validate_as": "url",
-			"placeholder": "https://youtube.com/feeds/video.xml"
+			"placeholder": "https://www.youtube.com/@theiconfactory"
 		}
 	]
 }
