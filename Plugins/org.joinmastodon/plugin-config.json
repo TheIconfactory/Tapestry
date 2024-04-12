@@ -1,6 +1,8 @@
 {
 	"id": "org.joinmastodon",
 	"display_name": "Mastodon",
+	"site_prompt": "Instance",
+	"site_placeholder": "https://mastodon.social",
 	"register": "/api/v1/apps",
 	"oauth_authorize": "/oauth/authorize",
 	"oauth_token": "/oauth/token",

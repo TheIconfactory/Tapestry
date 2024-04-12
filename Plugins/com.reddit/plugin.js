@@ -1,15 +1,30 @@
 
 // com.reddit
 
-// API Documentation:
-// https://www.reddit.com/dev/api/
-// https://support.reddithelp.com/hc/en-us/articles/16160319875092-Reddit-Data-API-Wiki
-
-// NOTE: There is no identify() function at present. A user's private API Keys are their own, so there doesn't
-// appear to be a need for ownership.
+function identify() {
+	if (subreddit != null && subreddit.length > 0) {
+		sendRequest(`${site}/r/${subreddit}/hot.json?raw_json=1`, "HEAD")
+		.then((dictionary) => {
+			const jsonObject = JSON.parse(dictionary);
+			
+			if (jsonObject.status == 200) {
+				setIdentifier(subreddit);
+			}
+			else {
+				setIdentifier(null);
+			}
+		})
+		.catch((requestError) => {
+			setIdentifier(null);
+		});
+	}
+	else {
+		setIdentifier(null);
+	}
+}
 
 function load() {
-	sendRequest("https://oauth.reddit.com/r/weirdwheels/hot.json?raw_json=1", "GET")
+	sendRequest(`${site}/r/${subreddit}/hot.json?raw_json=1`, "GET")
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		
@@ -39,7 +54,7 @@ function load() {
 						const metadata = mediaMetadata[mediaId];
 						const image = metadata.s.u;
 						// TODO: Use the metadata.p.u URL as a thumbnail.
-						if (image != null) {
+						if (image != null && attachments.length < 4) {
 							const attachment = Attachment.createWithMedia(image);
 							attachments.push(attachment);
 						}

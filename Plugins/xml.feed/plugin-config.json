@@ -1,6 +1,8 @@
 {
 	"id": "xml.feed",
 	"display_name": "Blog Feed",
+	"site_prompt": "Feed URL",
+	"site_placeholder": "https://foo.com/feed.xml",
 	"needsVerification": true,
 	"check_interval": 300
 }

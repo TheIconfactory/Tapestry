@@ -1,6 +1,7 @@
 {
 	"id": "com.gocomics",
 	"display_name": "GoComics",
+	"site": "https://www.gocomics.com",
 	"needsVerification": true,
 	"providesAttachments": true,
 	"check_interval": 300

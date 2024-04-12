@@ -1,5 +1,6 @@
 {
   "id": "com.kickstarter",
   "display_name": "Kickstarter",
+  "site": "https://kickstarter.com",
   "check_interval": 86400
 }

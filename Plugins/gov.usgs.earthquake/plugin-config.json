@@ -1,5 +1,6 @@
 {
 	"id": "gov.usgs.earthquake",
 	"display_name": "USGS Earthquakes",
+	"site": "https://earthquake.usgs.gov",
 	"check_interval": 300
 }

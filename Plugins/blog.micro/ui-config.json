@@ -1,11 +1,4 @@
 {
 	"inputs": [
-		{
-			"name": "site",
-			"type": "url",
-			"prompt": "Site",
-			"validate_as": "url",
-			"value": "https://micro.blog"
-		}
 	]
 }

@@ -1,11 +1,4 @@
 {
 	"inputs": [
-		{
-			"name": "site",
-			"type": "url",
-			"prompt": "Instance",
-			"validate_as": "url",
-			"placeholder": "https://mastodon.social"
-		}
 	]
 }

@@ -1,5 +1,7 @@
 {
 	"id": "org.nginx",
 	"display_name": "NGINX",
+	"site_prompt": "Status URL",
+	"site_placeholder": "https://example.com/basic_status",
 	"check_interval": 300
 }

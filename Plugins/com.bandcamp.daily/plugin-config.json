@@ -1,6 +1,7 @@
 {
   "id": "com.bandcamp.daily",
   "display_name": "Bandcamp Daily",
+  "site": "https://daily.bandcamp.com",
   "providesAttachments": true,
   "check_interval": 300
 }

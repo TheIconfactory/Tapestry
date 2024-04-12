@@ -386,13 +386,17 @@ Required properties:
 
 Recommended properties:
 
-  * site: `String` with the primary endpoint for the plugin's API. This parameter is used several different contexts:
+  * site: `String` with the primary endpoint for the plugin's API. This parameter is used in several different contexts:
   
   	- If not provided, the user will be prompted for a URL during setup. If you are accessing an API with a single endpoint, please provide a value. In cases where each instance of the source will need its own site, for example a Mastodon instance or an RSS feed, do not provide a value and let the user can set it up.
-  	- The value will also be used as a base URL for relative URLs (see the _NOTE_ below).
+  	- The value will also be used as a base URL for relative authentication URLs (see the _NOTE_ below).
   	- The configured value or a value provided by the user will be provided as as JavaScript variable.
   	- The configured value or a value provided by the user will be used to control when Tapestry sends an "Authorization" HTTP header. If the request's scheme is "https" on the default port (443) and the same domain or subdomain of `site`, the header will be included. 
-  
+
+  * site\_prompt: `String` with a prompt for user input.
+  * site\_placeholder: 'String' with a placeholder for user input.
+  	- If no `site` is configured, these properties are required.
+  	
 Optional properties:
 
   * needs\_verification: `Boolean` with true if verification is needed (by calling `identify()`)
@@ -408,7 +412,7 @@ Optional OAuth properties:
   * oauth\_type: `String` with response type parameter (currently, only "code" is supported).
   * oauth\_code\_key: `String` with code result from authorize endpoint (e.g "code").
   * oauth\_scope: `String` with scope used to register and get token (e.g. "read+write+push").
-  * oauth\_grant\_type: `String` with grant type (currently, only "authorization_code" is supported).
+  * oauth\_grant\_type: `String` with grant type (currently, only "authorization\_code" is supported).
   * oauth\_http\_redirect: `Boolean`, with true, the OAuth redirect URI will be "https://iconfactory.com/tapestry-oauth", otherwise "tapestry://oauth" is used.
   * oauth\_basic\_auth: `Boolean`, with true, the client id and secret will be added to a Basic authentication header when generating or refreshing tokens.
   * oauth\_authorize\_omit\_secret: `Boolean`, with true, the client secret will not be sent to the `oauth_authorize` endpoint. This is needed for Google's OAuth 2.0 server.

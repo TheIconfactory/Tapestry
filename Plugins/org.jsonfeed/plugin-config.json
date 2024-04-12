@@ -1,6 +1,8 @@
 {
 	"id": "org.jsonfeed",
 	"display_name": "JSON Feed",
+	"site_prompt": "Feed URL",
+	"site_placeholder": "https://foo.com/feed.json",
 	"needsVerification": true,
 	"check_interval": 300
 }

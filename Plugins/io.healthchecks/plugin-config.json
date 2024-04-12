@@ -1,5 +1,6 @@
 {
   "id": "io.healthchecks",
   "display_name": "Healthchecks",
+  "site": "https://healthchecks.io",
   "check_interval": 300
 }
