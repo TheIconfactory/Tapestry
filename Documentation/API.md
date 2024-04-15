@@ -126,6 +126,11 @@ A string that describes the media (for accessibility)
 
 A string that provides a placeholder image.
 
+#### mimeType: String
+
+A string that lets Tapestry know what kind of media is being attached. If this value isn't present, the file name
+extension for `media` will be used.
+
 #### authorizationHeader: String
 
 This string provides an authorization template for accessing protected `media`. If a value is provided, the "Authorization" header will be set with the following items being replaced with values managed by the Tapestry app:

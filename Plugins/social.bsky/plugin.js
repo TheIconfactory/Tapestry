@@ -88,6 +88,12 @@ function load() {
 						const attachment = Attachment.createWithMedia(media);
 						attachment.text = image.alt;
 						attachment.thumbnail = image.thumb;
+						if (media.endsWith("@jpeg")) {
+							attachment.mimeType = "image/jpeg";
+						}
+						else if (media.endsWith("@png")) {
+							attachment.mimeType = "image/png";
+						} 
 						attachments.push(attachment);
 					}
 				}
