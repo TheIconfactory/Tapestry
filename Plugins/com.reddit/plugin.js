@@ -64,6 +64,23 @@ function load() {
 					}
 				}
 			}
+			else if (item["preview"] != null)  {
+				const images = item["preview"].images;
+				if (images.length > 0) {
+					attachments = [];
+					for (const image of images) {
+						let selectedUrl = image.resolutions[image.resolutions.length - 1].url;
+						for (const resolution of image.resolutions) {
+							if (resolution.width > 900) {
+								selectedUrl = resolution.url;
+								break;
+							}
+						}
+						const attachment = Attachment.createWithMedia(selectedUrl);
+						attachments.push(attachment);
+					}
+				}
+			}
 			else {
 				const image = item["url"];
 				if (image != null) {
@@ -73,7 +90,7 @@ function load() {
 					}
 					else {
 						const thumbnail = item["thumbnail"];
-						if (thumbnail != null) {
+						if (thumbnail != null && (thumbnail.endsWith(".jpg") || thumbnail.endsWith(".jpeg"))) {
 							const attachment = Attachment.createWithMedia(thumbnail);
 							attachments = [attachment];
 						}
