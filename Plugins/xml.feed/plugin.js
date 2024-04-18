@@ -44,7 +44,7 @@ function identify() {
 		}
 		else {
 			// Unknown
-			setIdentifier("Unknown");
+			setIdentifier(null);
 		}
 	})
 	.catch((requestError) => {
