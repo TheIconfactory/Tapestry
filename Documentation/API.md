@@ -477,14 +477,14 @@ The configuration for the JSON Feed connector is:
 The user interface in the Tapestry app is configured with this file. A connector plug-in can have any number of inputs, specified as an `Array`. Each input has the these required properties:
 
   * name: `String` with the name of the input. This value is used to generate variables for `plugin.js`.
-  * type: `String` with the type of input (currently, everything is a `String` value).
+  * type: `String` with the type of input: "text", "switch", "choices".
   * prompt: `String` with the name displayed in the user interface.
 
 And these optional properties:
 
-  * validate\_as: `String` with a validation type (currently unimplemented).
   * placeholder: `String` with a placeholder value for the user interface.
   * value: `String` with a default value.
+  * choices: `String` with a comma separated list of values that will be displayed in a menu.
 
 #### EXAMPLES
 

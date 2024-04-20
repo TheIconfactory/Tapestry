@@ -1,0 +1,15 @@
+{
+  "id": "com.slack",
+  "display_name": "Slack",
+  "site": "https://slack.com",
+  "oauth_authorize": "https://slack.com/oauth/authorize",
+  "oauth_token": "https://slack.com/api/oauth.access",
+  "oauth_type": "code",
+  "oauth_code_key": "code",
+  "oauth_scope": "channels:history+channels:read+users.profile:read+files:read",
+  "oauth_grant_type": "authorization_code",
+  "oauth_http_redirect": true,
+  "needs_api_keys": true,
+  "provides_attachments": true,
+  "check_interval": 300
+}

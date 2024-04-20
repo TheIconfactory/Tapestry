@@ -1,13 +1,27 @@
 
 // gov.noaa.nesdis.star
 
+var lastDate = null;
+
+function identify() {
+	let identifier = "";
+	if (satellite == "East Coast") {
+		identifier += "GOES16";
+	}
+	else {
+		identifier += "GOES18";
+	}
+	
+	lastDate = null;
+	
+	setIdentifier(identifier);
+}
+	
 // NOTE: Images update every five minutes, but it takes longer to see a visible difference.
 // A new post will only be generated when we're past the minuteThreshold. Additionally,
 // this threshold is used to limit the number of times lookBack recurses.
 
-const minuteThreshold = 15;
-
-var lastDate = null;
+const minuteThreshold = 1; //60;
 
 function finalize(timestamp, url) {
 	const creatorUrl = "https://www.star.nesdis.noaa.gov";
@@ -79,11 +93,34 @@ function load() {
 	const date = new Date();
 	
 	if (Math.floor((date - lastDate) / 1000 / 60) > minuteThreshold) {
+		let directory = "GOES18";
+		if (satellite == "East Coast") {
+			directory = "GOES16";
+		}
+
+		let url = `https://cdn.star.nesdis.noaa.gov/${directory}/ABI/CONUS/${image}/2500x1500.jpg`;
+		
+		const creatorUrl = "https://www.star.nesdis.noaa.gov";
+		const creatorName = `NOAA STAR – ${directory}`;
+		var creator = Creator.createWithUriName(creatorUrl, creatorName);
+		creator.avatar = "https://www.star.nesdis.noaa.gov/favicon.ico";
+		
+		const date = new Date();
+		const content = `<p>${image} image of Continental US (${satellite})</p><p><img src="${url}"/></p>`;
+		var post = Post.createWithUriDateContent(url, date, content);
+		post.creator = creator;
+		
+		processResults([post]);
+		
+		lastDate = date;
+
+/*
 		const year = date.getUTCFullYear();
 		const dayOfYear = Math.floor((date - new Date(year, 0, 0)) / 1000 / 60 / 60 / 24);
 		const hours = date.getUTCHours();
 		const minutes = date.getUTCMinutes();
 		
 		lookBack(0, year, dayOfYear, hours, minutes);
+*/
 	}
 }

@@ -1,0 +1,7 @@
+{
+	"id": "variables.test",
+	"display_name": "Test Variables",
+	"site": "https://variables.test",
+	"needsVerification": true,
+	"check_interval": 300
+}

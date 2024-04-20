@@ -3,6 +3,6 @@
 	"display_name": "YouTube Channel",
 	"site_prompt": "Channel URL",
 	"site_placeholder": "https://youtube.com/feeds/video.xml",
-	"needsVerification": true,
+	"needs_verification": true,
 	"check_interval": 300
 }

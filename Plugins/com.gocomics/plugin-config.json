@@ -2,7 +2,7 @@
 	"id": "com.gocomics",
 	"display_name": "GoComics",
 	"site": "https://www.gocomics.com",
-	"needsVerification": true,
-	"providesAttachments": true,
+	"needs_verification": true,
+	"provides_attachments": true,
 	"check_interval": 300
 }

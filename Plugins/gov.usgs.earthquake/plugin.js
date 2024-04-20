@@ -1,7 +1,31 @@
 // gov.usgs.earthquake
 
 function load() {
-	const endpoint = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson";
+
+	let summaryName = "4.5_day";
+	
+	if (typeof magnitude !== 'undefined') {
+		switch (magnitude) {
+			case "Significant":
+				summaryName = "significant";
+				break;
+			case "Over 4.5":
+				summaryName = "4.5_day";
+				break;
+			case "Over 2.5":
+				summaryName = "2.5_day";
+				break;
+			case "Over 1.0":
+				summaryName = "1.0_day";
+				break;
+			case "All":
+				summaryName = "all";
+				break;
+		}
+	}
+	
+	const endpoint = `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/${summaryName}.geojson`;
+
 	sendRequest(endpoint)
 	.then((text) => {
 		const jsonObject = JSON.parse(text);

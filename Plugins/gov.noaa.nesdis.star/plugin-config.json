@@ -2,5 +2,6 @@
 	"id": "gov.noaa.nesdis.star",
 	"display_name": "NOAA Satellite",
 	"site": "https://www.star.nesdis.noaa.gov",
+	"needs_verification": true,
 	"check_interval": 300
 }

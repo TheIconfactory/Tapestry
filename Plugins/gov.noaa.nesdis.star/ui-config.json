@@ -1,4 +1,20 @@
 {
 	"inputs": [
+		{
+			"name": "satellite",
+			"type": "choices",
+			"prompt": "Satellite Location",
+			"value": "East Coast",
+			"choices": "East Coast, West Coast",
+			"placeholder": "Select satellite location."
+		},
+		{
+			"name": "image",
+			"type": "choices",
+			"prompt": "Image Type",
+			"value": "GEOCOLOR",
+			"choices": "GEOCOLOR, AirMass, DayNightCloudMicroCombo, DMW, Dust, FireTemperature, Sandwich",
+			"placeholder": "Select processing for satellite image."
+		}
 	]
 }

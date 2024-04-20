@@ -1,4 +1,12 @@
 {
 	"inputs": [
+		{
+			"name": "magnitude",
+			"type": "choices",
+			"prompt": "Magnitude",
+			"value": "Over 4.5",
+			"choices": "Significant, Over 4.5, Over 2.5, Over 1.0, All",
+			"placeholder": "Select magnitude for earthquake."
+		}
 	]
 }

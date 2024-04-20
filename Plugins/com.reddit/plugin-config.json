@@ -2,6 +2,6 @@
 	"id": "com.reddit",
 	"display_name": "Reddit",
 	"site": "https://www.reddit.com",
-	"needsVerification": true,
+	"needs_verification": true,
 	"check_interval": 300
 }
