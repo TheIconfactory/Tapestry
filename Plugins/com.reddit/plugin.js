@@ -41,8 +41,31 @@ function load() {
 
 			const date = new Date(item["created_utc"] * 1000);
 			const uri = "https://www.reddit.com" + encodeURI(item["permalink"]);
-			const content = `<p>${item["title"]} <a href="${item["url"]}">Link</a></p>`;
+			let content = `<p><strong>${item["title"]}</strong> <a href="${item["url"]}">Link</a></p>`;
 
+			if (item["selftext_html"] != null) {
+				let rawContent = item["selftext_html"];
+				// convert relative links to absolute links
+				let processedContent = rawContent.replace(/href=\"\/r\//g, "href=\"https://www.reddit.com/r/");
+				content = content + processedContent;
+			}
+			if (item["secure_media"] != null) {
+				if (item["secure_media"].reddit_video != null && item["secure_media"].reddit_video.hls_url != null) {
+					let videoUrl = item["secure_media"].reddit_video.hls_url;
+					let posterUrl = item.thumbnail;
+					if (item["preview"] != null)  {
+						const images = item["preview"].images;
+						if (images.length > 0) {
+							posterUrl = images[0].source.url;
+						}
+					}
+					content = content + `<p><video controls playsinline poster="${posterUrl}"><source src="${videoUrl}" type="video/mp4" /></video></p>`;
+				}
+				else if (item["secure_media_embed"].content != null) {
+					content = content + `<p>${item["secure_media_embed"].content}</p>`;
+				}
+			}
+			
 			var attachments = null;
 			if (item["preview"] != null)  {
 				const images = item["preview"].images;
