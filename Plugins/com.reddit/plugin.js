@@ -41,10 +41,27 @@ function load() {
 
 			const date = new Date(item["created_utc"] * 1000);
 			const uri = "https://www.reddit.com" + encodeURI(item["permalink"]);
-			const content = item["title"];
+			const content = `<p>${item["title"]} <a href="${item["url"]}">Link</a></p>`;
 
 			var attachments = null;
-			if (item["gallery_data"] != null) {
+			if (item["preview"] != null)  {
+				const images = item["preview"].images;
+				if (images.length > 0) {
+					attachments = [];
+					for (const image of images) {
+						let selectedUrl = image.source.url;
+						for (const resolution of image.resolutions) {
+							if (resolution.width > 900) {
+								selectedUrl = resolution.url;
+								break;
+							}
+						}
+						const attachment = Attachment.createWithMedia(selectedUrl);
+						attachments.push(attachment);
+					}
+				}
+			}
+			else if (item["gallery_data"] != null) {
 				attachments = [];
 				const galleryItems = item["gallery_data"].items;
 				for (const galleryItem of galleryItems) {
@@ -61,23 +78,6 @@ function load() {
 					}
 					else {
 						// NOTE: This might be an appropriate fallback: "https://i.redd.it/" + galleryItem["media_id"] + ".jpg";
-					}
-				}
-			}
-			else if (item["preview"] != null)  {
-				const images = item["preview"].images;
-				if (images.length > 0) {
-					attachments = [];
-					for (const image of images) {
-						let selectedUrl = image.resolutions[image.resolutions.length - 1].url;
-						for (const resolution of image.resolutions) {
-							if (resolution.width > 900) {
-								selectedUrl = resolution.url;
-								break;
-							}
-						}
-						const attachment = Attachment.createWithMedia(selectedUrl);
-						attachments.push(attachment);
 					}
 				}
 			}
