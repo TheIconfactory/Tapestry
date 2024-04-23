@@ -35,18 +35,10 @@
 			"placeholder": "Choose your dessert."
 		},
 		{
-			"name": "bad_default",
+			"name": "default_choice",
 			"type": "choices",
-			"prompt": "Wrong Menu",
-			"value": "Zebra Steak",
-			"choices": "Apple Pie,   Banana Cream Pie,Chestnut Pie, Doomsday Cake, Everything Bagel",
-			"placeholder": "Choose your dessert."
-		},
-		{
-			"name": "first_choice",
-			"type": "choices",
-			"prompt": "First Choice",
-			"choices": "One For The Money\n,   Two For the Show   ,\n\nThree to Get Ready, Four Cat Go\n!!!",
+			"prompt": "Default Choice",
+			"choices": "One For The Money\n,   Two For the Show   ,\n\nThree to Get Ready, Four Cat Go!",
 			"placeholder": "Choose your number."
 		},
 		{

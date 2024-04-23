@@ -7,7 +7,7 @@ function load() {
 	if (typeof magnitude !== 'undefined') {
 		switch (magnitude) {
 			case "Significant":
-				summaryName = "significant";
+				summaryName = "significant_day";
 				break;
 			case "Over 4.5":
 				summaryName = "4.5_day";

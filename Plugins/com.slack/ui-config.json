@@ -5,12 +5,6 @@
 		"type": "text",
 		"prompt": "Channel",
 		"placeholder": "lounge"
-	  },
-	  {
-		"name": "unused",
-		"type": "text",
-		"prompt": "Unused",
-		"placeholder": "for testing only"
 	  }
   ]
 }
