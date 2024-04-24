@@ -1,0 +1,19 @@
+{
+	"variables": [
+		{
+			"name": "comicId",
+			"value": "calvinandhobbes",
+			"title": "Calvin & Hobbs"
+		},
+		{
+			"name": "comicId",
+			"value": "doonesbury",
+			"title": "Doonesbury"
+		},
+		{
+			"name": "comicId",
+			"value": "nancy",
+			"title": "Nancy"
+		}
+	]
+}

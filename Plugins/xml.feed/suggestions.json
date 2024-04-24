@@ -1,0 +1,12 @@
+{
+	"sites": [
+		{
+			"value": "http://feeds.kottke.org/main",
+			"title": "Kottke"
+		},
+		{
+			"value": "https://www.apple.com/newsroom/rss-feed.rss",
+			"title": "Apple Newsroom"
+		}
+	]
+}

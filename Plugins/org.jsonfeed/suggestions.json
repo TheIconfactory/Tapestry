@@ -1,0 +1,16 @@
+{
+	"sites": [
+		{
+			"value": "https://daringfireball.net/feeds/json",
+			"title": "Daring Fireball"
+		},
+		{
+			"value": "https://onefoottsunami.com/feed/json",
+			"title": "One Foot Tsunami"
+		},
+		{
+			"value": "https://furbo.org/feed/json",
+			"title": "furbo.org"
+		}
+	]
+}
