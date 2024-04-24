@@ -1,7 +1,7 @@
 {
 	"sites": [
 		{
-			"value": "http://feeds.kottke.org/main",
+			"value": "https://feeds.kottke.org/main",
 			"title": "Kottke"
 		},
 		{

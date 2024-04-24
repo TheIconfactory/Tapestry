@@ -78,10 +78,10 @@ _NOTE:_ Media attachments will be automatically created when inline images are u
 A `Post` can have a creator that indicates how the content was created. It can be a person, a service, or a device. The information is used to present an avatar and header for the post in the timeline.
 
 ```javascript
-const uri = "http://chocklock.com";
+const uri = "https://chocklock.com";
 const name = "CHOCK OF THE LOCK";
 const creator = Creator.createWithUriName(uri, name);
-creator.avatar = "http://chocklock.com/favicon.ico";
+creator.avatar = "https://chocklock.com/favicon.ico";
 
 post.creator = creator;
 ```
@@ -380,7 +380,15 @@ Note that old style property lists or JSON property lists are not supported.
 
 ## Configuration
 
-Each connector plug-in is defined using three files: `plugin-config.json`, `plugin.js`, `ui-config.json`, and `README.md`. The contents of each of these files is discussed below:
+Each connector plug-in is defined using the following files:
+
+  * `plugin-config.json` (Required)
+  * `plugin.js` (Required)
+  * `ui-config.json` (Required)
+  * `README.md` (Recommended)
+  * `suggestions.json` (Optional)
+  
+The contents of each of these files is discussed below.
 
 ### plugin-config.json
 
@@ -553,7 +561,7 @@ function load() {
 			const coordinates = geometry["coordinates"];
 			const latitude = coordinates[1];
 			const longitude = coordinates[0];
-			const mapsUrl = "http://maps.apple.com/?ll=" + latitude + "," + longitude + "&spn=15.0";
+			const mapsUrl = "https://maps.apple.com/?ll=" + latitude + "," + longitude + "&spn=15.0";
 			
 			const content = "<p>" + text + " <a href=\"" + mapsUrl + "\">Open Map</a><p>"
 			
@@ -574,9 +582,9 @@ This connector took about an hour to write with no prior knowledge of the API or
 
 ### README.md
 
-This file, formatted with Markdown, is displayed in Tapestry when the user views your plugin’s information.
+This file, formatted with Markdown, is displayed in Tapestry when the user views your plugin’s information. It is highly recommended since it provides valuable context for the end user.
 
-Only inline styles are supported (e.g. no `#` header blocks or images). This is a limitation of displaying Markdown in SwiftUI. 
+Only inline styles are supported (e.g. no `#` header blocks or images). This is a limitation of displaying Markdown in user interface controls on Apple platforms. 
 
 Here is an example:
 
@@ -591,6 +599,56 @@ This is the first connector written for Tapestry and was written by Craig
 Hockenberry ([@chockenberry](https://mastodon.social/@chockenberry)) while
 creating the first prototype.
 
+```
+
+### suggestions.json
+
+The contents of this file will help the user setup the connector. There are two types of suggestions: one for site URLs and another for settings.
+
+For example, the RSS plug-in suggests a few sites to help someone set up a feed the first time:
+
+```
+{
+	"sites": [
+		{
+			"value": "https://feeds.kottke.org/main",
+			"title": "Kottke"
+		},
+		{
+			"value": "https://www.apple.com/newsroom/rss-feed.rss",
+			"title": "Apple Newsroom"
+		}
+	]
+}
+```
+
+Settings for variables can also be suggested. The `name` parameter should match the one in `ui-config.json`. The `title` should be kept fairly short because of the width limitations on mobile devices:
+
+```
+{
+	"variables": [
+		{
+			"name": "dessert_choice",
+			"value": "Apple Pie",
+			"title": "American as..."
+		},
+		{
+			"name": "reticulate_splines",
+			"value": "false",
+			"title": "ECO Mode"
+		},
+		{
+			"name": "title",
+			"value": "Now is the time for all good men to come to the aid of their party",
+			"title": "Long Title"
+		},
+		{
+			"name": "title",
+			"value": "Hello",
+			"title": "Short"
+		}
+	]
+}
 ```
 
 ## HTML Content

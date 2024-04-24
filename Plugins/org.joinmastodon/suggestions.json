@@ -1,0 +1,32 @@
+{
+	"sites": [
+		{
+			"value": "https://mastodon.social",
+			"title": "mastodon.social"
+		},
+		{
+			"value": "https://mastodon.cloud",
+			"title": "mastodon.cloud"
+		},
+		{
+			"value": "https://mstdn.social",
+			"title": "mstdn.social"
+		},
+		{
+			"value": "https://mastodon.online/",
+			"title": "mastodon.online"
+		},
+		{
+			"value": "https://mas.to",
+			"title": "mas.to"
+		},
+		{
+			"value": "https://mastodon.world",
+			"title": "mastodon.world"
+		},
+		{
+			"value": "https://mastodon.lol",
+			"title": "mastodon.lol"
+		}
+	]
+}

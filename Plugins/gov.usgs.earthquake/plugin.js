@@ -48,7 +48,7 @@ function load() {
 			const coordinates = geometry["coordinates"];
 			const latitude = coordinates[1];
 			const longitude = coordinates[0];
-			const mapsUrl = "http://maps.apple.com/?ll=" + latitude + "," + longitude + "&spn=15.0";
+			const mapsUrl = "https://maps.apple.com/?ll=" + latitude + "," + longitude + "&spn=15.0";
 			
 			const content = "<p>" + text + " <a href=\"" + mapsUrl + "\">Open Map</a></p>"
 			
