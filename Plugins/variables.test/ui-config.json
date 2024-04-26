@@ -1,6 +1,9 @@
 {
 	"inputs": [
 		{
+			"name": "minimum_requirement"
+		},
+		{
 			"name": "title",
 			"type": "text",
 			"prompt": "A Title",
@@ -17,14 +20,14 @@
 			"name": "reticulate_splines",
 			"type": "switch",
 			"prompt": "Reticulate Splines",
-			"value": "true",
+			"value": "on",
 			"placeholder": "When enabled, splines will be reticulated."
 		},
 		{
 			"name": "turbo",
 			"type": "switch",
 			"prompt": "TURBO",
-			"placeholder": "No default value, will be 'false'."
+			"placeholder": "No default value, will be 'off'."
 		},
 		{
 			"name": "dessert_choice",

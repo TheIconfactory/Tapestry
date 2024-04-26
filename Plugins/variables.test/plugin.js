@@ -9,16 +9,18 @@ function load() {
 	let uri = "custom://variables.test";
 	let date = new Date();
 	let status = ""
-	if (reticulate_splines == "true") {
+	if (reticulate_splines == "on") {
 		status = "Splines are being reticulated";
 	}
-	if (turbo == "true") {
+	if (turbo == "on") {
 		if (status.length > 0) {
 			status += " and ";
 		}
 		status += "TURBO is engaged";
 	}
-	let content = `<p>Test content for ${site}</p><p>${status}</p><p>For dessert, you'll be having ${dessert_choice}. Enjoy!</p>`
+	status += ` at level ${value}`;
+	
+	let content = `<p>Test content for ${site} & ${title}</p><p>${status}</p><p>For dessert, you'll be having ${dessert_choice}. Enjoy!</p><p><a href="https://streamer.iconfactory.net">Check user agent in logs</a></p>`
 	
 	const post = Post.createWithUriDateContent(uri, date, content);
 

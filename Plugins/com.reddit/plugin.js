@@ -49,22 +49,6 @@ function load() {
 				let processedContent = rawContent.replace(/href=\"\/r\//g, "href=\"https://www.reddit.com/r/");
 				content = content + processedContent;
 			}
-			if (item["secure_media"] != null) {
-				if (item["secure_media"].reddit_video != null && item["secure_media"].reddit_video.hls_url != null) {
-					let videoUrl = item["secure_media"].reddit_video.hls_url;
-					let posterUrl = item.thumbnail;
-					if (item["preview"] != null)  {
-						const images = item["preview"].images;
-						if (images.length > 0) {
-							posterUrl = images[0].source.url;
-						}
-					}
-					content = content + `<p><video controls playsinline poster="${posterUrl}"><source src="${videoUrl}" type="video/mp4" /></video></p>`;
-				}
-				else if (item["secure_media_embed"].content != null) {
-					content = content + `<p>${item["secure_media_embed"].content}</p>`;
-				}
-			}
 			
 			var attachments = null;
 			if (item["preview"] != null)  {
@@ -118,6 +102,33 @@ function load() {
 							attachments = [attachment];
 						}
 					}
+				}
+			}
+
+			if (item["secure_media"] != null) {
+//				if (item["secure_media"].reddit_video != null && item["secure_media"].reddit_video.fallback_url != null) {
+//					let videoUrl = item["secure_media"].reddit_video.fallback_url;
+				if (item["secure_media"].reddit_video != null && item["secure_media"].reddit_video.hls_url != null) {
+					let videoUrl = item["secure_media"].reddit_video.hls_url;
+					let posterUrl = item.thumbnail;
+					if (attachments.length > 0) {
+						posterUrl = attachments[0].media;
+					}
+					
+					const attachment = Attachment.createWithMedia(videoUrl);
+					attachment.thumbnail = posterUrl;
+					attachment.mimeType = "video/mp4";
+					
+					// replace first attachment with video and poster image
+					if (attachments.length > 0) {
+						attachments[0] = attachment;
+					}
+					else {
+						attachments.push(attachment);
+					}
+				}
+				else if (item["secure_media_embed"].content != null) {
+					content = content + `<p>${item["secure_media_embed"].content}</p>`;
 				}
 			}
 			

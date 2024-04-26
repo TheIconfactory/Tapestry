@@ -44,6 +44,34 @@ function postForItem(item, date = null) {
 			attachment.thumbnail = mediaAttachment["preview_url"];
 			attachment.text = mediaAttachment["description"];
 			attachment.blurhash = mediaAttachment["blurhash"];
+			let mimeType = "application/octet-stream";
+			const mediaType = mediaAttachment["type"];
+			if (mediaType == "video" || mediaType == "gifv") {
+				mimeType = "video/mp4";
+			}
+			else if (mediaType == "audio") {
+				if (media.endsWith(".aac")) {
+					mimeType = "audio/aac";
+				}
+				else if (media.endsWith(".mp3")) {
+					mimeType = "audio/mpeg";
+				}
+				else {
+					mimeType = "audio/*";
+				}
+			}
+			else if (mediaType == "image") {
+				if (media.endsWith(".png")) {
+					mimeType = "image/png";
+				}
+				else if (media.endsWith(".jpg") || media.endsWith(".jpeg")) {
+					mimeType = "image/jpeg";
+				}
+				else {
+					mimeType = "image/*";
+				}
+			}
+			attachment.mimeType = mimeType;
 			attachments.push(attachment);
 		}
 	}
@@ -75,22 +103,24 @@ function load() {
 		processError(requestError);
 	});	
 
-	sendRequest(site + "/api/v1/notifications?types%5B%5D=mention&limit=30", "GET")
-	.then((text) => {
-		const jsonObject = JSON.parse(text);
-		var results = [];
-		for (const item of jsonObject) {
-			var postItem = item["status"];
-
-			const post = postForItem(postItem);
-
-			results.push(post);
-		}
-		processResults(results, true);
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
+	if (includeMentions == "on") {
+		sendRequest(site + "/api/v1/notifications?types%5B%5D=mention&limit=30", "GET")
+		.then((text) => {
+			const jsonObject = JSON.parse(text);
+			var results = [];
+			for (const item of jsonObject) {
+				var postItem = item["status"];
+	
+				const post = postForItem(postItem);
+	
+				results.push(post);
+			}
+			processResults(results, true);
+		})
+		.catch((requestError) => {
+			processError(requestError);
+		});
+	}
 	
 	// NOTE: There needs to be something like the Web Storage API where data (like the account id) can be persisted
 	// across launches of the app. Having to verify the credentials each time to get information that doesn't change
