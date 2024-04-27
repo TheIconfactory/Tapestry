@@ -119,6 +119,11 @@ function load() {
 			
 			let content = contentForRecord(item.post.record);
 			
+			const replyContent = contentForReply(item.reply);
+			if (replyContent != null) {
+				content = replyContent + content;
+			}
+
 			const repostContent = contentForRepost(item.reason);
 			if (repostContent != null) {
 				content = repostContent + content;
@@ -152,12 +157,28 @@ function load() {
 }
 
 function creatorForAccount(account) {
+	if (account == null || account.handle == null || account.displayName == null) {
+		return null;
+	}
+	
 	const authorUri = uriPrefix + "/profile/" + account.handle;
 	const name = account.displayName;
 	const creator = Creator.createWithUriName(authorUri, name);
 	creator.avatar = account.avatar;
 	
 	return creator;
+}
+
+function contentForAccount(account, prefix = "") {
+	if (account == null || account.handle == null || account.displayName == null) {
+		return "";
+	}
+
+	const authorUri = uriPrefix + "/profile/" + account.handle;
+	const name = account.displayName;
+	
+	const content = `<p>${prefix}<a href="${authorUri}">${name}</a></p>`;
+	return content;
 }
 
 function contentForRepost(reason) {
@@ -170,12 +191,15 @@ function contentForRepost(reason) {
 	return content;
 }
 
-function contentForAccount(account, prefix = "") {
-	const authorUri = uriPrefix + "/profile/" + account.handle;
-	const name = account.displayName;
-	const handle = "@" + account.handle;
+function contentForReply(reply) {
+	let content = null;
+
+	if (reply != null && reply.parent != null) {
+		const replyAccount = contentForAccount(reply.parent.author, "In reply to ");
+		const replyContent = contentForRecord(reply.parent.record);
+		content = `<blockquote>${replyAccount}${replyContent}</blockquote>`;
+	}
 	
-	const content = `<p>${prefix}<a href="${authorUri}">${name}</a></p>`;
 	return content;
 }
 
@@ -223,7 +247,7 @@ function attachmentsForEmbed(embed) {
 
 function contentForRecord(record) {
 	if (record == null) {
-		return "";
+		return "<p>Deleted post</p>";
 	}
 	if (record.text == null && record.value.text == null) {
 		return "";
