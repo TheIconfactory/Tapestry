@@ -3,16 +3,14 @@
 
 function identify() {
 	if (comicId != null && comicId.length > 0) {
-		const baseUrl = "https://www.gocomics.com";
-		const url = baseUrl + "/" + comicId;
+		const url = site + "/" + comicId;
 		sendRequest(url, "HEAD")
 		.then((dictionary) => {
 			const jsonObject = JSON.parse(dictionary);
 			
 			const responseUrl = jsonObject["url"];
 			
-			// NOTE: If the responseUrl is the same as the original url, there was no redirect
-			// and the comicId is valid.
+			// NOTE: If the responseUrl is the same as the original url, there was no redirect and the comicId is valid.
 			if (responseUrl == url) {
 				setIdentifier(comicId);
 			}
@@ -31,8 +29,8 @@ function identify() {
 
 
 /*
- NOTE: The regular expression below will match the meta properties in the HTML, which are then put into a
- dictionary as key/value pairs.
+ NOTE: This plugin relies on the meta properties in the HTML. They are obtained by the extractProperties() function
+ supplied by Tapestry.
  
  This is a sample of what the properties look like:
  
@@ -52,27 +50,12 @@ function identify() {
  <meta property="article:tag" content="" />
  */
 
-const metaRegex = /<meta\s+property=\"(.*)\"\s+content=\"(.*)\".*>/g
-
-function metaProperties(html) {
-	var properties = {};
-	
-	const matches = html.matchAll(metaRegex);
-	for (const match of matches) {
-		const key = match[1];
-		const value = match[2];
-		properties[key] = value;
-	}
-
-	return properties;
-}
-
+// NOTE: Regular expressions can be used to extract information from the HTML, too.
 const avatarRegex = /<div class="gc-avatar gc-avatar--creator xs"><img[^]*?src="(.*)"/
 
 var lastTimestamp = null
 
 function load() {
-	const baseUrl = "https://www.gocomics.com";
 	const date = new Date();
 	
 	const year = date.getFullYear();
@@ -85,14 +68,13 @@ function load() {
 		return;
 	}
 	
-	const url = baseUrl + "/" + comicId + "/" + timestamp;
+	const url = site + "/" + comicId + "/" + timestamp;
 	sendRequest(url)
 	.then((html) => {
-		const properties = metaProperties(html);
+		const properties = extractProperties(html);
 		
 		const image = properties["og:image"];
 		const title = properties["og:title"];
-		const url = properties["og:url"];
 		const siteName = properties["og:site_name"];
 		const author = properties["article:author"];
 		
@@ -110,7 +92,7 @@ function load() {
 			const match = html.match(avatarRegex);
 			const avatar = match[1];
 
-			const creatorUrl = baseUrl + "/" + comicId;
+			const creatorUrl = site + "/" + comicId;
 			const creatorName = author;
 			const creator = Creator.createWithUriName(creatorUrl, creatorName);
 			creator.avatar = avatar;

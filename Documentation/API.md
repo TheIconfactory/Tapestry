@@ -378,6 +378,12 @@ Returns an `Object` representation of the data, much like `JSON.parse` does.
 
 Note that old style property lists or JSON property lists are not supported.
 
+### extractProperties(text) → Object
+
+  * text: `String` is HTML content with meta properties (such as OpenGraph).
+  
+Returns an `Object` representation containing the HTML’s properties. These values can be used to generate link previews or enhance the content without scraping the markup.
+
 ## Configuration
 
 Each connector plug-in is defined using the following files:
