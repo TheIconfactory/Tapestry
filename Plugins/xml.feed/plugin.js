@@ -180,6 +180,31 @@ function load() {
 				const post = Post.createWithUriDateContent(url, date, content);
 				post.creator = creator;
 			
+				// extract any media from RSS: https://www.rssboard.org/media-rss
+				if (item["media:group"] != null) {
+					const mediaGroup = item["media:group"];
+				
+					const thumbnail = mediaGroup["media:thumbnail$attrs"].url;
+					if (thumbnail != null) {
+						const attachment = Attachment.createWithMedia(thumbnail);
+						post.attachments = [attachment];
+					}
+				}
+				else if (item["media:thumbnail$attrs"] != null) {
+					const thumbnail = item["media:thumbnail$attrs"].url;
+					if (thumbnail != null) {
+						const attachment = Attachment.createWithMedia(thumbnail);
+						post.attachments = [attachment];
+					}
+				}
+				else if (item["media:content$attrs"] != null) {
+					const content = item["media:content$attrs"].url;
+					if (content != null) {
+						const attachment = Attachment.createWithMedia(content);
+						post.attachments = [attachment];
+					}
+				}
+					
 				results.push(post);
 			}
 

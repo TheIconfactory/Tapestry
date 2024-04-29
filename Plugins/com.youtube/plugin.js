@@ -117,6 +117,9 @@ function load() {
 					const url = entryUrl;
 					const date = new Date(entry.published); // could also be "entry.updated"
 				
+					// TODO: Use "media:content" to do content embed.
+					// <media:content url="https://www.youtube.com/v/TstuOX6NldA?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+					
 					const mediaGroup = entry["media:group"];
 				
 					const thumbnail = mediaGroup["media:thumbnail$attrs"].url;
