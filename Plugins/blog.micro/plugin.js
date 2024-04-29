@@ -15,12 +15,20 @@ function identify() {
 }
 
 function load() {
+	const filterMentions = includeMentions != "on";
+	
 	sendRequest(site + "/posts/timeline", "GET")
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		const items = jsonObject["items"];
 		var results = [];
 		for (const item of items) {
+			if (filterMentions) {
+				if (item["_microblog"].is_mention) {
+					continue;
+				}
+			}
+			
 			const author = item["author"]; 
 			const creator = Creator.createWithUriName(author["url"], author["name"]);
 			creator.avatar = author["avatar"];
