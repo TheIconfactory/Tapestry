@@ -1,0 +1,17 @@
+{
+	"link": [
+		{
+			"check": "type",
+			"match": "application/rss+xml",
+			"use": "href",
+			"apply": "site"
+		}
+	],
+	"regex": [
+		{
+			"pattern": "<audio[^>]*src.*=.*\".*\\.mp3\"",
+			"require": "true?"
+		}
+	]
+
+}

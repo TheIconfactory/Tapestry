@@ -1,0 +1,16 @@
+{
+	"link": [
+		{
+			"check": "type",
+			"match": "application/json",
+			"use": "href",
+			"apply": "site"
+		},
+		{
+			"check": "type",
+			"match": "application/feed+json",
+			"use": "href",
+			"apply": "site"
+		}
+	]
+}

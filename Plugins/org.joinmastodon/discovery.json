@@ -1,0 +1,13 @@
+{
+	"meta": [
+		{
+			"property": "og:title",
+			"require": "Mastodon" 
+		},
+		{
+			"property": "og:url",
+			"pattern": "(https:\/\/[^\/]+\/)",
+			"apply": "site"
+		},
+	]
+}

@@ -1,0 +1,11 @@
+{
+	"site": [
+		"reddit.com"
+	],
+	"regex": [
+		{
+			"pattern": "form\\s+.*\\s+action=\"\\/r\\/(\\w+)\\/",
+			"apply": "subreddit"
+		}
+	]
+}

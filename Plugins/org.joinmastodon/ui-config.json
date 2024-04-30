@@ -4,6 +4,6 @@
 			"name": "includeMentions",
 			"type": "switch",
 			"prompt": "Include Mentions"
-		},
+		}
 	]
 }

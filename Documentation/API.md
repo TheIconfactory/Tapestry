@@ -625,7 +625,7 @@ The contents of this file will help the user setup the connector. There are two 
 
 For example, the RSS plug-in suggests a few sites to help someone set up a feed the first time:
 
-```
+```json
 {
 	"sites": [
 		{
@@ -642,7 +642,7 @@ For example, the RSS plug-in suggests a few sites to help someone set up a feed 
 
 Settings for variables can also be suggested. The `name` parameter should match the one in `ui-config.json`. The `title` should be kept fairly short because of the width limitations on mobile devices:
 
-```
+```json
 {
 	"variables": [
 		{
@@ -668,6 +668,168 @@ Settings for variables can also be suggested. The `name` parameter should match 
 	]
 }
 ```
+
+### discovery.json
+
+This file helps the user find your plugin when they have a URL to page of HTML. The rules in this file will be checked and matches will be offered in an interface that simplifies set up.
+
+The file consists of four categories of rules. You only need to supply the ones you use.
+
+```json
+{
+	"site": [],
+	"link": [],
+	"meta": [],
+	"regex": []
+}
+```
+
+Each category that you specify must be satisfied. For example, if you supply `site` and `link`, and the page has the correct URL but not the correct `<link>` tag, your plugin will not be suggested.
+
+The following sections describe each of the rule categories.
+
+#### site
+
+A list of sites where the plugin can be used. These checks are performed on the URL that is supplied by the user.
+
+For example. the `com.gocomics` plugin only works on one site so it uses:
+
+```json
+	"site": [
+		"gocomics.com"
+	],
+```
+
+The YouTube plugin will work on many different domains. The "youtube." will match "youtube.de", "youtube.fr", "youtube.com", etc.
+
+```json
+ 	"site": [
+ 		"youtube.",
+ 		"youtu.be",
+ 		"youtubekids.com"
+ 	],
+```
+
+If you don't supply a site, you must provide one of the other rules for your plugin to be suggested.
+
+#### link
+
+The HTML at the URL supplied by the user is loaded, then this rule checks the `<link>` tags in the content.
+
+  * check: the attribute in a `<link>` to check
+  * match: the following rules will be applied when the attribute has the specified value
+  * use: the attribute in the `<link>` that contains a value to use with the plugin
+  * pattern: a regex pattern that will be used on the `value` and passed to a variable with `apply`.
+  * apply: the name of the `site` or any variable defined in `ui-config.json` that will be set with the value above
+  * require: only the existence of the value is checked, no variables are used
+
+A `value` with "href" will always return an absolute URL, even if it is a relative URL in the document.
+
+TODO: Implement relative URL conversion (e.g. "/feeds/main" at Daring Fireball)
+
+Multiple matches will result in multiple choices in user interface (e.g. both RSS and Atom feeds).
+
+For example, the following link rules check for RSS and Atom feeds and use the resulting "href" value for the `site` configuration:
+
+```json
+	"link": [
+		{
+			"check": "type",
+			"match": "application/rss+xml",
+			"use": "href",
+			"apply": "site"
+		},
+		{
+			"check": "type",
+			"match": "application/atom+xml",
+			"use": "href",
+			"apply": "site"
+		}
+```
+
+Note the rules can suggest more than one option to the user. In the case above, a site that has both an RSS and Atom feed will
+GoComics:
+
+```json
+	"link": [
+		{
+			"check": "rel",
+			"match": "canonical",
+			"use": "href",
+			"pattern": "https:\/\/www.gocomics.com\/([^\/]+)\/.*",
+			"apply": "comicId"
+		},
+	]
+```
+
+Micro.blog:
+
+```json
+	"link": [
+		{
+			"check": "rel",
+			"match": "subscribe",
+			"use": "href",
+			"require": "https://micro.blog/users/follow"
+		}
+	]
+```
+
+#### meta
+
+The meta rules check the `<meta>` tags in the HTML.
+
+  * match: the following rules will be applied when the `<meta>` tag property has the specified value
+  * pattern: a regex pattern that will be used on the content value and passed to a variable with `apply`.
+  * apply: the name of the `site` or any variable defined in `ui-config.json` that will be set with the value above
+  * require: only the existence of the value is checked, no variables are used
+
+Mastodon:
+
+```json
+	"meta": [
+		{
+			"match": "og:title",
+			"require": "Mastodon" 
+		},
+		{
+			"property": "og:url",
+			"pattern": "(https:\/\/[^\/]+\/)",
+			"apply": "site"
+		},
+	]
+```
+
+#### regex
+
+  * pattern: a regex pattern that will be used on the HTML content and passed to a variable with `apply`.
+  * apply: the name of the `site` or any variable defined in `ui-config.json` that will be set with the value above
+  * require: only the existence of the value is checked, no variables are used
+
+Reddit:
+
+```json
+	"regex": [
+		{
+			"pattern": "form\\s+.*\\s+action=\"\\/r\\/(\\w+)\\/",
+			"apply": "subreddit"
+		}
+	]
+```
+
+Podcast:
+
+```json
+	"regex": [
+		{
+			"pattern": "<audio[^>]*src.*=.*\".*\\.mp3\"",
+			"require": "true?"
+		}
+	]
+```
+
+Note the escaping of backslashes and quotes in the `pattern`.
+
 
 ## HTML Content
 
@@ -696,7 +858,7 @@ The following tags are supported:
 
 For example, if your plugin provides the following `content`:
 
-```
+```html
 <p><b>Bold</b>, <i>italic</i>, <b><i>both</i></b>,<br/> and <a href="#">link</a>.</p>
 ```
 

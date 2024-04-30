@@ -1,0 +1,15 @@
+{
+ 	"site": [
+ 		"youtube.",
+ 		"youtu.be",
+ 		"youtubekids.com"
+ 	],
+	"link": [
+		{
+			"check": "type",
+			"match": "application/rss+xml",
+			"use": "href",
+			"apply": "site"
+		}
+	]
+}

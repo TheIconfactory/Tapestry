@@ -1,0 +1,16 @@
+{
+	"link": [
+		{
+			"check": "type",
+			"match": "application/rss+xml",
+			"use": "href",
+			"apply": "site"
+		},
+		{
+			"check": "type",
+			"match": "application/atom+xml",
+			"use": "href" ,
+			"apply": "site"
+		}
+	]
+}
