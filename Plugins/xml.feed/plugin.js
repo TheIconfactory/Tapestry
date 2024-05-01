@@ -122,7 +122,8 @@ function load() {
 				else if (entry.updated) {
 					date =  new Date(entry.updated);
 				}
-				const content = entry.content;
+				const content = entry.content ?? entry.title ?? "No content";
+				
 				const post = Post.createWithUriDateContent(url, date, content);
 				post.creator = creator;
 				if (entryAttributes instanceof Array) {
@@ -146,6 +147,33 @@ function load() {
 						post.attachments = attachments;
 					}
 				}
+				else {
+					// extract any media from RSS: https://www.rssboard.org/media-rss
+					if (entry["media:group"] != null) {
+						const mediaGroup = entry["media:group"];
+			
+						const thumbnail = mediaGroup["media:thumbnail$attrs"].url;
+						if (thumbnail != null) {
+							const attachment = Attachment.createWithMedia(thumbnail);
+							post.attachments = [attachment];
+						}
+					}
+					else if (entry["media:thumbnail$attrs"] != null) {
+						const thumbnail = entry["media:thumbnail$attrs"].url;
+						if (thumbnail != null) {
+							const attachment = Attachment.createWithMedia(thumbnail);
+							post.attachments = [attachment];
+						}
+					}
+					else if (entry["media:content$attrs"] != null) {
+						const content = entry["media:content$attrs"].url;
+						if (content != null) {
+							const attachment = Attachment.createWithMedia(content);
+							post.attachments = [attachment];
+						}
+					}
+				}
+
 				results.push(post);
 			}
 
@@ -173,10 +201,8 @@ function load() {
 			for (const item of items) {
 				const url = item.link;
 				const date = new Date(item.pubDate);
-				let content = item["content:encoded"];
-				if (content == null) {
-					content = item.description;
-				}
+				let content = item["content:encoded"] ?? item["description"] ?? "No content";
+				
 				const post = Post.createWithUriDateContent(url, date, content);
 				post.creator = creator;
 			
