@@ -7,7 +7,7 @@
 			"check": "rel",
 			"match": "canonical",
 			"use": "href",
-			"pattern": "https:\/\/www.gocomics.com\/([^\/]+)\/.*",
+			"pattern": "https:\/\/www.gocomics.com\/([^\/]+)",
 			"apply": "comicId"
 		},
 	]

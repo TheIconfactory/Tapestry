@@ -380,7 +380,7 @@ Note that old style property lists or JSON property lists are not supported.
 
 ### extractProperties(text) → Object
 
-  * text: `String` is HTML content with meta properties (such as OpenGraph).
+  * text: `String` is HTML content with `<meta>` properties (such as OpenGraph).
   
 Returns an `Object` representation containing the HTML’s properties. These values can be used to generate link previews or enhance the content without scraping the markup.
 
@@ -747,7 +747,8 @@ For example, the following link rules check for RSS and Atom feeds and use the r
 		}
 ```
 
-Note the rules can suggest more than one option to the user. In the case above, a site that has both an RSS and Atom feed will
+Note the rules can suggest more than one option to the user. In the case above, a site that has both an RSS and Atom feed will offer the user choices with both `site` variables.
+
 GoComics:
 
 ```json
@@ -779,7 +780,7 @@ Micro.blog:
 
 The meta rules check the `<meta>` tags in the HTML.
 
-  * match: the following rules will be applied when the `<meta>` tag property has the specified value
+  * property: the following rules will be applied when the `<meta>` tag property has the specified value
   * pattern: a regex pattern that will be used on the content value and passed to a variable with `apply`.
   * apply: the name of the `site` or any variable defined in `ui-config.json` that will be set with the value above
   * require: only the existence of the value is checked, no variables are used
@@ -789,7 +790,7 @@ Mastodon:
 ```json
 	"meta": [
 		{
-			"match": "og:title",
+			"property": "og:title",
 			"require": "Mastodon" 
 		},
 		{
