@@ -1,10 +1,11 @@
 {
-	"link": [
+	"html": [
 		{
+			"element": "link",
 			"check": "rel",
 			"match": "subscribe",
 			"use": "href",
-			"require": "https://micro.blog/users/follow"
+			"extract": "https://micro.blog/users/follow"
 		}
 	]
 }

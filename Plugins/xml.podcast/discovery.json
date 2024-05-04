@@ -1,17 +1,16 @@
 {
-	"link": [
+	"html": [
 		{
+			"element": "link",
 			"check": "type",
 			"match": "application/rss+xml",
 			"use": "href",
-			"apply": "site"
-		}
-	],
-	"regex": [
+			"variable": "site"
+		},
 		{
-			"pattern": "<audio[^>]*src.*=.*\".*\\.mp3\"",
-			"require": "true?"
+			"element": "a",
+			"check": "href",
+			"match": "///(?:podcasts.apple.com|apple.co)//"
 		}
 	]
-
 }

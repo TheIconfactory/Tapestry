@@ -1,15 +1,16 @@
 {
- 	"site": [
+ 	"sites": [
  		"youtube.",
  		"youtu.be",
  		"youtubekids.com"
  	],
-	"link": [
+	"html": [
 		{
+			"element": "link",
 			"check": "type",
 			"match": "application/rss+xml",
 			"use": "href",
-			"apply": "site"
+			"variable": "site"
 		}
 	]
 }

@@ -1,14 +1,15 @@
 {
-	"site": [
+	"sites": [
 		"gocomics.com"
 	],
-	"link": [
+	"html": [
 		{
+			"element": "link",
 			"check": "rel",
 			"match": "canonical",
 			"use": "href",
-			"pattern": "https:\/\/www.gocomics.com\/([^\/]+)",
-			"apply": "comicId"
-		},
+			"extract": "/gocomics.com/([^/]+)/",
+			"variable": "comicId"
+		}
 	]
 }
