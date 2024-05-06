@@ -671,26 +671,25 @@ Settings for variables can also be suggested. The `name` parameter should match 
 
 ### discovery.json
 
-This file helps the user find your plugin when they have a URL to page of HTML. The rules in this file will be checked and matches will be offered in an interface that simplifies set up.
+This file helps the user find your plugin when they have a URL to a page of HTML. The rules in this file will be checked and if all constraints match, the plugin will be suggested to the user in an interface that simplifies set up.
 
-The file consists of four categories of rules. You only need to supply the ones you use.
+The file consists of three categories: one specifies a list of sites where the plugin can be used, the other two specify a list of rules for the URL and HTML.
 
 ```json
 {
-	"site": [],
-	"link": [],
-	"meta": [],
-	"regex": []
+	"sites": [],
+	"url": [],
+	"html": []
 }
 ```
 
-Each category that you specify must be satisfied. For example, if you supply `site` and `link`, and the page has the correct URL but not the correct `<link>` tag, your plugin will not be suggested.
+All three categories must match in order to be displayed. If one of these category is not supplied, it has no constraints, so it is considered a match.
 
-The following sections describe each of the rule categories.
+The following sections describe each category.
 
-#### site
+#### sites
 
-A list of sites where the plugin can be used. These checks are performed on the URL that is supplied by the user.
+The sites category is a list of strings where the plugin can be used. These checks are performed on the URL that is supplied by the user.
 
 For example. the `com.gocomics` plugin only works on one site so it uses:
 
@@ -700,7 +699,7 @@ For example. the `com.gocomics` plugin only works on one site so it uses:
 	],
 ```
 
-The YouTube plugin will work on many different domains. The "youtube." will match "youtube.de", "youtube.fr", "youtube.com", etc.
+The YouTube plugin will work on many different domains. Note that "youtube." will match "youtube.de", "youtube.fr", as well as the more familiar "youtube.com". The match does not use regular expressions.
 
 ```json
  	"site": [
@@ -710,126 +709,145 @@ The YouTube plugin will work on many different domains. The "youtube." will matc
  	],
 ```
 
-If you don't supply a site, you must provide one of the other rules for your plugin to be suggested.
+If the sites rules do not match, no further checks are performed and the plugin is not suggested to the user.
 
-#### link
+#### url
 
-The HTML at the URL supplied by the user is loaded, then this rule checks the `<link>` tags in the content.
+The rules for the user’s URL consist of two parts:
 
-  * check: the attribute in a `<link>` to check
-  * match: the following rules will be applied when the attribute has the specified value
-  * use: the attribute in the `<link>` that contains a value to use with the plugin
-  * pattern: a regex pattern that will be used on the `value` and passed to a variable with `apply`.
-  * apply: the name of the `site` or any variable defined in `ui-config.json` that will be set with the value above
-  * require: only the existence of the value is checked, no variables are used
+  * extract (required): a regex pattern that will be used on the URL and passed to the `variable`.
+  * variable (required): `site` or any variable defined in `ui-config.json` that will be set using `extract`.
 
-A `value` with "href" will always return an absolute URL, even if it is a relative URL in the document.
-
-TODO: Implement relative URL conversion (e.g. "/feeds/main" at Daring Fireball)
-
-Multiple matches will result in multiple choices in user interface (e.g. both RSS and Atom feeds).
-
-For example, the following link rules check for RSS and Atom feeds and use the resulting "href" value for the `site` configuration:
+If the `extract` pattern is empty it's considered a match and the full URL will be passed to the variable (this will likely be the `site`). The following example sets the `site` variable with the URL entered by the user.
 
 ```json
-	"link": [
+	"url": [
 		{
-			"check": "type",
-			"match": "application/rss+xml",
-			"use": "href",
-			"apply": "site"
-		},
-		{
-			"check": "type",
-			"match": "application/atom+xml",
-			"use": "href",
-			"apply": "site"
+			"extract": "",
+			"variable": "site"
 		}
-```
-
-Note the rules can suggest more than one option to the user. In the case above, a site that has both an RSS and Atom feed will offer the user choices with both `site` variables.
-
-GoComics:
-
-```json
-	"link": [
-		{
-			"check": "rel",
-			"match": "canonical",
-			"use": "href",
-			"pattern": "https:\/\/www.gocomics.com\/([^\/]+)\/.*",
-			"apply": "comicId"
-		},
 	]
 ```
 
-Micro.blog:
+The `extract` regex pattern begins and ends with a single slash ("/") character. The first capture group in the pattern is used to set the variable’s value. If no match is found, the rule fails and the plugin is not offered as a suggestion.
+
+If necessary, non-capturing groups like "(?:foo|bar)" can be used in the regular expression.
+
+This example extracts the "aww" from `http://reddit.com/r/aww/whatever` and puts it in a "subreddit" variable:
 
 ```json
-	"link": [
+	"url": [
 		{
+			"extract": "/reddit.com/r/([^/]+)/",
+			"variable": "subreddit"
+		}
+	]
+```
+
+#### html
+
+The content at the URL provided by the user can also be checked. The strategy is to collect all elements of a specific type, check an attribute of those elements, see if it matches, and then optionally save all or part of a match in a variable.
+
+This approach allows your plugin to check things like `<link>` or `<meta>` tags for things that it needs. For example, a page that has the following HTML markup can be used with a plugin that handles RSS feeds:
+
+```html
+<link rel="alternate" type="application/atom+xml" href="/feeds/main" />
+```
+
+The `html` rules use the following properties:
+
+  * element (required): the elements in the HTML to check: "link", "meta", or any other tag.
+  * check (required): the attribute in the element to check
+  * match (required): a string _or_ regex pattern that will be used to find matching attribute values
+  * use (optional): the attribute in the element that contains a value to use with the plugin
+  * extract (optional): a string _or_ regex pattern that will be used on the value specified by `use` and passed to the `variable`.
+  * variable (optional): `site` or any variable defined in `ui-config.json` that will be set using `extract`.
+
+Both `match` and `extract` can be:
+
+  * a string to match (e.g. "Mastodon" or "application/rss+xml")
+  * a regex pattern that begins and ends with a single slash ("/") (e.g. "/example.com/([^/]+)/"
+
+The HTML rule will fail if any of the following are true:
+
+  * The HTML contains no `element` tags.
+  * If no `check` attribute exists, or if the `match` is not satisfied.
+  * If `use` is specified and no `extract` match is found.
+
+A picture is worth a thousand words, so here are some examples.
+
+The first example shows how to get the URL for an RSS feed. Note the use of a `match` pattern with a non-capturing group that allows both the RSS and Atom formats:
+
+```json
+	"html": [
+		{
+			"element": "link",
+			"check": "type",
+			"match": "/application/(?:rss|atom)\\+xml/",
+			"use": "href",
+			"variable": "site"
+		}
+	]
+```
+
+Also note that the example above shows that backslashes need to be escaped because they are passed as strings to Swift's Regex framework. Forward slashes do not need to be escaped.
+
+A simpler example just checks if there is a subscribe URL for Micro.blog without setting a variable:
+
+```json
+	"html": [
+		{
+			"element": "link",
 			"check": "rel",
 			"match": "subscribe",
 			"use": "href",
-			"require": "https://micro.blog/users/follow"
+			"extract": "https://micro.blog/users/follow"
 		}
 	]
 ```
 
-#### meta
-
-The meta rules check the `<meta>` tags in the HTML.
-
-  * property: the following rules will be applied when the `<meta>` tag property has the specified value
-  * pattern: a regex pattern that will be used on the content value and passed to a variable with `apply`.
-  * apply: the name of the `site` or any variable defined in `ui-config.json` that will be set with the value above
-  * require: only the existence of the value is checked, no variables are used
-
-Mastodon:
+If there are multiple rules, they must all pass. For example, the first rule below checks if there is an OpenGraph `og:site_name` meta property that contains the word "Mastodon". If it does, there is another check for the `og:url` property where the `site` variable can be extracted:
 
 ```json
-	"meta": [
+	"html": [
 		{
-			"property": "og:title",
-			"require": "Mastodon" 
+			"element": "meta",
+			"check": "property",
+			"match": "og:site_name",
+			"use": "content",
+			"extract": "/.*Mastodon.*/" 
 		},
 		{
-			"property": "og:url",
-			"pattern": "(https:\/\/[^\/]+\/)",
-			"apply": "site"
+			"element": "meta",
+			"check": "property",
+			"match": "og:url",
+			"use": "content",
+			"extract": "/(https://[^/]+)/",
+			"variable": "site"
+		}
+	]
+```
+
+Any HTML element can be used. For example the plugin for podcasts uses these two rules:
+
+```json
+		{
+			"element": "link",
+			"check": "type",
+			"match": "application/rss+xml",
+			"use": "href",
+			"variable": "site"
 		},
-	]
-```
-
-#### regex
-
-  * pattern: a regex pattern that will be used on the HTML content and passed to a variable with `apply`.
-  * apply: the name of the `site` or any variable defined in `ui-config.json` that will be set with the value above
-  * require: only the existence of the value is checked, no variables are used
-
-Reddit:
-
-```json
-	"regex": [
 		{
-			"pattern": "form\\s+.*\\s+action=\"\\/r\\/(\\w+)\\/",
-			"apply": "subreddit"
+			"element": "a",
+			"check": "href",
+			"match": "///(?:podcasts.apple.com|apple.co)//"
 		}
-	]
 ```
 
-Podcast:
+The first rule checks that there is an RSS feed while the second rule checks if there is a link on the page to Apple's podcast directory. 
 
-```json
-	"regex": [
-		{
-			"pattern": "<audio[^>]*src.*=.*\".*\\.mp3\"",
-			"require": "true?"
-		}
-	]
-```
-
-Note the escaping of backslashes and quotes in the `pattern`.
+Finally, the "href" attribute value in a `use` property will always return an absolute URL, even if there is a relative URL in the document. Variables, specifically `site`, will need a fully qualified domain name to access data since the plugin has no notion of a base URL.
 
 
 ## HTML Content
