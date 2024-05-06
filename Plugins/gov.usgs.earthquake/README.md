@@ -3,6 +3,6 @@ This connector displays a feed of earthquakes from around the world. The feed is
 
 The feed can be configured to show significant quakes or ones above a certain threshold on the Richter scale.
 
-This is the first connector written for Tapestry and was written by Craig Hockenberry ([@chockenberry](https://mastodon.social/@chockenberry)) while creating the first prototype.
+This first connector for Tapestry was written by Craig Hockenberry ([@chockenberry](https://mastodon.social/@chockenberry)) while creating a prototype.
 
 
