@@ -1,6 +1,7 @@
 {
-  "id": "io.healthchecks",
-  "display_name": "Healthchecks",
-  "site": "https://healthchecks.io",
-  "check_interval": 300
+	"id": "io.healthchecks",
+	"display_name": "Healthchecks",
+	"service_name": "Information",
+	"site": "https://healthchecks.io",
+	"check_interval": 300
 }

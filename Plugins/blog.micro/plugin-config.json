@@ -1,6 +1,7 @@
 {
 	"id": "blog.micro",
 	"display_name": "Micro.blog",
+	"service_name": "Micro.blog",
 	"site": "https://micro.blog",
 	"oauth_authorize": "/indieauth/auth",
 	"oauth_token": "/indieauth/token",

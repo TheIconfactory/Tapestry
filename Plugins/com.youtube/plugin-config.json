@@ -1,6 +1,7 @@
 {
 	"id": "com.youtube",
 	"display_name": "YouTube Channel",
+	"service_name": "YouTube",
 	"site_prompt": "Channel URL",
 	"site_placeholder": "https://youtube.com/feeds/video.xml",
 	"needs_verification": true,

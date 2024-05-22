@@ -1,6 +1,7 @@
 {
 	"id": "social.bsky",
 	"display_name": "Bluesky",
+	"service_name": "Bluesky",
 	"site": "https://bsky.social",
 	"jwt_authorize": "/xrpc/com.atproto.server.createSession",
 	"jwt_refresh": "/xrpc/com.atproto.server.refreshSession",

@@ -1,6 +1,7 @@
 {
 	"id": "org.joinmastodon",
 	"display_name": "Mastodon",
+	"service_name": "Mastodon",
 	"site_prompt": "Instance",
 	"site_placeholder": "https://mastodon.social",
 	"register": "/api/v1/apps",
@@ -10,7 +11,7 @@
 	"oauth_code_key": "code",
 	"oauth_scope": "read+write+push",
 	"oauth_grant_type": "authorization_code",
-	"providesAttachments": true,
+	"provides_attachments": true,
 	"canPost": true,
 	"check_interval": 300
 }

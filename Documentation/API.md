@@ -774,7 +774,9 @@ The HTML rule will fail if any of the following are true:
   * If no `check` attribute exists, or if the `match` is not satisfied.
   * If `use` is specified and no `extract` match is found.
 
-A picture is worth a thousand words, so here are some examples.
+Finally, the "href" attribute value in a `use` property will always return an absolute URL, even if there is a relative URL in the document. Variables, specifically `site`, will need a fully qualified domain name to access data since the plugin has no notion of a base URL.
+
+A picture is worth a thousand words, so the remainder of this section are examples.
 
 The first example shows how to get the URL for an RSS feed. Note the use of a `match` pattern with a non-capturing group that allows both the RSS and Atom formats:
 
@@ -846,8 +848,6 @@ Any HTML element can be used. For example the plugin for podcasts uses these two
 ```
 
 The first rule checks that there is an RSS feed while the second rule checks if there is a link on the page to Apple's podcast directory. 
-
-Finally, the "href" attribute value in a `use` property will always return an absolute URL, even if there is a relative URL in the document. Variables, specifically `site`, will need a fully qualified domain name to access data since the plugin has no notion of a base URL.
 
 
 ## HTML Content
