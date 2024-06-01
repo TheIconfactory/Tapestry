@@ -1,13 +1,15 @@
 
 // social.bsky
 
-function identify() {
+function verify() {
 	sendRequest(site + "/xrpc/com.atproto.server.getSession")
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		const identifier = jsonObject.handle;
 		
-		setIdentifier(identifier);
+		// TODO: Use getProfile to get avatar: https://docs.bsky.app/docs/api/app-bsky-actor-get-profile
+		
+		processVerification(identifier);
 	})
 	.catch((requestError) => {
 		processError(requestError);

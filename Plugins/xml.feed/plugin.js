@@ -1,7 +1,7 @@
 
 // xml.feed
 
-function identify() {
+function verify() {
 	sendRequest(site)
 	.then((xml) => {	
 		let jsonObject = xmlParse(xml);
@@ -24,27 +24,46 @@ function identify() {
 				}
 			}
 			const feedName = jsonObject.feed.title;
+			let feedAvatar = null;
+			if (jsonObject.feed.icon != null) {
+				feedAvatar = jsonObject.feed.icon;
+			}
+			if (feedUrl != null && feedAvatar === null) {
+				let baseUrl = feedUrl.split("/").splice(0,3).join("/");
+				feedAvatar = baseUrl + "/favicon.ico";
+			}
 
-			const dictionary = {
-				identifier: feedName,
+			const verification = {
+				displayName: feedName,
+				icon: feedAvatar,
 				baseUrl: feedUrl
 			};
-			setIdentifier(dictionary);
+			processVerification(verification);
 		}
 		else if (jsonObject.rss != null) {
 			// RSS 2.0
 			const feedUrl = jsonObject.rss.channel.link;
 			const feedName = jsonObject.rss.channel.title;
 
-			const dictionary = {
-				identifier: feedName,
+			let feedAvatar = null;
+			if (jsonObject.rss.channel.image != null) {
+				feedAvatar = jsonObject.rss.channel.image.url;
+			}
+			if (feedAvatar === null) {
+				let baseUrl = feedUrl.split("/").splice(0,3).join("/");
+				feedAvatar = baseUrl + "/favicon.ico";
+			}
+
+			const verification = {
+				displayName: feedName,
+				icon: feedAvatar,
 				baseUrl: feedUrl
 			};
-			setIdentifier(dictionary);
+			processVerification(verification);
 		}
 		else {
 			// Unknown
-			setIdentifier(null);
+			processError(Error("Unknown feed format"));
 		}
 	})
 	.catch((requestError) => {

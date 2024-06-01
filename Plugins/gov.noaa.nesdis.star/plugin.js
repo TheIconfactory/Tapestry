@@ -3,7 +3,7 @@
 
 var lastDate = null;
 
-function identify() {
+function verify() {
 	let identifier = "";
 	if (satellite == "East Coast") {
 		identifier += "GOES16";
@@ -11,10 +11,16 @@ function identify() {
 	else {
 		identifier += "GOES18";
 	}
+	identifier += ": ";
+	identifier += image;
 	
 	lastDate = null;
 	
-	setIdentifier(identifier);
+	const verification = {
+		displayName: identifier,
+		icon: "https://www.star.nesdis.noaa.gov/favicon.ico"
+	};
+	processVerification(verification);
 }
 	
 // NOTE: Images update every five minutes, but it takes longer to see a visible difference.

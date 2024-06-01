@@ -11,6 +11,7 @@
 	"oauth_grant_type": "authorization_code",
 	"oauth_http_redirect": true,
 	"needs_api_keys": true,
+	"freeze_variables": true,
 	"provides_attachments": true,
 	"check_interval": 300
 }

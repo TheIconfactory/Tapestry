@@ -42,9 +42,9 @@ Pressing this button initates the OAuth authentication for the plugin.
 
 Pressing this button refreshes the OAuth authentication if it has a refresh token.
 
-#### Identify
+#### Verify
 
-This button calls the `identify()` action in the plugin.
+This button calls the `verify()` action in the plugin.
 
 #### Load
 

@@ -1,15 +1,19 @@
 
 // com.tumblr
 
-function identify() {
+function verify() {
 	sendRequest(site + "/v2/user/info")
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		
 		const blogs = jsonObject.response.user.blogs;
 		const blog = blogs[0];
-		const identifier = blog.name;
-		setIdentifier(identifier);
+		
+		const verification = {
+			displayName: blog.name,
+			icon: "https://assets.tumblr.com/pop/manifest/apple-touch-icon-6d2aadd9.png"
+		};
+		processVerification(verification);
 	})
 	.catch((requestError) => {
 		processError(requestError);

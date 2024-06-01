@@ -1,8 +1,12 @@
 
 // variables.test
 
-function identify() {
-	setIdentifier(title)
+function verify() {
+	const verification = {
+		displayName: title,
+		icon: "https://iconfactory.com/favicon.ico"
+	};
+	processVerification(verification)
 }
 
 function load() {

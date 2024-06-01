@@ -1,11 +1,12 @@
 
 // xml.feed
 
-function identify() {
-	console.log("identify")
+function verify() {
 	sendRequest(site)
 	.then((xml) => {	
-		let jsonObject = xmlParse(xml);
+		const jsonObject = xmlParse(xml);
+		
+		const icon = "https://www.youtube.com/s/desktop/905763c7/img/favicon_144x144.png";
 		
 		if (jsonObject.feed != null) {
 			// Atom 1.0
@@ -26,19 +27,19 @@ function identify() {
 			}
 			const feedName = jsonObject.feed.title;
 
-			const dictionary = {
-				identifier: feedName,
+			const verification = {
+				displayName: feedName,
+				icon: icon,
 				baseUrl: feedUrl
 			};
-			setIdentifier(dictionary);
+			processVerification(verification);
 		}
 		else if (jsonObject.rss != null) {
 			// RSS 2.0
-			processError(new Error("Invalid feed format"));
+			processError(Error("Invalid feed format"));
 		}
 		else {
-			// Unknown
-			setIdentifier("Unknown");
+			processError(Error("Unknown feed format"));
 		}
 	})
 	.catch((requestError) => {
@@ -47,19 +48,6 @@ function identify() {
 }
 
 const avatarRegex = /<link rel="image_src" href="([^"]*)">/
-
-function metaProperties(html) {
-	var properties = {};
-	
-	const matches = html.matchAll(metaRegex);
-	for (const match of matches) {
-		const key = match[1];
-		const value = match[2];
-		properties[key] = value;
-	}
-
-	return properties;
-}
 
 function load() {	
 	console.log("load")
@@ -141,7 +129,7 @@ function load() {
 		}
 		else if (jsonObject.rss != null) {
 			// RSS 2.0
-			processError(new Error("Invalid feed format"));
+			processError(Error("Invalid feed format"));
 		}
 		else {
 			// Unknown

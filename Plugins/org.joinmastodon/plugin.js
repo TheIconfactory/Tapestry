@@ -1,13 +1,19 @@
 
 // org.joinmastodon
 
-function identify() {
+function verify() {
 	sendRequest(site + "/api/v1/accounts/verify_credentials")
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		
-		const identifier = jsonObject["username"];
-		setIdentifier(identifier);
+		const displayName = "@" + jsonObject["username"];
+		const icon = jsonObject["avatar"];
+		
+		const verification = {
+			displayName: displayName,
+			icon: icon
+		}
+		processVerification(verification);
 	})
 	.catch((requestError) => {
 		processError(requestError);

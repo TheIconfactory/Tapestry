@@ -1,7 +1,7 @@
 
 // local.ping
 
-function identify() {
+function verify() {
 	if (typeof site !== 'undefined') {
 		sendRequest(site, "HEAD")
 		.then((dictionary) => {
@@ -12,6 +12,7 @@ function identify() {
 				// NOTE: The responseUrl may not be the same as the original url if there was a redirect.
 				const responseUrl = jsonObject["url"];
 				
+				let icon = null
 				let identifier = responseUrl;
 				if (identifier.startsWith("https://")) {
 					identifier = identifier.replace("https://", "");
@@ -20,18 +21,29 @@ function identify() {
 					identifier = identifier.replace("http://", "");
 				}
 				if (identifier.endsWith("/")) {
+					icon = responseUrl + "favicon.ico";
 					identifier = identifier.substring(0, identifier.length - 1);
 				}
+				else {
+					icon = responseUrl + "/favicon.ico";
+				}
 				
-				setIdentifier(identifier);
+				const verification = {
+					displayName: identifier,
+					icon: icon
+				};
+				processVerification(identifier);
 			}
 			else {
-				setIdentifier(null);
+				processError(Error("Failed to load site"));
 			}
 		})
 		.catch((requestError) => {
-			setIdentifier(null);
+			processError(requestError);
 		});
+	}
+	else {
+		processError(Error("Missing site"));
 	}
 }
 

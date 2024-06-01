@@ -4,6 +4,7 @@
 	"service_name": "Comics",
 	"site": "https://www.gocomics.com",
 	"needs_verification": true,
+	"freeze_variables": true,
 	"provides_attachments": true,
 	"check_interval": 300
 }

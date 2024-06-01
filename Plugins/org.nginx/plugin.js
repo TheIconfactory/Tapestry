@@ -15,8 +15,8 @@ function toPercentage(value) {
 	return (value * 100.0).toFixed(1) + "%"
 }
 
-function identify() {
-	setIdentifier(site.substring(0, site.lastIndexOf("/")));
+function verify() {
+	processVerification(site.substring(0, site.lastIndexOf("/")));
 }
 
 function load() {

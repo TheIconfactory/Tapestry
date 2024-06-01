@@ -142,25 +142,21 @@ For example, you could set a string value of `Bearer __ACCESS_TOKEN__` and an "A
 
 ## Actions
 
-The Tapestry app will call the following functions in `plugin.js` when it needs the script to read or write data. If no implementation is provided, no action will be performed. For example, some sources will not need to `identify()` themselves.
+The Tapestry app will call the following functions in `plugin.js` when it needs the script to read or write data. If no implementation is provided, no action will be performed. For example, some sources will not need to `verify()` themselves.
 
-All actions are performed asynchronously (using one or more JavaScript Promise objects). An action indicates that it has completed using the `processResults`, `processError`, and `setIdentifier` functions specified below.
+All actions are performed asynchronously (using one or more JavaScript Promise objects). An action indicates that it has completed using the `processResults`, `processError`, and `processVerification` functions specified below.
 
-### identify()
+### verify()
 
-Determines the identity for the user and site. After `setIdentifier` is called with a String, it will displayed in the app when configuring the timeline. For example, "Mastodon (chockenberry)" allows a user to differentiate between separate accounts.
+Determines if a site is reachable and gathers properties for the feed. After `processVerification` is called a feed can be saved by a user.
+
+The properties returned can be user visible or used internally. An example of the former case is a display name will be used identify the feed. The latter case is a base URL that will be used to handle relative paths in the feed.
 
 This function will only be called if `needsVerification` is set to true in the plug-in’s configuration.
 
 ### load()
 
 Loads any new data and return it to the app with `processResults` or `processError`. Variables can be used to determine what to load. For example, whether to include mentions on Mastodon or not.
-
-### send(post)
-
-Use the supplied `Post` object to send data to a service. The `post.attachments` will contain a string URL in media and a description (if available): these attachments can be uploaded to a media endpoint using `uploadFile` before posting. 
-
-This function will only be called if `canPost` is set to true in the plug-in’s configuration.
 
 ## Functions
 
@@ -206,13 +202,19 @@ For example, if you need to "POST" the client ID, you would use "client=\_\_CLIE
 A Mastodon user’s identity is determined by sending a request to verify credentials:
 
 ```javascript
-function identify() {
+function verify() {
 	sendRequest(site + "/api/v1/accounts/verify_credentials")
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		
-		const identifier = jsonObject["username"];
-		setIdentifier(identifier);
+		const displayName = "@" + jsonObject["username"];
+		const icon = jsonObject["avatar"];
+		
+		const verification = {
+			displayName: displayName,
+			icon: icon
+		}
+		processVerification(verification);
 	})
 	.catch((requestError) => {
 		processError(requestError);
@@ -237,19 +239,22 @@ Sends any error to the Tapestry app for display
 
   * error: `Error` which indicates what went wrong. Will be displayed in the user interface.
 
-### setIdentifier(identifier)
+### processVerification(verification)
 
-Sets the identity for the site and service.
+Sets the parameters for the site and service.
 
-  * identifier: `String` or dictionary `Object` which helps user to identify the account being used.
+  * verification: dictionary `Object` or `String`.
+
+The dictionary can contain the following:
+
+  * displayName: `String` that will be used to name the feed. For example, a RSS feed name or a Mastodon account.
+  * icon: `String` for an image URL that will be presented alongside the display name.
+  * baseUrl: `String` that will be used to resolve relative URLs.
   
-_NOTE:_ When using a dictionary, an `identifier` for the site name and a `baseUrl` for media (which is different than the site) should be supplied. A dictionary is typically used for feeds where the site is "feed.example.com" but images and other resources are loaded from "example.com".
+When a string is returned, it will be used as a `displayName` with an empty `baseUrl` and default `icon`.
+
+_NOTE:_ A `baseUrl` is typically used for feeds where the site is "feed.example.com" but images and other resources are loaded from "example.com".
   
-### uploadFile(file, mediaEndpoint) → Promise
-
-  * file: `String` is the name retrieved from `post.attachments.media`. Do not modify this value, which points to a temporary file that will be used for the upload.
-  * mediaEndpoint: `String` is the URL where multipart/form-data content will be delivered.
-
 ### xmlParse(text) → Object
 
   * text: `String` is the text representation of the XML data.
@@ -418,9 +423,10 @@ Recommended properties:
   	
 Optional properties:
 
-  * needs\_verification: `Boolean` with true if verification is needed (by calling `identify()`)
+  * needs\_verification: `Boolean` with true if verification is needed (by calling `verify()`)
+  * freeze\_variables: 'Boolean' with true if variables are not editable after verification. Use this option if changing a variable will break content loading (because its a part of a URL, for example).
   * provides\_attachments: `Boolean` with true if connector generates attachments directly, otherwise post-processing of HTML content will be used to capture images & video.
-  * authorization\_header: `String` with a template for the authorization header. If no value is specified, "Bearer \_\_ACCESS\_TOKEN\_\_" will be used. See below for options
+  * authorization\_header: `String` with a template for the authorization header. If no value is specified, "Bearer \_\_ACCESS\_TOKEN\_\_" will be used. See below for options.
   * check\_interval: `Number` with number of seconds between load requests (currently unimplemented).
 
 Optional OAuth properties:

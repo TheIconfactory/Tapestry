@@ -1,25 +1,29 @@
 
 // com.reddit
 
-function identify() {
+function verify() {
 	if (subreddit != null && subreddit.length > 0) {
 		sendRequest(`${site}/r/${subreddit}/hot.json?raw_json=1`, "HEAD")
 		.then((dictionary) => {
 			const jsonObject = JSON.parse(dictionary);
 			
 			if (jsonObject.status == 200) {
-				setIdentifier(subreddit);
+				const verification = {
+					displayName: "/r/" + subreddit,
+					icon: "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png"
+				};	
+				processVerification(verification);
 			}
 			else {
-				setIdentifier(null);
+				processError(Error("Invalid Subreddit"));
 			}
 		})
 		.catch((requestError) => {
-			setIdentifier(null);
+			processError(requestError);
 		});
 	}
 	else {
-		setIdentifier(null);
+		processError(Error("Invalid Subreddit"));
 	}
 }
 

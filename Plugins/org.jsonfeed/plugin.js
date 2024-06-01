@@ -1,18 +1,20 @@
 
 // org.jsonfeed
 
-function identify() {
+function verify() {
 	sendRequest(site)
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		
 		const identifier = jsonObject["title"];
+		const icon = jsonObject["icon"];
 		const baseUrl = jsonObject["home_page_url"];
-		const dictionary = {
-			identifier: identifier,
+		const verification = {
+			displayName: identifier,
+			icon: icon,
 			baseUrl: baseUrl
 		};
-		setIdentifier(dictionary);
+		processVerification(verification);
 	})
 	.catch((requestError) => {
 		processError(requestError);

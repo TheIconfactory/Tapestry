@@ -1,7 +1,7 @@
-function identify() {
+function verify() {
   sendRequest(site + "/api/auth.test").then(text => {
     const response = JSON.parse(text)
-    setIdentifier(`${response.user}, ${response.team}`)
+    processVerification(`${response.user}, ${response.team}`)
   })
   .catch((requestError) => {
     processError(requestError)

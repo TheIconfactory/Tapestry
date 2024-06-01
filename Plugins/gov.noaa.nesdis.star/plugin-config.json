@@ -4,5 +4,6 @@
 	"service_name": "Information",
 	"site": "https://www.star.nesdis.noaa.gov",
 	"needs_verification": true,
+	"freeze_variables": true,
 	"check_interval": 300
 }

@@ -1,13 +1,19 @@
 
 // blog.micro
 
-function identify() {
+function verify() {
 	sendRequest(site + "/account/verify", "POST", "token=__bearerToken__")
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		
-		const identifier = jsonObject["username"];
-		setIdentifier(identifier);
+		const displayName = "@" + jsonObject["username"];
+		const icon = jsonObject["avatar"];
+		
+		const verification = {
+			displayName: displayName,
+			icon: icon
+		};
+		processVerification(verification);
 	})
 	.catch((requestError) => {
 		processError(requestError);

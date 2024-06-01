@@ -1,7 +1,7 @@
 
 // com.gocomics
 
-function identify() {
+function verify() {
 	if (comicId != null && comicId.length > 0) {
 		const url = site + "/" + comicId;
 		sendRequest(url, "HEAD")
@@ -12,18 +12,22 @@ function identify() {
 			
 			// NOTE: If the responseUrl is the same as the original url, there was no redirect and the comicId is valid.
 			if (responseUrl == url) {
-				setIdentifier(comicId);
+				const verifcation = {
+					displayName: comicId,
+					icon: "https://assets.gocomics.com/assets/favicons/favicon-96x96-92f1ac367fd0f34bc17956ef33d79433ddbec62144ee17b40add7a6a2ae6e61a.png"	
+				};
+				processVerification(verifcation);
 			}
 			else {
-				setIdentifier(null);
+				processError(Error("Invalid Comic ID"));
 			}
 		})
 		.catch((requestError) => {
-			setIdentifier(null);
+			processError(requestError);
 		});
 	}
 	else {
-		setIdentifier(null);
+		processError(Error("Missing Comic ID"));
 	}
 }
 
