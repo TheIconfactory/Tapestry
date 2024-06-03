@@ -3,17 +3,25 @@
 
 function verify() {
 	if (comicId != null && comicId.length > 0) {
-		const url = site + "/" + comicId;
-		sendRequest(url, "HEAD")
-		.then((dictionary) => {
-			const jsonObject = JSON.parse(dictionary);
-			
-			const responseUrl = jsonObject["url"];
-			
-			// NOTE: If the responseUrl is the same as the original url, there was no redirect and the comicId is valid.
-			if (responseUrl == url) {
+		let date = new Date();
+		date.setDate(date.getDate() - 1); // https://stackoverflow.com/questions/5511323/calculate-the-date-yesterday-in-javascript
+		
+		const year = date.getFullYear();
+		const month = date.getMonth() + 1;
+		const day = date.getDate();
+	
+		const timestamp = String(year) + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
+
+		const url = site + "/" + comicId + "/" + timestamp;
+		sendRequest(url)
+		.then((html) => {
+			const properties = extractProperties(html);
+		
+			const title = properties["og:title"];
+			if (title != null) {
+				const displayName = title.replace(/ by.*$/, "");
 				const verifcation = {
-					displayName: comicId,
+					displayName: displayName,
 					icon: "https://assets.gocomics.com/assets/favicons/favicon-96x96-92f1ac367fd0f34bc17956ef33d79433ddbec62144ee17b40add7a6a2ae6e61a.png"	
 				};
 				processVerification(verifcation);
