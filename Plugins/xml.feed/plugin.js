@@ -9,55 +9,76 @@ function verify() {
 		if (jsonObject.feed != null) {
 			// Atom 1.0
 			const feedAttributes = jsonObject.feed.link$attrs;
-			let feedUrl = null;
+			let baseUrl = null;
 			if (feedAttributes instanceof Array) {
 				for (const feedAttribute of feedAttributes) {
 					if (feedAttribute.rel == "alternate") {
-						feedUrl = feedAttribute.href;
+						baseUrl = feedAttribute.href;
 						break;
 					}
 				}
 			}
 			else {
 				if (feedAttributes.rel == "alternate") {
-					feedUrl = feedAttributes.href;
+					baseUrl = feedAttributes.href;
 				}
 			}
-			const feedName = jsonObject.feed.title;
-			let feedAvatar = null;
+			const displayName = jsonObject.feed.title;
+			let icon = null;
 			if (jsonObject.feed.icon != null) {
-				feedAvatar = jsonObject.feed.icon;
+				icon = jsonObject.feed.icon;
 			}
-			if (feedUrl != null && feedAvatar === null) {
-				let baseUrl = feedUrl.split("/").splice(0,3).join("/");
-				feedAvatar = baseUrl + "/favicon.ico";
+			if (baseUrl != null && icon === null) {
+				let siteUrl = baseUrl.split("/").splice(0,3).join("/");
+				icon = siteUrl + "/favicon.ico";
 			}
-
+			else {
+				// try to get icon from the fe
+				let feedUrl = null;
+				if (feedAttributes instanceof Array) {
+					for (const feedAttribute of feedAttributes) {
+						if (feedAttribute.rel == "self") {
+							feedUrl = feedAttribute.href;
+							break;
+						}
+					}
+				}
+				else {
+					if (feedAttributes.rel == "self") {
+						feedUrl = feedAttributes.href;
+					}
+				}
+				if (feedUrl != null) {
+					let siteUrl = feedUrl.split("/").splice(0,3).join("/");
+					icon = siteUrl + "/favicon.ico";
+				}
+			}
+			
 			const verification = {
-				displayName: feedName,
-				icon: feedAvatar,
-				baseUrl: feedUrl
+				displayName: displayName,
+				icon: icon,
+				baseUrl: baseUrl
 			};
 			processVerification(verification);
 		}
 		else if (jsonObject.rss != null) {
 			// RSS 2.0
-			const feedUrl = jsonObject.rss.channel.link;
-			const feedName = jsonObject.rss.channel.title;
+			const baseUrl = jsonObject.rss.channel.link;
+			const displayName = jsonObject.rss.channel.title;
 
-			let feedAvatar = null;
+			let icon = null;
 			if (jsonObject.rss.channel.image != null) {
-				feedAvatar = jsonObject.rss.channel.image.url;
+				icon = jsonObject.rss.channel.image.url;
 			}
-			if (feedAvatar === null) {
-				let baseUrl = feedUrl.split("/").splice(0,3).join("/");
-				feedAvatar = baseUrl + "/favicon.ico";
+			if (icon === null) {
+				let feedUrl = baseUrl.split("/").splice(0,3).join("/");
+				icon = feedUrl + "/favicon.ico";
 			}
 
 			const verification = {
-				displayName: feedName,
-				icon: feedAvatar,
-				baseUrl: feedUrl
+				displayName: displayName,
+				icon: icon,
+				baseUrl: baseUrl
 			};
 			processVerification(verification);
 		}

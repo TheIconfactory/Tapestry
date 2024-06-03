@@ -4,23 +4,19 @@
 var lastDate = null;
 
 function verify() {
-	let identifier = "";
+	let displayName = "";
 	if (satellite == "East Coast") {
-		identifier += "GOES16";
+		displayName += "GOES16";
 	}
 	else {
-		identifier += "GOES18";
+		displayName += "GOES18";
 	}
-	identifier += ": ";
-	identifier += image;
+	displayName += ": ";
+	displayName += image;
 	
 	lastDate = null;
 	
-	const verification = {
-		displayName: identifier,
-		icon: "https://www.star.nesdis.noaa.gov/favicon.ico"
-	};
-	processVerification(verification);
+	processVerification(displayName);
 }
 	
 // NOTE: Images update every five minutes, but it takes longer to see a visible difference.

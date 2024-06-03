@@ -420,7 +420,9 @@ Recommended properties:
   * site\_prompt: `String` with a prompt for user input.
   * site\_placeholder: 'String' with a placeholder for user input.
   	- If no `site` is configured, these properties are required.
-  	
+ 
+   * icon: `String` with a URL to an image that will be used as a default for this connector.
+ 	
 Optional properties:
 
   * needs\_verification: `Boolean` with true if verification is needed (by calling `verify()`)

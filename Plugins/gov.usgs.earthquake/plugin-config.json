@@ -2,6 +2,7 @@
 	"id": "gov.usgs.earthquake",
 	"display_name": "USGS Earthquakes",
 	"service_name": "Information",
+	"icon": "https://earthquake.usgs.gov/earthquakes/map/assets/pwa/icon-192x192.png",
 	"site": "https://earthquake.usgs.gov",
 	"check_interval": 300
 }
