@@ -30,10 +30,11 @@ function load() {
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 
-		const creatorUrl = "https://earthquake.usgs.gov/";
-		const creatorName = "USGS – Latest Earthquakes";
-		let creator = Creator.createWithUriName(creatorUrl, creatorName);
-		creator.avatar = "https://earthquake.usgs.gov/earthquakes/map/assets/pwa/icon-192x192.png";
+// 		const identityUrl = "https://earthquake.usgs.gov/";
+// 		const identityName = "USGS – Latest Earthquakes";
+// 		let identity = Identity.createWithName(identityName);
+// 		identity.uri = identityUrl;
+// 		identity.avatar = "https://earthquake.usgs.gov/earthquakes/map/assets/pwa/icon-192x192.png";
 
 		const features = jsonObject["features"];
 		
@@ -52,10 +53,11 @@ function load() {
 			
 			const content = "<p>" + text + " <a href=\"" + mapsUrl + "\">Open Map</a></p>"
 			
-			let post = Post.createWithUriDateContent(url, date, content);
-			post.creator = creator;
+			let resultItem = Item.createWithUriDate(url, date);
+			resultItem.body = content;
+//			resultItem.author = identity;
 			
-			results.push(post);
+			results.push(resultItem);
 		}
 		processResults(results);
 	})

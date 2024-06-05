@@ -102,17 +102,18 @@ function load() {
 
 		let url = `https://cdn.star.nesdis.noaa.gov/${directory}/ABI/CONUS/${image}/2500x1500.jpg`;
 		
-		const creatorUrl = "https://www.star.nesdis.noaa.gov";
-		const creatorName = `NOAA STAR – ${directory}`;
-		var creator = Creator.createWithUriName(creatorUrl, creatorName);
-		creator.avatar = "https://www.star.nesdis.noaa.gov/favicon.ico";
+// 		const creatorUrl = "https://www.star.nesdis.noaa.gov";
+// 		const creatorName = `NOAA STAR – ${directory}`;
+// 		var creator = Creator.createWithUriName(creatorUrl, creatorName);
+// 		creator.avatar = "https://www.star.nesdis.noaa.gov/favicon.ico";
 		
 		const date = new Date();
 		const content = `<p>${image} image of Continental US (${satellite})</p><p><img src="${url}"/></p>`;
-		var post = Post.createWithUriDateContent(url, date, content);
-		post.creator = creator;
+		var resultItem = Item.createWithUriDate(url, date);
+		resultItem.body = content;
+//		post.creator = creator;
 		
-		processResults([post]);
+		processResults([resultItem]);
 		
 		lastDate = date;
 

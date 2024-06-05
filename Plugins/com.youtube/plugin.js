@@ -1,5 +1,5 @@
 
-// xml.feed
+// com.youtube
 
 function verify() {
 	sendRequest(site)
@@ -11,18 +11,18 @@ function verify() {
 		if (jsonObject.feed != null) {
 			// Atom 1.0
 			const feedAttributes = jsonObject.feed.link$attrs;
-			let feedUrl = null;
+			let baseUrl = null;
 			if (feedAttributes instanceof Array) {
 				for (const feedAttribute of feedAttributes) {
 					if (feedAttribute.rel == "alternate") {
-						feedUrl = feedAttribute.href;
+						baseUrl = feedAttribute.href;
 						break;
 					}
 				}
 			}
 			else {
 				if (feedAttributes.rel == "alternate") {
-					feedUrl = feedAttributes.href;
+					baseUrl = feedAttributes.href;
 				}
 			}
 			const feedName = jsonObject.feed.title;
@@ -30,7 +30,7 @@ function verify() {
 			const verification = {
 				displayName: feedName,
 				icon: icon,
-				baseUrl: feedUrl
+				baseUrl: baseUrl
 			};
 			processVerification(verification);
 		}
@@ -50,10 +50,8 @@ function verify() {
 const avatarRegex = /<link rel="image_src" href="([^"]*)">/
 
 function load() {	
-	console.log("load")
 	sendRequest(site)
 	.then((xml) => {
-		
 		let jsonObject = xmlParse(xml);
 				
 		if (jsonObject.feed != null) {
@@ -80,8 +78,9 @@ function load() {
 				const match = html.match(avatarRegex);
 				const avatar = match[1];
 
-				var creator = Creator.createWithUriName(feedUrl, feedName)
-				creator.avatar = avatar
+				var identity = Identity.createWithName(feedName);
+				identity.uri = feedUrl;
+				identity.avatar = avatar;
 		
 				const entries = jsonObject.feed.entry;
 				var results = [];
@@ -113,12 +112,15 @@ function load() {
 					const thumbnail = mediaGroup["media:thumbnail$attrs"].url;
 					const attachment = Attachment.createWithMedia(thumbnail);
 
-					const content = mediaGroup["media:title"];
-					const post = Post.createWithUriDateContent(url, date, content);
-					post.creator = creator;
-					post.attachments = [attachment];
+					const title = mediaGroup["media:title"];
+					const description = mediaGroup["media:description"];
+					const resultItem = Item.createWithUriDate(url, date);
+					resultItem.title = title;
+					resultItem.body = description;
+					resultItem.author = identity;
+					resultItem.attachments = [attachment];
 				
-					results.push(post);
+					results.push(resultItem);
 				}
 
 				processResults(results);
