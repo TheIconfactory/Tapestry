@@ -120,15 +120,6 @@ function load() {
 				feedUrl = jsonObject.feed.id
 			}
 			const feedName = jsonObject.feed.title;
-			var creator = Creator.createWithUriName(feedUrl, feedName)
-			const feedAvatar = jsonObject.feed.icon;
-			if (feedAvatar != null) {
-				creator.avatar = feedAvatar;
-			}
-			else {
-				let baseUrl = feedUrl.split("/").splice(0,3).join("/");
-				creator.avatar = baseUrl + "/favicon.ico";
-			}
 		
 			const entries = jsonObject.feed.entry;
 			var results = [];
@@ -162,10 +153,20 @@ function load() {
 				else if (entry.updated) {
 					date =  new Date(entry.updated);
 				}
-				const content = entry.content ?? entry.title ?? "No content";
+				const title = entry.title?.trim();
+				const content = entry.content;
 				
-				const post = Post.createWithUriDateContent(url, date, content);
-				post.creator = creator;
+				var identity = null;
+				const authorName = entry.author.name;
+				if (authorName != null) {
+					identity = Identity.createWithName(authorName);
+					identity.uri = entry.author.uri;
+				}
+
+				const resultItem = Item.createWithUriDate(url, date);
+				resultItem.title = title;
+				resultItem.body = content;
+				resultItem.author = identity;
 				if (entryAttributes instanceof Array) {
 					const attachments = entryAttributes
 					.filter(e => {
@@ -184,7 +185,7 @@ function load() {
 						return attachment
 					})
 					if (attachments.length > 0) {
-						post.attachments = attachments;
+						resultItem.attachments = attachments;
 					}
 				}
 				else {
@@ -195,26 +196,26 @@ function load() {
 						const thumbnail = mediaGroup["media:thumbnail$attrs"].url;
 						if (thumbnail != null) {
 							const attachment = Attachment.createWithMedia(thumbnail);
-							post.attachments = [attachment];
+							resultItem.attachments = [attachment];
 						}
 					}
 					else if (entry["media:thumbnail$attrs"] != null) {
 						const thumbnail = entry["media:thumbnail$attrs"].url;
 						if (thumbnail != null) {
 							const attachment = Attachment.createWithMedia(thumbnail);
-							post.attachments = [attachment];
+							resultItem.attachments = [attachment];
 						}
 					}
 					else if (entry["media:content$attrs"] != null) {
 						const content = entry["media:content$attrs"].url;
 						if (content != null) {
 							const attachment = Attachment.createWithMedia(content);
-							post.attachments = [attachment];
+							resultItem.attachments = [attachment];
 						}
 					}
 				}
 
-				results.push(post);
+				results.push(resultItem);
 			}
 
 			processResults(results);
@@ -223,28 +224,26 @@ function load() {
 			// RSS 2.0
 			const feedUrl = jsonObject.rss.channel.link;
 			const feedName = jsonObject.rss.channel.title;
-			var creator = Creator.createWithUriName(feedUrl, feedName);
-			var feedAvatar = null;
-			if (jsonObject.rss.channel.image != null) {
-				feedAvatar = jsonObject.rss.channel.image.url;
-			}
-			if (feedAvatar != null) {
-				creator.avatar = feedAvatar;
-			}
-			else {
-				let baseUrl = feedUrl.split("/").splice(0,3).join("/");
-				creator.avatar = baseUrl + "/favicon.ico";
-			}
 
 			const items = jsonObject.rss.channel.item;
 			var results = [];
 			for (const item of items) {
 				const url = item.link;
 				const date = new Date(item.pubDate);
-				let content = item["content:encoded"] ?? item["description"] ?? "No content";
+				let title = item.title?.trim();
+				let content = item["content:encoded"];
+
+				let identity = null;
+				const authorName = item["dc:creator"];
+				if (authorName != null) {
+					identity = Identity.createWithName(authorName);
+					identity.uri = feedUrl;
+				}
 				
-				const post = Post.createWithUriDateContent(url, date, content);
-				post.creator = creator;
+				const resultItem = Item.createWithUriDate(url, date);
+				resultItem.title = title;
+				resultItem.body = content;
+				resultItem.author = identity;
 			
 				// extract any media from RSS: https://www.rssboard.org/media-rss
 				if (item["media:group"] != null) {
@@ -253,25 +252,25 @@ function load() {
 					const thumbnail = mediaGroup["media:thumbnail$attrs"].url;
 					if (thumbnail != null) {
 						const attachment = Attachment.createWithMedia(thumbnail);
-						post.attachments = [attachment];
+						resultItem.attachments = [attachment];
 					}
 				}
 				else if (item["media:thumbnail$attrs"] != null) {
 					const thumbnail = item["media:thumbnail$attrs"].url;
 					if (thumbnail != null) {
 						const attachment = Attachment.createWithMedia(thumbnail);
-						post.attachments = [attachment];
+						resultItem.attachments = [attachment];
 					}
 				}
 				else if (item["media:content$attrs"] != null) {
 					const content = item["media:content$attrs"].url;
 					if (content != null) {
 						const attachment = Attachment.createWithMedia(content);
-						post.attachments = [attachment];
+						resultItem.attachments = [attachment];
 					}
 				}
 					
-				results.push(post);
+				results.push(resultItem);
 			}
 
 			processResults(results);

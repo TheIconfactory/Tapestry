@@ -2,6 +2,7 @@
 	"id": "social.bsky",
 	"display_name": "Bluesky",
 	"service_name": "Bluesky",
+	"item_style": "post",
 	"icon": "https://bsky.app/static/apple-touch-icon.png",
 	"site": "https://bsky.social",
 	"jwt_authorize": "/xrpc/com.atproto.server.createSession",

@@ -2,6 +2,7 @@
 	"id": "org.joinmastodon",
 	"display_name": "Mastodon",
 	"service_name": "Mastodon",
+	"item_style": "post",
 	"site_prompt": "Instance",
 	"site_placeholder": "https://mastodon.social",
 	"register": "/api/v1/apps",

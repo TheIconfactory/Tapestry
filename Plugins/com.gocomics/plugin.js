@@ -96,22 +96,24 @@ function load() {
 			attachment.text = title;
 			
 			const text = title.replace(/\| GoComics.com$/, "at <a href=\"" + url + "\">" + siteName + "</a>");
-			
 			const content = "<p>" + text + "</p>";
-			const post = Post.createWithUriDateContent(url, date, content);
-			post.attachments = [attachment];
+			
+			const item = Item.createWithUriDate(url, date);
+			item.body = content;
+			item.attachments = [attachment];
 
 			const match = html.match(avatarRegex);
 			const avatar = match[1];
 
-			const creatorUrl = site + "/" + comicId;
-			const creatorName = author;
-			const creator = Creator.createWithUriName(creatorUrl, creatorName);
-			creator.avatar = avatar;
+			let identity = null;
+			if (author != null) {
+				identity = Identity.createWithName(author);
+				identity.uri = site + "/" + comicId;
+				identity.avatar = avatar;
+			}
+			item.author = identity;
 			
-			post.creator = creator;
-			
-			processResults([post]);
+			processResults([item]);
 			
 			lastTimestamp = timestamp;
 		}

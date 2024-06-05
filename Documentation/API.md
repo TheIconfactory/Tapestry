@@ -40,32 +40,42 @@ See the Configuration section below for the specification of `ui-config.json` an
 The following objects are used to create content for the Tapestry app:
 
 
-### Post
+### Item
 
-`Post` objects are used to populate a timeline in the app. One will also be used to add a new item to a service (and timeline). You create one with:
+`Item` objects are used to populate a timeline in the app. Items can be either posts or articles. You create one with:
 
 ```javascript
 const uri = "https://example.com/unique/path/to/content";
 const date = Date();
-const content = "This is <em>a contrived</em> example, but <b>so what?</b>".
-const post = Post.createWithUriDateContent(uri, date, content);
+const item = Item.createWithUriDate(uri, date);
+item.title = "Hello.";
+item.body = "<p>This is <em>a contrived</em> example, but <b>so what?</b></p>";
+
 ```
 
 #### uri: String (required)
 
-A unique URI for the post on the Internet. Used to show details for the post.
+A unique URI for the item on the Internet. Used to show details in a browser (assuming the URI is a valid HTTP URL).
 
 #### date: Date (required)
 
 The date and time when the post was created.
 
-#### content: String (required)
+#### title: String
+
+The title.
+
+#### body: String
 
 Text with HTML formatting that will be displayed for the post. See the end of this document for how this content and its formatting is used.
 
-#### creator: Creator
+#### contentWarning: String
 
-The creator of the content. See below.
+Adds a content warning to the item and blurs any attachments.
+
+#### author: Identity
+
+The creator of the content. See `Identity` below.
 
 #### attachments: Array of Attachment
 
@@ -73,26 +83,30 @@ Up to four media attachments for the content. See below.
 
 _NOTE:_ Media attachments will be automatically created when inline images are used in the HTML of the `content` property unless the `providesAttachments` configuration parameter is set to true.
 
-### Creator
+### Identity
 
 A `Post` can have a creator that indicates how the content was created. It can be a person, a service, or a device. The information is used to present an avatar and header for the post in the timeline.
 
 ```javascript
-const uri = "https://chocklock.com";
 const name = "CHOCK OF THE LOCK";
-const creator = Creator.createWithUriName(uri, name);
-creator.avatar = "https://chocklock.com/favicon.ico";
+const identity = Identity.createWithName(name);
+identity.uri = "https://chocklock.com";
+identity.avatar = "https://chocklock.com/favicon.ico";
 
-post.creator = creator;
+item.author = identity;
 ```
-
-#### uri: String (required)
-
-A unique URI for the creator on the Internet. Can be an individual’s account page, bot, or other type of creator. Will be used to show details for the creator.
 
 #### name: String (required)
 
 The name of the creator. Can be an account’s full name, a bot name, or anything to identify the data and source.
+
+#### username: String
+
+The name of the creator. Can be an account’s full name, a bot name, or anything to identify the data and source.
+
+#### uri: String
+
+A unique URI for the creator on the Internet. Can be an individual’s account page, bot, or other type of creator. Will be used to show details for the creator if the URI can be converted to a browsable URL.
 
 #### avatar: String
 
@@ -422,6 +436,7 @@ Recommended properties:
   	- If no `site` is configured, these properties are required.
  
    * icon: `String` with a URL to an image that will be used as a default for this connector.
+   * item\_style: `String` with either "post" or "article" to define the content layout.
  	
 Optional properties:
 
