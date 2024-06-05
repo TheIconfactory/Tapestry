@@ -4,6 +4,6 @@
 	"service_name": "Reddit",
 	"site": "https://www.reddit.com",
 	"needs_verification": true,
-	"freeze_variables": true,
+	"verify_variables": true,
 	"check_interval": 300
 }

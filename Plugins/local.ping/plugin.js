@@ -12,27 +12,15 @@ function verify() {
 				// NOTE: The responseUrl may not be the same as the original url if there was a redirect.
 				const responseUrl = jsonObject["url"];
 				
-				let icon = null
-				let identifier = responseUrl;
-				if (identifier.startsWith("https://")) {
-					identifier = identifier.replace("https://", "");
+				let displayName = responseUrl;
+				if (displayName.startsWith("https://")) {
+					displayName = displayName.replace("https://", "");
 				}
-				else if (identifier.startsWith("http://")) {
-					identifier = identifier.replace("http://", "");
-				}
-				if (identifier.endsWith("/")) {
-					icon = responseUrl + "favicon.ico";
-					identifier = identifier.substring(0, identifier.length - 1);
-				}
-				else {
-					icon = responseUrl + "/favicon.ico";
+				else if (displayName.startsWith("http://")) {
+					displayName = displayName.replace("http://", "");
 				}
 				
-				const verification = {
-					displayName: identifier,
-					icon: icon
-				};
-				processVerification(identifier);
+				processVerification(displayName);
 			}
 			else {
 				processError(Error("Failed to load site"));
@@ -57,15 +45,17 @@ function load() {
 			let date = new Date();
 			let uri = `${site}?{date.valueOf()}`;
 			let content = `<p>Response from ${site} failed with HTTP ${responseStatus} response.`;
-			const post = Post.createWithUriDateContent(uri, date, content);
-			processResults([post]);
+			const resultItem = Item.createWithUriDate(uri, date);
+			resultItem.body = content;
+			processResults([resultItem]);
 		}
 	})
 	.catch((requestError) => {
 		let date = new Date();
 		let uri = `${site}?timestamp=${date.valueOf()}`;
 		let content = `<p>Request to ${site} failed with <strong>${requestError}</strong></p>`;
-		const post = Post.createWithUriDateContent(uri, date, content);
-		processResults([post]);
+		const resultItem = Item.createWithUriDate(uri, date);
+		resultItem.body = content;
+		processResults([resultItem]);
 	});
 }

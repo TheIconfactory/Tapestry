@@ -1,7 +1,6 @@
 {
 	"id": "org.jsonfeed",
-	"display_name": "JSON Feed",
-	"service_name": "Blog",
+	"display_name": "Blog Feed (JSON)",
 	"site_prompt": "Feed URL",
 	"site_placeholder": "https://foo.com/feed.json",
 	"needsVerification": true,

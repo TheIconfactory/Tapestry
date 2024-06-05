@@ -1,7 +1,6 @@
 {
 	"id": "xml.feed",
-	"display_name": "Blog Feed",
-	"service_name": "Blog",
+	"display_name": "Blog Feed (RSS/Atom)",
 	"icon": "https://usetapestry.com/icons/rss.png",
 	"site_prompt": "Feed URL",
 	"site_placeholder": "https://foo.com/feed.xml",

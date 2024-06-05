@@ -441,7 +441,7 @@ Recommended properties:
 Optional properties:
 
   * needs\_verification: `Boolean` with true if verification is needed (by calling `verify()`)
-  * freeze\_variables: 'Boolean' with true if variables are not editable after verification. Use this option if changing a variable will break content loading (because its a part of a URL, for example).
+  * verify\_variables: 'Boolean' with true if variable changes cause verification. Use this option if changing a variable will affect  loading content (because its a part of a URL, for example).
   * provides\_attachments: `Boolean` with true if connector generates attachments directly, otherwise post-processing of HTML content will be used to capture images & video.
   * authorization\_header: `String` with a template for the authorization header. If no value is specified, "Bearer \_\_ACCESS\_TOKEN\_\_" will be used. See below for options.
   * check\_interval: `Number` with number of seconds between load requests (currently unimplemented).

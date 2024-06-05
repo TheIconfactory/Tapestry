@@ -2,18 +2,33 @@
 // blog.micro
 
 function verify() {
-	sendRequest(site + "/account/verify", "POST", "token=__bearerToken__")
+	//sendRequest(site + "/account/verify", "POST", "token=__bearerToken__");
+	const url = site + "/account/verify";
+	sendRequest(url, "POST", "token=__ACCESS_TOKEN__")
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		
-		const displayName = "@" + jsonObject["username"];
-		const icon = jsonObject["avatar"];
-		
-		const verification = {
-			displayName: displayName,
-			icon: icon
-		};
-		processVerification(verification);
+		if (jsonObject["username"] != null) {
+			displayName = "@" + jsonObject["username"];
+
+			var icon = null;
+			if (jsonObject["avatar"] != null) {
+				icon = jsonObject["avatar"];
+			}
+			else {
+				icon = "https://cdn.micro.blog/images/icons/favicon_192.png";
+			}
+			
+			const verification = {
+				displayName: displayName,
+				icon: icon
+			};
+			processVerification(verification);
+		}
+		else {
+			const message = jsonObject["error"] ?? "Invalid response";
+			processError(Error(message));
+		}
 	})
 	.catch((requestError) => {
 		processError(requestError);
@@ -35,88 +50,24 @@ function load() {
 				}
 			}
 			
-			const author = item["author"]; 
-			const creator = Creator.createWithUriName(author["url"], author["name"]);
-			creator.avatar = author["avatar"];
+			const author = item.author; 
+			const identity = Identity.createWithName(author.name);
+			identity.uri = author.url;
+			identity.avatar = author.avatar;
+			identity.username = "@" + author._microblog.username
 			
-			const uri = item["url"];
-			const date = new Date(item["date_published"]);
-			const content = item['content_html'];
-			const post = Post.createWithUriDateContent(uri, date, content);
-			post.creator = creator;
+			const url = item.url;
+			const date = new Date(item.date_published);
+			const content = item.content_html;
+			const resultItem = Item.createWithUriDate(url, date);
+			resultItem.body = content;
+			resultItem.author = identity;
 			
-			results.push(post);
+			results.push(resultItem);
 		}
 		processResults(results);
 	})
 	.catch((requestError) => {
 		processError(requestError);
 	});	
-}
-
-function sendPost(parameters) {
-	sendRequest(site + "/micropub", "POST", parameters)
-	.then((text) => {
-		const jsonObject = JSON.parse(text);
-		processResults([jsonObject], true);
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
-}
-
-function sendAttachments(post) {
-	sendRequest(site + "/micropub?q=config")
-	.then((text) => {
-		const jsonObject = JSON.parse(text);
-		const mediaEndpoint = jsonObject["media-endpoint"];
-		
-		if (mediaEndpoint != null) {
-			const file = post.attachments[0].media;
-			uploadFile(file, mediaEndpoint)
-			.then((text) => {
-				const jsonObject = JSON.parse(text);
-
-				// {"url":"https://chockenberry.micro.blog/uploads/2023/bac6e514ee.png","poster":""}
-
-				const photo = jsonObject["url"];
-				
-				const status = post.content;
-				const dictionary = {
-					type: [ "h-entry" ],
-					properties: {
-						content: [ status ],
-						photo: [ photo ]
-					}
-				};
-				const parameters = JSON.stringify(dictionary);
-
-				sendPost(parameters);
-			})
-			.catch((requestError) => {
-				processError(requestError);
-			});
-
-		}
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
-}
-
-function send(post) {
-	if (post.attachments != null && post.attachments.length > 0) {
-		sendAttachments(post);
-	}
-	else {
-		const status = post.content;
-		const dictionary = {
-			type: [ "h-entry" ],
-			properties: {
-				content: [ status ]
-			}
-		};
-		const parameters = JSON.stringify(dictionary);
-		sendPost(parameters);
-	}
 }
