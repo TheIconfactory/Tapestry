@@ -1,0 +1,12 @@
+{
+	"sites": [
+		{
+			"value": "https://www.youtube.com/feeds/videos.xml?channel_id=UCBJycsmduvYEL83R_U4JriQ",
+			"title": "MKBHD"
+		},
+		{
+			"value": "https://www.youtube.com/feeds/videos.xml?channel_id=UCI208kAmpJNUrLrBz77ZTAA",
+			"title": "BigZaphod"
+		}
+	]
+}

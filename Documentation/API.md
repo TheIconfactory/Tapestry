@@ -37,8 +37,38 @@ See the Configuration section below for the specification of `ui-config.json` an
 
 ## Objects
 
-The following objects are used to create content for the Tapestry app:
+The following objects are used to create content for the Tapestry app.
 
+Note that the properties of these objects have implicit type conversions when values are set. For example:
+
+```
+> item = Item.createWithUriDate(uri, date);
+< TapestryCore.ItemObject { … }
+
+> item.body
+< undefined
+
+> typeof(item.body)
+< "undefined"
+
+> item.body = undefined
+< undefined
+
+> item.body
+< "undefined"
+
+> typeof(item.body)
+< "string"
+```
+
+If you want to return an undefined (nil) value back to Tapestry, do not set the property. For example, to conditionally set the body property, you'd use:
+
+```javascript
+const item = Item.createWithUriDate(uri, date);
+if (myContent != null) {
+	item.body = myContent;
+}
+```
 
 ### Item
 

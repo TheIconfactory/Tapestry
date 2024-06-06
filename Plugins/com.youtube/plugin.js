@@ -126,10 +126,16 @@ function load() {
 					const attachment = Attachment.createWithMedia(thumbnail);
 
 					const title = mediaGroup["media:title"];
-					const description = mediaGroup["media:description"];
+					let description = null;
+					if (mediaGroup["media:description"] != null) {
+						// NOTE: YouTube shorts do not have a description.
+						description = mediaGroup["media:description"];
+					}
 					const resultItem = Item.createWithUriDate(url, date);
 					resultItem.title = title;
-					resultItem.body = description;
+					if (description != null) {
+						resultItem.body = description;
+					}
 //					resultItem.author = identity;
 					resultItem.attachments = [attachment];
 				

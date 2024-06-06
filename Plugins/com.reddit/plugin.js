@@ -75,11 +75,14 @@ function load() {
 					const mediaMetadata = item["media_metadata"];
 					if (mediaMetadata != null) {
 						const metadata = mediaMetadata[mediaId];
-						const image = metadata.s.u;
-						// TODO: Use the metadata.p.u URL as a thumbnail.
-						if (image != null && attachments.length < 4) {
-							const attachment = Attachment.createWithMedia(image);
-							attachments.push(attachment);
+						if (metadata.status == "valid") {
+							const image = metadata.s.u;
+							// TODO: Use the metadata.p.u URL as a thumbnail.
+							// TODO: Use s.x and s.y to create aspect ratio
+							if (image != null && attachments.length < 4) {
+								const attachment = Attachment.createWithMedia(image);
+								attachments.push(attachment);
+							}
 						}
 					}
 					else {
