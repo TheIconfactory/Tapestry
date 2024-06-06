@@ -2,29 +2,24 @@
 // com.reddit
 
 function verify() {
-	if (subreddit != null && subreddit.length > 0) {
-		sendRequest(`${site}/r/${subreddit}/hot.json?raw_json=1`, "HEAD")
-		.then((dictionary) => {
-			const jsonObject = JSON.parse(dictionary);
-			
-			if (jsonObject.status == 200) {
-				const verification = {
-					displayName: "/r/" + subreddit,
-					icon: "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png"
-				};	
-				processVerification(verification);
-			}
-			else {
-				processError(Error("Invalid Subreddit"));
-			}
-		})
-		.catch((requestError) => {
-			processError(requestError);
-		});
-	}
-	else {
-		processError(Error("Invalid Subreddit"));
-	}
+	sendRequest(`${site}/r/${subreddit}/hot.json?raw_json=1`, "HEAD")
+	.then((dictionary) => {
+		const jsonObject = JSON.parse(dictionary);
+		
+		if (jsonObject.status == 200) {
+			const verification = {
+				displayName: "/r/" + subreddit,
+				icon: "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png"
+			};	
+			processVerification(verification);
+		}
+		else {
+			processError(Error("Invalid Subreddit"));
+		}
+	})
+	.catch((requestError) => {
+		processError(requestError);
+	});
 }
 
 function load() {
@@ -38,14 +33,14 @@ function load() {
 			const item = child.data;
 			
 			const author = item["author"];
-			const avatar = "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png";
-			const creatorUri = "https://www.reddit.com/user/" + author;
-			var creator = Creator.createWithUriName(creatorUri, author)
-			creator.avatar = avatar
+			var identity = Identity.createWithName(author);
+			identity.url = "https://www.reddit.com/user/" + author;
+			identity.avatar = "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png";
 
 			const date = new Date(item["created_utc"] * 1000);
 			const uri = "https://www.reddit.com" + encodeURI(item["permalink"]);
-			let content = `<p><strong>${item["title"]}</strong> <a href="${item["url"]}">Link</a></p>`;
+			let title = item["title"];
+			let content = `<p><a href="${item["url"]}">Link</a></p>`;
 
 			if (item["selftext_html"] != null) {
 				let rawContent = item["selftext_html"];
@@ -136,11 +131,13 @@ function load() {
 				}
 			}
 			
-			const post = Post.createWithUriDateContent(uri, date, content);
-			post.creator = creator;
-			post.attachments = attachments;
+			const resultItem = Item.createWithUriDate(uri, date);
+			resultItem.title = title;
+			resultItem.body = content;
+			resultItem.author = identity;
+			resultItem.attachments = attachments;
 			
-			results.push(post);			
+			results.push(resultItem);			
 		}
 		
 		processResults(results, true);

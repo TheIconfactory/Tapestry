@@ -16,7 +16,45 @@ function toPercentage(value) {
 }
 
 function verify() {
-	processVerification(site.substring(0, site.lastIndexOf("/")));
+	sendRequest(site, "HEAD")
+	.then((dictionary) => {
+		const jsonObject = JSON.parse(dictionary);
+
+		const responseStatus = jsonObject["status"];
+		if (responseStatus == 200) {
+			// NOTE: The responseUrl may not be the same as the original url if there was a redirect.
+			const responseUrl = jsonObject["url"];
+			let siteUrl = responseUrl.split("/").splice(0,3).join("/");
+			
+			let displayName = siteUrl;
+			if (displayName.startsWith("https://")) {
+				displayName = displayName.replace("https://", "");
+			}
+			else if (displayName.startsWith("http://")) {
+				displayName = displayName.replace("http://", "");
+			}
+			
+			let icon = null;		
+			if (siteUrl.endsWith("/")) {
+				icon = siteUrl + "favicon.ico";
+			}
+			else {
+				icon = siteUrl + "/favicon.ico";
+			}
+			
+			const verification = {
+				displayName: displayName,
+				icon: icon
+			};
+			processVerification(verification);
+		}
+		else {
+			processError(Error("Failed to load site"));
+		}
+	})
+	.catch((requestError) => {
+		processError(requestError);
+	});
 }
 
 function load() {
@@ -39,11 +77,9 @@ function load() {
 		const writingConnections = parseInt(states[3]);
 		const waitingConnections = parseInt(states[5]);
 		
-		const creatorUrl = site;
-		const creatorName = "NGINX – " + site.substring(0, site.lastIndexOf("/"));
-		var creator = Creator.createWithUriName(creatorUrl, creatorName);
-		const avatar = "https://nginx.org/favicon.ico";
-		creator.avatar = avatar;
+		var identity = Identity.createWithName("NGINX");
+		identity.uri = "https://nginx.org";
+		identity.avatar = "https://nginx.org/favicon.ico";
 
 		var content = "";
 		content += "<p>Connections: " + currentConnections + "</p>\n";
@@ -60,13 +96,13 @@ function load() {
 
 		const url = site + "?date=" + date.valueOf();
 		
-		const post = Post.createWithUriDateContent(url, date, content);
-		post.creator = creator;
+		const resultItem = Item.createWithUriDate(url, date);
+		resultItem.body = content;
+		resultItem.author = identity;
 
-		processResults([post]);
+		processResults([resultItem]);
 	})
 	.catch((requestError) => {
 		processError(requestError);
 	});
-
 }

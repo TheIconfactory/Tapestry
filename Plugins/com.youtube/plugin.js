@@ -6,8 +6,6 @@ function verify() {
 	.then((xml) => {	
 		const jsonObject = xmlParse(xml);
 		
-		const icon = "https://www.youtube.com/s/desktop/905763c7/img/favicon_144x144.png";
-		
 		if (jsonObject.feed != null) {
 			// Atom 1.0
 			const feedAttributes = jsonObject.feed.link$attrs;
@@ -26,13 +24,28 @@ function verify() {
 				}
 			}
 			const feedName = jsonObject.feed.title;
+			
+			sendRequest(baseUrl)
+			.then((html) => {
+				const match = html.match(avatarRegex);
+				const icon = match[1];
 
-			const verification = {
-				displayName: feedName,
-				icon: icon,
-				baseUrl: baseUrl
-			};
-			processVerification(verification);
+				const verification = {
+					displayName: feedName,
+					icon: icon,
+					baseUrl: baseUrl
+				};
+				processVerification(verification);
+			})
+			.catch((requestError) => {
+				const verification = {
+					displayName: feedName,
+					icon: "https://www.youtube.com/s/desktop/905763c7/img/favicon_144x144.png",
+					baseUrl: baseUrl
+				};
+				processVerification(verification);
+				processError(requestError);
+			});	
 		}
 		else if (jsonObject.rss != null) {
 			// RSS 2.0
@@ -73,15 +86,15 @@ function load() {
 			}
 			const feedName = jsonObject.feed.title;
 			
-			sendRequest(feedUrl)
-			.then((html) => {
-				const match = html.match(avatarRegex);
-				const avatar = match[1];
-
-				var identity = Identity.createWithName(feedName);
-				identity.uri = feedUrl;
-				identity.avatar = avatar;
-		
+// 			sendRequest(feedUrl)
+// 			.then((html) => {
+// 				const match = html.match(avatarRegex);
+// 				const avatar = match[1];
+// 
+// 				var identity = Identity.createWithName(feedName);
+// 				identity.uri = feedUrl;
+// 				identity.avatar = avatar;
+			
 				const entries = jsonObject.feed.entry;
 				var results = [];
 				for (const entry of entries) {
@@ -117,17 +130,17 @@ function load() {
 					const resultItem = Item.createWithUriDate(url, date);
 					resultItem.title = title;
 					resultItem.body = description;
-					resultItem.author = identity;
+//					resultItem.author = identity;
 					resultItem.attachments = [attachment];
 				
 					results.push(resultItem);
 				}
 
 				processResults(results);
-			})
-			.catch((requestError) => {
-				processError(requestError);
-			});	
+// 			})
+// 			.catch((requestError) => {
+// 				processError(requestError);
+// 			});	
 		}
 		else if (jsonObject.rss != null) {
 			// RSS 2.0
