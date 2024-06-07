@@ -115,7 +115,7 @@ _NOTE:_ Media attachments will be automatically created when inline images are u
 
 ### Identity
 
-A `Post` can have a creator that indicates how the content was created. It can be a person, a service, or a device. The information is used to present an avatar and header for the post in the timeline.
+An `Item` can have a author that indicates how the content was created. It can be a person, a woman, a man, a camera, or a TV. The information is used to present an avatar and header in the timeline.
 
 ```javascript
 const name = "CHOCK OF THE LOCK";
@@ -141,6 +141,31 @@ A unique URI for the creator on the Internet. Can be an individual’s account p
 #### avatar: String
 
 A string containing the URL for the creator’s avatar on the Internet. If no avatar is specified a generic image will be displayed in the timeline.
+
+### Annotation
+
+An `Item` can have annotations that indicates how the content arrived in the timeline. It can be used for boosts, replies, reposts, reblogs, or any other type of reference.
+
+```javascript
+const text = "CHOCK STAR";
+const annotation = Annotation.createWithText(text);
+annotation.icon = "https://chocklock.com/favicon.ico";
+annotation.uri = "https://chocklock.com";
+
+item.annotations = [annotation];
+```
+
+#### text: String (required)
+
+The text for the annotation. It can be anything, but will be most useful to the user as something like "@chockenberry Boosted".
+
+#### icon: String
+
+A string containing a URL for the annotation’s icon. If no icon is specified only the text will be displayed in the timeline.
+
+#### uri: String
+
+A URI with more information about the annotation. For things like boosts/reposts/reblogs that are done by an account the user follows, a link to the account listed in the annotation would be appropriate.
 
 
 ### Attachment

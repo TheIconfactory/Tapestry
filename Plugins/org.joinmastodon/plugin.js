@@ -30,7 +30,7 @@ function postForItem(item, date = null) {
 	identity.uri = account["url"];
 	identity.avatar = account["avatar"];
 
-	var postDate;
+	let postDate;
 	if (date == null) {
 		postDate = new Date(item["created_at"]);
 	}
@@ -44,7 +44,7 @@ function postForItem(item, date = null) {
 	post.body = content;
 	post.author = identity;
 
-	var attachments = null;
+	let attachments = null;
 	const mediaAttachments = item["media_attachments"];
 	if (mediaAttachments != null && mediaAttachments.length > 0) {
 		attachments = []
@@ -94,16 +94,28 @@ function load() {
 	sendRequest(site + "/api/v1/timelines/home?limit=40", "GET")
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
-		var results = [];
+		let results = [];
 		for (const item of jsonObject) {
 			const date = new Date(item["created_at"]);
 			
-			var postItem = item;
+			let annotation = null;
+			let postItem = item;
 			if (item["reblog"] != null) {
+				const account = item["account"];
+				const displayName = account["display_name"];
+				const userName = account["username"];
+				const accountName = (displayName ? displayName : userName);
+				annotation = Annotation.createWithText(`${accountName} Boosted`);
+				annotation.uri = account["url"];
+				annotation.icon = account["avatar"];
+				
 				postItem = item["reblog"];
 			}
 			
 			const post = postForItem(postItem, date);
+			if (annotation != null) {
+				post.annotations = [annotation];
+			}
 			
 			results.push(post);
 		}
@@ -117,9 +129,9 @@ function load() {
 		sendRequest(site + "/api/v1/notifications?types%5B%5D=mention&limit=30", "GET")
 		.then((text) => {
 			const jsonObject = JSON.parse(text);
-			var results = [];
+			let results = [];
 			for (const item of jsonObject) {
-				var postItem = item["status"];
+				let postItem = item["status"];
 	
 				const post = postForItem(postItem);
 	
@@ -145,9 +157,9 @@ function load() {
 		sendRequest(site + "/api/v1/accounts/" + userId + "/statuses?limit=30", "GET")
 		.then((text) => {
 			const jsonObject = JSON.parse(text);
-			var results = [];
+			let results = [];
 			for (const item of jsonObject) {
-				var postItem = item;
+				let postItem = item;
 
 				const post = postForItem(postItem);
 
@@ -164,49 +176,5 @@ function load() {
 		processError(requestError);
 	});
 
-}
-
-function sendPost(parameters) {
-	sendRequest(site + "/api/v1/statuses", "POST", parameters)
-	.then((text) => {
-		const jsonObject = JSON.parse(text);
-		processResults([jsonObject], true);
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
-}
-
-function sendAttachments(post) {
-	const mediaEndpoint = site + "/api/v2/media";
-	
-	const file = post.attachments[0].media;
-	uploadFile(file, mediaEndpoint)
-	.then((text) => {
-		const jsonObject = JSON.parse(text);
-		
-		const mediaId = jsonObject["id"];
-		
-		const status = post.content;
-		
-		const parameters = "status=" + status + "&" + "media_ids[]=" + mediaId;
-		
-		sendPost(parameters);
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
-}
-
-function send(post) {
-	if (post.attachments != null && post.attachments.length > 0) {
-		sendAttachments(post);
-	}
-	else {
-		const status = post.content;
-		const parameters = "status=" + status;
-		
-		sendPost(parameters);
-	}
 }
 
