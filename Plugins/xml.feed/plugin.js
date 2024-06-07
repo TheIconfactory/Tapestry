@@ -164,9 +164,15 @@ function load() {
 				}
 
 				const resultItem = Item.createWithUriDate(url, date);
-				resultItem.title = title;
-				resultItem.body = content;
-				resultItem.author = identity;
+				if (title != null) {
+					resultItem.title = title;
+				}
+				if (content != null) {
+					resultItem.body = content;
+				}
+				if (identity != null) {
+					resultItem.author = identity;
+				}
 				if (entryAttributes instanceof Array) {
 					const attachments = entryAttributes
 					.filter(e => {
@@ -231,7 +237,7 @@ function load() {
 				const url = item.link;
 				const date = new Date(item.pubDate);
 				let title = item.title?.trim();
-				let content = item["content:encoded"];
+				let content = item["content:encoded"] ?? item.description;
 
 				let identity = null;
 				const authorName = item["dc:creator"];
@@ -241,9 +247,15 @@ function load() {
 				}
 				
 				const resultItem = Item.createWithUriDate(url, date);
-				resultItem.title = title;
-				resultItem.body = content;
-				resultItem.author = identity;
+				if (title != null) {
+					resultItem.title = title;
+				}
+				if (content != null) {
+					resultItem.body = content;
+				}
+				if (identity != null) {
+					resultItem.author = identity;
+				}
 			
 				// extract any media from RSS: https://www.rssboard.org/media-rss
 				if (item["media:group"] != null) {

@@ -2,6 +2,7 @@
 	"id": "org.jsonfeed",
 	"display_name": "Blog Feed (JSON)",
 	"service_name": "Blog",
+	"icon": "https://micro.blog/jsonfeed/favicon.png",
 	"site_prompt": "Feed URL",
 	"site_placeholder": "https://foo.com/feed.json",
 	"needsVerification": true,

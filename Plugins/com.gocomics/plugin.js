@@ -1,45 +1,6 @@
 
 // com.gocomics
 
-function verify() {
-	if (comicId != null && comicId.length > 0) {
-		let date = new Date();
-		date.setDate(date.getDate() - 1); // https://stackoverflow.com/questions/5511323/calculate-the-date-yesterday-in-javascript
-		
-		const year = date.getFullYear();
-		const month = date.getMonth() + 1;
-		const day = date.getDate();
-	
-		const timestamp = String(year) + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
-
-		const url = site + "/" + comicId + "/" + timestamp;
-		sendRequest(url)
-		.then((html) => {
-			const properties = extractProperties(html);
-		
-			const title = properties["og:title"];
-			if (title != null) {
-				const displayName = title.replace(/ by.*$/, "");
-				const verifcation = {
-					displayName: displayName,
-					icon: "https://assets.gocomics.com/assets/favicons/favicon-96x96-92f1ac367fd0f34bc17956ef33d79433ddbec62144ee17b40add7a6a2ae6e61a.png"	
-				};
-				processVerification(verifcation);
-			}
-			else {
-				processError(Error("Invalid Comic ID"));
-			}
-		})
-		.catch((requestError) => {
-			processError(requestError);
-		});
-	}
-	else {
-		processError(Error("Missing Comic ID"));
-	}
-}
-
-
 /*
  NOTE: This plugin relies on the meta properties in the HTML. They are obtained by the extractProperties() function
  supplied by Tapestry.
@@ -65,6 +26,45 @@ function verify() {
 // NOTE: Regular expressions can be used to extract information from the HTML, too.
 const avatarRegex = /<div class="gc-avatar gc-avatar--creator xs"><img[^]*?src="(.*)"/
 
+function verify() {
+	let date = new Date();
+	date.setDate(date.getDate() - 1); // https://stackoverflow.com/questions/5511323/calculate-the-date-yesterday-in-javascript
+	
+	const year = date.getFullYear();
+	const month = date.getMonth() + 1;
+	const day = date.getDate();
+
+	const timestamp = String(year) + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
+
+	const url = site + "/" + comicId + "/" + timestamp;
+	sendRequest(url)
+	.then((html) => {
+		const properties = extractProperties(html);
+	
+		const title = properties["og:title"];
+		if (title != null) {
+			const displayName = title.replace(/ by.*$/, "");
+			const match = html.match(avatarRegex);
+			let icon = match[1];
+			if (icon == null) {
+				icon = "https://assets.gocomics.com/assets/favicons/favicon-96x96-92f1ac367fd0f34bc17956ef33d79433ddbec62144ee17b40add7a6a2ae6e61a.png";
+			}
+
+			const verifcation = {
+				displayName: displayName,
+				icon: icon
+			};
+			processVerification(verifcation);
+		}
+		else {
+			processError(Error("Invalid Comic ID"));
+		}
+	})
+	.catch((requestError) => {
+		processError(requestError);
+	});
+}
+
 var lastTimestamp = null
 
 function load() {
@@ -89,29 +89,26 @@ function load() {
 		const title = properties["og:title"];
 		const siteName = properties["og:site_name"];
 		const author = properties["article:author"];
+		const publishedTime = properties["article:published_time"];
 		
 		if (image != null) {
 			const media = image;
 			const attachment = Attachment.createWithMedia(media);
 			attachment.text = title;
+			// TODO: Use og:image:height and og:image:width to create aspect ratio
 			
-			const text = title.replace(/\| GoComics.com$/, "at <a href=\"" + url + "\">" + siteName + "</a>");
-			const content = "<p>" + text + "</p>";
+			const localizedDate = new Date(publishedTime + "T00:00:00").toLocaleDateString();
+			const content = `<p>Published on ${localizedDate} at <a href="${url}">${siteName}</a></p>`;
 			
 			const item = Item.createWithUriDate(url, date);
 			item.body = content;
 			item.attachments = [attachment];
 
-			const match = html.match(avatarRegex);
-			const avatar = match[1];
-
-			let identity = null;
 			if (author != null) {
-				identity = Identity.createWithName(author);
+				let identity = Identity.createWithName(author);
 				identity.uri = site + "/" + comicId;
-				identity.avatar = avatar;
+				item.author = identity;
 			}
-			item.author = identity;
 			
 			processResults([item]);
 			

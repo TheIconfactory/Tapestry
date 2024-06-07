@@ -1,6 +1,9 @@
 
 // com.youtube
 
+const avatarRegex = /<link rel="image_src" href="([^"]*)">/;
+const urlRegex = /(https?:[^\s]*)/g;
+
 function verify() {
 	sendRequest(site)
 	.then((xml) => {	
@@ -60,7 +63,6 @@ function verify() {
 	});
 }
 
-const avatarRegex = /<link rel="image_src" href="([^"]*)">/
 
 function load() {	
 	sendRequest(site)
@@ -129,7 +131,14 @@ function load() {
 					let description = null;
 					if (mediaGroup["media:description"] != null) {
 						// NOTE: YouTube shorts do not have a description.
-						description = mediaGroup["media:description"];
+						let rawDescription = mediaGroup["media:description"];
+						let linkedDescription = rawDescription.replace(urlRegex, "<a href=\"$1\">$1</a>");
+						let paragraphs = linkedDescription.split("\n\n");
+						description = paragraphs.map((paragraph) => {
+							let lines = paragraph.split("\n");
+							let breakLines = lines.join("<br/>");
+							return `<p>${breakLines}</p>`
+						}).join("\n")
 					}
 					const resultItem = Item.createWithUriDate(url, date);
 					resultItem.title = title;

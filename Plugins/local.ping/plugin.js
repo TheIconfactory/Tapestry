@@ -2,37 +2,35 @@
 // local.ping
 
 function verify() {
-	if (typeof site !== 'undefined') {
-		sendRequest(site, "HEAD")
-		.then((dictionary) => {
-			const jsonObject = JSON.parse(dictionary);
-	
-			const responseStatus = jsonObject["status"];
-			if (responseStatus == 200) {
-				// NOTE: The responseUrl may not be the same as the original url if there was a redirect.
-				const responseUrl = jsonObject["url"];
-				
-				let displayName = responseUrl;
-				if (displayName.startsWith("https://")) {
-					displayName = displayName.replace("https://", "");
-				}
-				else if (displayName.startsWith("http://")) {
-					displayName = displayName.replace("http://", "");
-				}
-				
-				processVerification(displayName);
+	sendRequest(site, "HEAD")
+	.then((dictionary) => {
+		const jsonObject = JSON.parse(dictionary);
+
+		const responseStatus = jsonObject["status"];
+		if (responseStatus == 200) {
+			// NOTE: The responseUrl may not be the same as the original url if there was a redirect.
+			const responseUrl = jsonObject["url"];
+			
+			let displayName = responseUrl;
+			if (displayName.startsWith("https://")) {
+				displayName = displayName.replace("https://", "");
 			}
-			else {
-				processError(Error("Failed to load site"));
+			else if (displayName.startsWith("http://")) {
+				displayName = displayName.replace("http://", "");
 			}
-		})
-		.catch((requestError) => {
-			processError(requestError);
-		});
-	}
-	else {
-		processError(Error("Missing site"));
-	}
+			if (displayName.endsWith("/")) {
+				displayName = displayName.substring(0, displayName.length - 1);
+			}
+			
+			processVerification(displayName);
+		}
+		else {
+			processError(Error("Failed to load site"));
+		}
+	})
+	.catch((requestError) => {
+		processError(requestError);
+	});
 }
 
 function load() {

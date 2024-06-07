@@ -9,9 +9,12 @@ function verify() {
 		const blogs = jsonObject.response.user.blogs;
 		const blog = blogs[0];
 		
+		const displayName = blog.name;
+		const icon = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
+
 		const verification = {
-			displayName: blog.name,
-			icon: "https://assets.tumblr.com/pop/manifest/apple-touch-icon-6d2aadd9.png"
+			displayName: displayName,
+			icon: icon
 		};
 		processVerification(verification);
 	})
@@ -28,12 +31,14 @@ function load() {
 		var results = [];
 		for (const item of items) {
 			const blog = item.blog;
-			const creator = Creator.createWithUriName(blog["url"], blog["name"]);
-			let avatar = "https://api.tumblr.com/v2/blog/" + blog["name"] + "/avatar/96";
-			creator.avatar = avatar;
+			const identity = Identity.createWithName(blog["name"]);
+			identity.uri = blog["url"];
+			identity.avatar = "https://api.tumblr.com/v2/blog/" + blog["name"] + "/avatar/96";
 
 			const uri = item["post_url"];
 			const date = new Date(item["timestamp"] * 1000); // timestamp is seconds since the epoch, convert to milliseconds
+			
+			// TODO: Add an annotation for reblogging.
 			
 			let content = null;
 			let attachments = null;
@@ -56,8 +61,9 @@ function load() {
 			}
 			
 			if (content != null) {
-				const post = Post.createWithUriDateContent(uri, date, content);
-				post.creator = creator;
+				const post = Item.createWithUriDate(uri, date);
+				post.body = content;
+				post.author = identity;
 				if (attachments != null) {
 					post.attachments = attachments
 				}

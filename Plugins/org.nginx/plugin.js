@@ -16,16 +16,12 @@ function toPercentage(value) {
 }
 
 function verify() {
-	sendRequest(site, "HEAD")
-	.then((dictionary) => {
-		const jsonObject = JSON.parse(dictionary);
+	let endpoint = site;
+	sendRequest(endpoint)
+	.then((text) => {
+		if (text.startsWith("Active connections:")) {
+			let siteUrl = site.split("/").splice(0,3).join("/");
 
-		const responseStatus = jsonObject["status"];
-		if (responseStatus == 200) {
-			// NOTE: The responseUrl may not be the same as the original url if there was a redirect.
-			const responseUrl = jsonObject["url"];
-			let siteUrl = responseUrl.split("/").splice(0,3).join("/");
-			
 			let displayName = siteUrl;
 			if (displayName.startsWith("https://")) {
 				displayName = displayName.replace("https://", "");
@@ -33,7 +29,7 @@ function verify() {
 			else if (displayName.startsWith("http://")) {
 				displayName = displayName.replace("http://", "");
 			}
-			
+
 			let icon = null;		
 			if (siteUrl.endsWith("/")) {
 				icon = siteUrl + "favicon.ico";
@@ -49,7 +45,7 @@ function verify() {
 			processVerification(verification);
 		}
 		else {
-			processError(Error("Failed to load site"));
+			processError(Error("Invalid status endpoint"));
 		}
 	})
 	.catch((requestError) => {
@@ -77,9 +73,9 @@ function load() {
 		const writingConnections = parseInt(states[3]);
 		const waitingConnections = parseInt(states[5]);
 		
-		var identity = Identity.createWithName("NGINX");
-		identity.uri = "https://nginx.org";
-		identity.avatar = "https://nginx.org/favicon.ico";
+// 		var identity = Identity.createWithName("NGINX");
+// 		identity.uri = "https://nginx.org";
+// 		identity.avatar = "https://nginx.org/favicon.ico";
 
 		var content = "";
 		content += "<p>Connections: " + currentConnections + "</p>\n";
@@ -98,7 +94,7 @@ function load() {
 		
 		const resultItem = Item.createWithUriDate(url, date);
 		resultItem.body = content;
-		resultItem.author = identity;
+//		resultItem.author = identity;
 
 		processResults([resultItem]);
 	})

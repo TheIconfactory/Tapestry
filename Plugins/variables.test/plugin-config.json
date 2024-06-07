@@ -1,6 +1,7 @@
 {
 	"id": "variables.test",
 	"display_name": "Test Variables",
+	"icon": "https://iconfactory.com/favicon.ico",
 	"site": "https://variables.test",
 	"needsVerification": true,
 	"check_interval": 300

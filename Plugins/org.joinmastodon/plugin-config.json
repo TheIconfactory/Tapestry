@@ -2,6 +2,7 @@
 	"id": "org.joinmastodon",
 	"display_name": "Mastodon",
 	"service_name": "Mastodon",
+	"icon": "https://mastodon.social/packs/media/icons/apple-touch-icon-180x180-a75559a0af48064c1b7c71b81f3bf7c6.png",
 	"item_style": "post",
 	"site_prompt": "Instance",
 	"site_placeholder": "https://mastodon.social",

@@ -5,11 +5,11 @@ function verify() {
 	sendRequest(site + "/xrpc/com.atproto.server.getSession")
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
-		const identifier = jsonObject.handle;
+		const displayName = "@" + jsonObject.handle;
 		
 		// TODO: Use getProfile to get avatar: https://docs.bsky.app/docs/api/app-bsky-actor-get-profile
 		
-		processVerification(identifier);
+		processVerification(displayName);
 	})
 	.catch((requestError) => {
 		processError(requestError);
@@ -17,6 +17,8 @@ function verify() {
 }
 
 // https://bsky.social/xrpc/app.bsky.feed.getTimeline?algorithm=reverse-chronological&limit=22
+
+// site: "https://bsky.social"
 
 const uriPrefix = "https://bsky.app";
 
@@ -32,7 +34,7 @@ function load() {
 
 			const author = item.post.author;
 			
-			const creator = creatorForAccount(author);
+			const identity = identityForAccount(author);
 			
 			const inReplyToRecord = item.reply && item.reply.record
 			const reason = item.reason
@@ -143,8 +145,9 @@ function load() {
 			const itemIdentifier = item.post.uri.split("/").pop();
 			const postUri = uriPrefix + "/profile/" + author.handle + "/post/" + itemIdentifier;
 			
-			const post = Post.createWithUriDateContent(postUri, date, content);
-			post.creator = creator;
+			const post = Item.createWithUriDate(postUri, date);
+			post.body = content;
+			post.author = identity;
 			if (attachments != null) {
 				post.attachments = attachments
 			}
@@ -158,17 +161,19 @@ function load() {
 	});	
 }
 
-function creatorForAccount(account) {
+function identityForAccount(account) {
 	if (account == null || account.handle == null || account.displayName == null) {
 		return null;
 	}
 	
 	const authorUri = uriPrefix + "/profile/" + account.handle;
 	const name = account.displayName;
-	const creator = Creator.createWithUriName(authorUri, name);
-	creator.avatar = account.avatar;
+	const identity = Identity.createWithName(name);
+	identity.username = "@" + account.handle;
+	identity.uri = authorUri;
+	identity.avatar = account.avatar;
 	
-	return creator;
+	return identity;
 }
 
 function contentForAccount(account, prefix = "") {

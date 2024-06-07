@@ -22,10 +22,13 @@ function verify() {
 
 function postForItem(item, date = null) {
 	const account = item["account"];
-	const displayName = account["display_name"]
-	const accountName = (displayName ? displayName : ("@" + account["username"]));
-	const creator = Creator.createWithUriName(account["url"], accountName);
-	creator.avatar = account["avatar"];
+	const displayName = account["display_name"];
+	const userName = account["username"];
+	const accountName = (displayName ? displayName : userName);
+	const identity = Identity.createWithName(accountName);
+	identity.username = "@" + userName;
+	identity.uri = account["url"];
+	identity.avatar = account["avatar"];
 
 	var postDate;
 	if (date == null) {
@@ -37,8 +40,9 @@ function postForItem(item, date = null) {
 	
 	const uri = item["uri"];
 	const content = item["content"];
-	const post = Post.createWithUriDateContent(uri, postDate, content);
-	post.creator = creator;
+	const post = Item.createWithUriDate(uri, postDate);
+	post.body = content;
+	post.author = identity;
 
 	var attachments = null;
 	const mediaAttachments = item["media_attachments"];

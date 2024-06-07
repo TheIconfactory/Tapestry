@@ -2,6 +2,7 @@
 	"id": "com.slack",
 	"display_name": "Slack",
 	"service_name": "Slack",
+	"icon": "https://a.slack-edge.com/80588/marketing/img/meta/favicon-32.png",
 	"site": "https://slack.com",
 	"oauth_authorize": "https://slack.com/oauth/authorize",
 	"oauth_token": "https://slack.com/api/oauth.access",
