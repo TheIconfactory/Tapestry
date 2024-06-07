@@ -91,40 +91,42 @@ function postForItem(item, date = null) {
 }
 
 function load() {
-	sendRequest(site + "/api/v1/timelines/home?limit=40", "GET")
-	.then((text) => {
-		const jsonObject = JSON.parse(text);
-		let results = [];
-		for (const item of jsonObject) {
-			const date = new Date(item["created_at"]);
-			
-			let annotation = null;
-			let postItem = item;
-			if (item["reblog"] != null) {
-				const account = item["account"];
-				const displayName = account["display_name"];
-				const userName = account["username"];
-				const accountName = (displayName ? displayName : userName);
-				annotation = Annotation.createWithText(`${accountName} Boosted`);
-				annotation.uri = account["url"];
-				annotation.icon = account["avatar"];
+	if (includeHome == "on") {
+		sendRequest(site + "/api/v1/timelines/home?limit=40", "GET")
+		.then((text) => {
+			const jsonObject = JSON.parse(text);
+			let results = [];
+			for (const item of jsonObject) {
+				const date = new Date(item["created_at"]);
 				
-				postItem = item["reblog"];
+				let annotation = null;
+				let postItem = item;
+				if (item["reblog"] != null) {
+					const account = item["account"];
+					const displayName = account["display_name"];
+					const userName = account["username"];
+					const accountName = (displayName ? displayName : userName);
+					annotation = Annotation.createWithText(`${accountName} Boosted`);
+					annotation.uri = account["url"];
+					annotation.icon = account["avatar"];
+					
+					postItem = item["reblog"];
+				}
+				
+				const post = postForItem(postItem, date);
+				if (annotation != null) {
+					post.annotations = [annotation];
+				}
+				
+				results.push(post);
 			}
-			
-			const post = postForItem(postItem, date);
-			if (annotation != null) {
-				post.annotations = [annotation];
-			}
-			
-			results.push(post);
-		}
-		processResults(results, true);
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});	
-
+			processResults(results, true);
+		})
+		.catch((requestError) => {
+			processError(requestError);
+		});	
+	}
+	
 	if (includeMentions == "on") {
 		sendRequest(site + "/api/v1/notifications?types%5B%5D=mention&limit=30", "GET")
 		.then((text) => {
@@ -132,8 +134,24 @@ function load() {
 			let results = [];
 			for (const item of jsonObject) {
 				let postItem = item["status"];
+
+				let annotation = null;
+				if (postItem.mentions != null && postItem.mentions.length > 0) {
+					const mentions = postItem.mentions;
+					const account = mentions[0];
+					const userName = account["username"];
+					let text = "Replying to @" + userName;
+					if (mentions.length > 1) {
+						text += " and others";
+					}
+					annotation = Annotation.createWithText(text);
+					annotation.uri = account["url"];
+				}
 	
 				const post = postForItem(postItem);
+				if (annotation != null) {
+					post.annotations = [annotation];
+				}
 	
 				results.push(post);
 			}
@@ -143,38 +161,39 @@ function load() {
 			processError(requestError);
 		});
 	}
-	
-	// NOTE: There needs to be something like the Web Storage API where data (like the account id) can be persisted
-	// across launches of the app. Having to verify the credentials each time to get information that doesn't change
-	// doesn't make sense. This local storage may also be useful for timeline backfills (e.g. to track last ID returned).
-	
-	sendRequest(site + "/api/v1/accounts/verify_credentials")
-	.then((text) => {
-		const jsonObject = JSON.parse(text);
-		
-		const userId = jsonObject["id"];
 
-		sendRequest(site + "/api/v1/accounts/" + userId + "/statuses?limit=30", "GET")
+	if (includeStatuses == "on") {
+		// NOTE: There needs to be something like the Web Storage API where data (like the account id) can be persisted
+		// across launches of the app. Having to verify the credentials each time to get information that doesn't change
+		// doesn't make sense. This local storage may also be useful for timeline backfills (e.g. to track last ID returned).
+		
+		sendRequest(site + "/api/v1/accounts/verify_credentials")
 		.then((text) => {
 			const jsonObject = JSON.parse(text);
-			let results = [];
-			for (const item of jsonObject) {
-				let postItem = item;
-
-				const post = postForItem(postItem);
-
-				results.push(post);
-			}
-			processResults(results, true);
+			
+			const userId = jsonObject["id"];
+	
+			sendRequest(site + "/api/v1/accounts/" + userId + "/statuses?limit=30", "GET")
+			.then((text) => {
+				const jsonObject = JSON.parse(text);
+				let results = [];
+				for (const item of jsonObject) {
+					let postItem = item;
+	
+					const post = postForItem(postItem);
+	
+					results.push(post);
+				}
+				processResults(results, true);
+			})
+			.catch((requestError) => {
+				processError(requestError);
+			});
+	
 		})
 		.catch((requestError) => {
 			processError(requestError);
 		});
-
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
-
+	}
 }
 
