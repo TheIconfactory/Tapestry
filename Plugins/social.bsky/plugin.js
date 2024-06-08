@@ -123,13 +123,17 @@ function load() {
 			
 			let content = contentForRecord(item.post.record);
 			
+			let annotation = null;
+			
 			const replyContent = contentForReply(item.reply);
 			if (replyContent != null) {
+				annotation = annotationForReply(item.reply);
 				content = replyContent + content;
 			}
 
 			const repostContent = contentForRepost(item.reason);
 			if (repostContent != null) {
+				annotation = annotationForRepost(item.reason);
 				content = repostContent + content;
 			}
 			
@@ -151,6 +155,10 @@ function load() {
 			if (attachments != null) {
 				post.attachments = attachments
 			}
+			if (annotation != null) {
+				post.annotations = [annotation];
+			}
+			
 			results.push(post);
 		}
 
@@ -188,23 +196,77 @@ function contentForAccount(account, prefix = "") {
 	return content;
 }
 
+function nameForAccount(account) {
+	if (account == null || account.handle == null || account.displayName == null) {
+		return null;
+	}
+
+	return account.displayName;
+}
+
+function handleForAccount(account) {
+	if (account == null || account.handle == null || account.displayName == null) {
+		return null;
+	}
+
+	return "@" + account.handle;
+}
+
+function uriForAccount(account) {
+	if (account == null || account.handle == null || account.displayName == null) {
+		return null;
+	}
+
+	return uriPrefix + "/profile/" + account.handle;
+
+}
+
+function annotationForRepost(reason) {
+	let annotation = null;
+
+	if (reason != null && reason.$type == "app.bsky.feed.defs#reasonRepost") {
+		let name = nameForAccount(reason.by);
+		if (name != null) {
+			const text = `Reposted by ${name}`;
+			annotation = Annotation.createWithText(text);
+			annotation.uri = uriForAccount(reason.by);
+		}
+	}
+	
+	return annotation;
+}
+
 function contentForRepost(reason) {
 	let content = null;
 
 	if (reason != null && reason.$type == "app.bsky.feed.defs#reasonRepost") {
-		content = contentForAccount(reason.by, "Reposted by ");
+		content = "";
 	}
 	
 	return content;
+}
+
+function annotationForReply(reply) {
+	let annotation = null;
+
+	if (reply != null && reply.parent != null) {
+		let name = nameForAccount(reply.parent.author);
+		if (name != null) {
+			const text = `In reply to ${name}`;
+			annotation = Annotation.createWithText(text);
+			annotation.uri = uriForAccount(reply.parent.author);
+		}
+	}
+	
+	return annotation;
 }
 
 function contentForReply(reply) {
 	let content = null;
 
 	if (reply != null && reply.parent != null) {
-		const replyAccount = contentForAccount(reply.parent.author, "In reply to ");
 		const replyContent = contentForRecord(reply.parent.record);
-		content = `<blockquote>${replyAccount}${replyContent}</blockquote>`;
+		content = `<blockquote>${replyContent}</blockquote>`;
 	}
 	
 	return content;
