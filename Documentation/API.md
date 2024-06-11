@@ -208,7 +208,7 @@ An object with `width` and `height` properties. The values are used to optimize 
 
 #### focalPoint: Object
 
-An object with `x` and `x` properties. The values are used to center media in the timeline.
+An object with `x` and `x` properties. The values are used to center media in the timeline. If no values are specified, the center at (0, 0) is assumed.
 
 
 ## Actions

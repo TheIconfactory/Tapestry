@@ -54,7 +54,21 @@ function postForItem(item, date = null) {
 			attachment.thumbnail = mediaAttachment["preview_url"];
 			attachment.text = mediaAttachment["description"];
 			attachment.blurhash = mediaAttachment["blurhash"];
-// TODO: Add aspectRatio and focalPoint properties
+			if (mediaAttachment["meta"] != null) {
+				const metadata = mediaAttachment["meta"];
+				if (metadata["focus"] != null) {
+					const focus = metadata["focus"];
+					if (focus["x"] != null && focus["y"] != null) {
+						attachment.focalPoint = {x : focus["x"], y: focus["y"]};
+					}
+				}
+				if (metadata["original"] != null) {
+					const original = metadata["original"];
+					if (original["width"] != null && original["height"] != null) {
+						attachment.aspectSize = {width : original["width"], height: original["height"]};
+					}
+				}
+			}
 			let mimeType = "application/octet-stream";
 			const mediaType = mediaAttachment["type"];
 			if (mediaType == "video" || mediaType == "gifv") {
