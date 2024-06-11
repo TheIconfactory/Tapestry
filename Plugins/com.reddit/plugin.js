@@ -62,7 +62,7 @@ function load() {
 								break;
 							}
 						}
-						const attachment = Attachment.createWithMedia(selectedUrl);
+						const attachment = MediaAttachment.createWithUrl(selectedUrl);
 						attachments.push(attachment);
 					}
 				}
@@ -80,7 +80,7 @@ function load() {
 							// TODO: Use the metadata.p.u URL as a thumbnail.
 							// TODO: Use s.x and s.y to create aspect ratio
 							if (image != null && attachments.length < 4) {
-								const attachment = Attachment.createWithMedia(image);
+								const attachment = MediaAttachment.createWithUrl(image);
 								attachments.push(attachment);
 							}
 						}
@@ -94,13 +94,13 @@ function load() {
 				const image = item["url"];
 				if (image != null) {
 					if (image.endsWith(".jpg") || image.endsWith(".jpeg")) {
-						const attachment = Attachment.createWithMedia(image);
+						const attachment = MediaAttachment.createWithUrl(image);
 						attachments = [attachment];
 					}
 					else {
 						const thumbnail = item["thumbnail"];
 						if (thumbnail != null && (thumbnail.endsWith(".jpg") || thumbnail.endsWith(".jpeg"))) {
-							const attachment = Attachment.createWithMedia(thumbnail);
+							const attachment = MediaAttachment.createWithUrl(thumbnail);
 							attachments = [attachment];
 						}
 					}
@@ -117,7 +117,7 @@ function load() {
 						posterUrl = attachments[0].media;
 					}
 					
-					const attachment = Attachment.createWithMedia(videoUrl);
+					const attachment = MediaAttachment.createWithUrl(videoUrl);
 					attachment.thumbnail = posterUrl;
 					attachment.mimeType = "video/mp4";
 					

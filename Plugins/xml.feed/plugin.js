@@ -160,7 +160,9 @@ function load() {
 				const authorName = entry.author.name;
 				if (authorName != null) {
 					identity = Identity.createWithName(authorName);
-					identity.uri = entry.author.uri;
+					if (entry.author.uri != null) {
+						identity.uri = entry.author.uri;
+					}
 				}
 
 				const resultItem = Item.createWithUriDate(url, date);
@@ -186,7 +188,7 @@ function load() {
 					// Tapestry supports at most four images.
 					.slice(0, 4)
 					.map(link => {
-						const attachment = Attachment.createWithMedia(link.href)
+						const attachment = MediaAttachment.createWithUrl(link.href)
 						attachment.text = link.title || link.text
 						return attachment
 					})
@@ -198,24 +200,24 @@ function load() {
 					// extract any media from RSS: https://www.rssboard.org/media-rss
 					if (entry["media:group"] != null) {
 						const mediaGroup = entry["media:group"];
-			
-						const thumbnail = mediaGroup["media:thumbnail$attrs"].url;
-						if (thumbnail != null) {
-							const attachment = Attachment.createWithMedia(thumbnail);
+
+						const mediaAttributes = mediaGroup["media:thumbnail$attrs"];
+						let attachment = attachmentForAttributes(mediaAttributes);
+						if (attachment != null) {
 							resultItem.attachments = [attachment];
 						}
 					}
 					else if (entry["media:thumbnail$attrs"] != null) {
-						const thumbnail = entry["media:thumbnail$attrs"].url;
-						if (thumbnail != null) {
-							const attachment = Attachment.createWithMedia(thumbnail);
+						const mediaAttributes = entry["media:thumbnail$attrs"];
+						let attachment = attachmentForAttributes(mediaAttributes);
+						if (attachment != null) {
 							resultItem.attachments = [attachment];
 						}
 					}
 					else if (entry["media:content$attrs"] != null) {
-						const content = entry["media:content$attrs"].url;
-						if (content != null) {
-							const attachment = Attachment.createWithMedia(content);
+						const mediaAttributes = entry["media:content$attrs"];
+						let attachment = attachmentForAttributes(mediaAttributes);
+						if (attachment != null) {
 							resultItem.attachments = [attachment];
 						}
 					}
@@ -260,24 +262,24 @@ function load() {
 				// extract any media from RSS: https://www.rssboard.org/media-rss
 				if (item["media:group"] != null) {
 					const mediaGroup = item["media:group"];
-				
-					const thumbnail = mediaGroup["media:thumbnail$attrs"].url;
-					if (thumbnail != null) {
-						const attachment = Attachment.createWithMedia(thumbnail);
+
+					const mediaAttributes = mediaGroup["media:thumbnail$attrs"];
+					let attachment = attachmentForAttributes(mediaAttributes);
+					if (attachment != null) {
 						resultItem.attachments = [attachment];
 					}
 				}
 				else if (item["media:thumbnail$attrs"] != null) {
-					const thumbnail = item["media:thumbnail$attrs"].url;
-					if (thumbnail != null) {
-						const attachment = Attachment.createWithMedia(thumbnail);
+					const mediaAttributes = item["media:thumbnail$attrs"];
+					let attachment = attachmentForAttributes(mediaAttributes);
+					if (attachment != null) {
 						resultItem.attachments = [attachment];
 					}
 				}
 				else if (item["media:content$attrs"] != null) {
-					const content = item["media:content$attrs"].url;
-					if (content != null) {
-						const attachment = Attachment.createWithMedia(content);
+					const mediaAttributes = item["media:content$attrs"];
+					let attachment = attachmentForAttributes(mediaAttributes);
+					if (attachment != null) {
 						resultItem.attachments = [attachment];
 					}
 				}
@@ -295,4 +297,17 @@ function load() {
 	.catch((requestError) => {
 		processError(requestError);
 	});	
+}
+
+function attachmentForAttributes(mediaAttributes) {
+	let attachment = null;
+	if (mediaAttributes.url != null) {
+		attachment = MediaAttachment.createWithUrl(mediaAttributes.url);
+		if (mediaAttributes.width != null && mediaAttributes.height != null) {
+			let width = mediaAttributes.width;
+			let height = mediaAttributes.height;
+			attachment.aspectSize = { width: width, height: height };
+		}
+	}
+	return attachment;
 }

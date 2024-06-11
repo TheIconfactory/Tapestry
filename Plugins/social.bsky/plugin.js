@@ -197,15 +197,20 @@ function contentForAccount(account, prefix = "") {
 }
 
 function nameForAccount(account) {
-	if (account == null || account.handle == null || account.displayName == null) {
+	if (account == null || account.handle == null) {
 		return null;
 	}
 
-	return account.displayName;
+	if (account.displayName != null && account.displayName.length > 0) {
+		return account.displayName;
+	}
+	else {
+		return account.handle;
+	}
 }
 
 function handleForAccount(account) {
-	if (account == null || account.handle == null || account.displayName == null) {
+	if (account == null || account.handle == null) {
 		return null;
 	}
 
@@ -297,7 +302,7 @@ function attachmentsForEmbed(embed) {
 			for (let index = 0; index < count; index++) {
 				let image = images[index];
 				const media = image.fullsize;
-				const attachment = Attachment.createWithMedia(media);
+				const attachment = MediaAttachment.createWithUrl(media);
 				attachment.text = image.alt;
 				attachment.thumbnail = image.thumb;
 				if (media.endsWith("@jpeg")) {

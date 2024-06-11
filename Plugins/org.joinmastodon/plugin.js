@@ -50,10 +50,11 @@ function postForItem(item, date = null) {
 		attachments = []
 		for (const mediaAttachment of mediaAttachments) {
 			const media = mediaAttachment["url"]
-			const attachment = Attachment.createWithMedia(media);
+			const attachment = MediaAttachment.createWithUrl(media);
 			attachment.thumbnail = mediaAttachment["preview_url"];
 			attachment.text = mediaAttachment["description"];
 			attachment.blurhash = mediaAttachment["blurhash"];
+// TODO: Add aspectRatio and focalPoint properties
 			let mimeType = "application/octet-stream";
 			const mediaType = mediaAttachment["type"];
 			if (mediaType == "video" || mediaType == "gifv") {

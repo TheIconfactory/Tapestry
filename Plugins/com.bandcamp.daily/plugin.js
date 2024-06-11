@@ -20,7 +20,7 @@ async function loadAsync() {
     resultItem.title = item.title;
 	resultItem.body = paragraphs.join('');
     if (media) {
-      const attachment = Attachment.createWithMedia(media);
+      const attachment = MediaAttachment.createWithUrl(media);
 
       resultItem.attachments = [attachment];
     }

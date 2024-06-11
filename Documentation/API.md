@@ -168,18 +168,20 @@ A string containing a URL for the annotation’s icon. If no icon is specified o
 A URI with more information about the annotation. For things like boosts/reposts/reblogs that are done by an account the user follows, a link to the account listed in the annotation would be appropriate.
 
 
-### Attachment
+### MediaAttachment
 
 `Post`s can also have media attachments. Photos, videos, and audio are commonly available from APIs and other data sources, and this is how you get them into the timeline. They will be displayed under the HTML content.
 
 ```javascript
-const attachment = Attachment.createWithMedia(media)
+const attachment = MediaAttachment.createWithUrl(url)
 attachment.text = "Yet another cat on the Internet."
+attachment.aspectSize = {width: 300, height: 400};
+attachment.focalPoint = {x: 0, y: 0};
 
-post.attachments = [attachment];
+item.attachments = [attachment];
 ```
 
-#### media: String (required)
+#### url: String (required)
 
 A string containing the URL for the media on the Internet
 
@@ -187,27 +189,27 @@ A string containing the URL for the media on the Internet
 
 A string containing the URL for a lower resolution copy of the media
 
-#### text: String
-
-A string that describes the media (for accessibility)
-
-#### blurhash: String
-
-A string that provides a placeholder image.
-
 #### mimeType: String
 
 A string that lets Tapestry know what kind of media is being attached. If this value isn't present, the file name
 extension for `media` will be used.
 
-#### authorizationHeader: String
+#### blurhash: String
 
-This string provides an authorization template for accessing protected `media`. If a value is provided, the "Authorization" header will be set with the following items being replaced with values managed by the Tapestry app:
+A string that provides a placeholder image.
 
-  * `__ACCESS_TOKEN__` The access token returned when authenticating with OAuth or JWT.
-  * `__CLIENT_ID__` The client ID used to identify the plugin with the API.
-  
-For example, you could set a string value of `Bearer __ACCESS_TOKEN__` and an "Authorization: Bearer dead-beef-1234" header would be used when retrieving a `media` image.
+#### text: String
+
+A string that describes the media (for accessibility)
+
+#### aspectSize: Object
+
+An object with `width` and `height` properties. The values are used to optimize the media placement in the timeline.
+
+#### focalPoint: Object
+
+An object with `x` and `x` properties. The values are used to center media in the timeline.
+
 
 ## Actions
 

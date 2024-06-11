@@ -67,7 +67,7 @@ function load() {
 				const date = new Date(item.pubDate);
 				
 				const enclosureUrl = item["enclosure$attrs"].url;
-				const attachment = Attachment.createWithMedia(enclosureUrl);
+				const attachment = MediaAttachment.createWithUrl(enclosureUrl);
 
 				let title = null;
 				let subtitle = null;

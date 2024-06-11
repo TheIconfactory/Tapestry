@@ -78,7 +78,7 @@ function load() {
 				for (let index = 0; index < count; index++) {
 					let photo = photos[index];
 					const media = photo.original_size.url;
-					const attachment = Attachment.createWithMedia(media);
+					const attachment = MediaAttachment.createWithUrl(media);
 					attachment.text = item.summary;
 					attachments.push(attachment);
 				}

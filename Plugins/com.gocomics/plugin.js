@@ -93,7 +93,7 @@ function load() {
 		
 		if (image != null) {
 			const media = image;
-			const attachment = Attachment.createWithMedia(media);
+			const attachment = MediaAttachment.createWithUrl(media);
 			attachment.text = title;
 			// TODO: Use og:image:height and og:image:width to create aspect ratio
 			

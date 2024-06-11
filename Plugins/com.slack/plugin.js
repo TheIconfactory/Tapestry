@@ -26,10 +26,10 @@ async function loadAsync() {
     post.creator = creator
     if (message.files) {
       post.attachments = message.files.slice(0, 4).map(file => {
-        const attachment = Attachment.createWithMedia(file.url_private)
+        const attachment = MediaAttachment.createWithUrl(file.url_private)
         attachment.text = file.title
         attachment.thumbnail = file.thumb_360
-        attachment.authorizationHeader = "Bearer __ACCESS_TOKEN__"
+        //attachment.authorizationHeader = "Bearer __ACCESS_TOKEN__"
         return attachment
       })
     }

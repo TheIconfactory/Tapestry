@@ -125,7 +125,7 @@ function load() {
 					const mediaGroup = entry["media:group"];
 				
 					const thumbnail = mediaGroup["media:thumbnail$attrs"].url;
-					const attachment = Attachment.createWithMedia(thumbnail);
+					const attachment = MediaAttachment.createWithUrl(thumbnail);
 
 					const title = mediaGroup["media:title"];
 					let description = null;
