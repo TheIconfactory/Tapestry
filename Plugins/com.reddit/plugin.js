@@ -55,15 +55,24 @@ function load() {
 				if (images.length > 0) {
 					attachments = [];
 					for (const image of images) {
-						let selectedUrl = image.source.url;
-						for (const resolution of image.resolutions) {
-							if (resolution.width > 900) {
-								selectedUrl = resolution.url;
-								break;
+						let url = image.source.url;
+						let width = image.source.width;
+						let height = image.source.height;
+// 						let thumbnailUrl = null;
+// 						for (const resolution of image.resolutions) {
+// 							if (resolution.width > 300) {
+// 								thumbnailUrl = resolution.url;
+// 								break;
+// 							}
+// 						}
+						if (url != null) {
+							const attachment = MediaAttachment.createWithUrl(url);
+							attachment.mimeType = "image";
+							if (width != null && height != null) {
+								attachment.aspectSize = { width: width, height: height };
 							}
+							attachments.push(attachment);
 						}
-						const attachment = MediaAttachment.createWithUrl(selectedUrl);
-						attachments.push(attachment);
 					}
 				}
 			}
@@ -76,13 +85,32 @@ function load() {
 					if (mediaMetadata != null) {
 						const metadata = mediaMetadata[mediaId];
 						if (metadata.status == "valid") {
+							let width = null;
+							if (metadata.s.x != null) {
+								width = metadata.s.x;
+							}
+							let height = null;
+							if (metadata.s.y != null) {
+								height = metadata.s.y;
+							}
+							let mimeType = null;
+							if (metadata.m != null) {
+								mimeType = metadata.m;
+							}
 							const image = metadata.s.u;
 							// TODO: Use the metadata.p.u URL as a thumbnail.
 							// TODO: Use s.x and s.y to create aspect ratio
 							if (image != null && attachments.length < 4) {
 								const attachment = MediaAttachment.createWithUrl(image);
+								if (width != null && height != null) {
+									attachment.aspectSize = { width: width, height: height };
+								}
+								if (mimeType != null) {
+									attachment.mimeType = mimeType;
+								}
 								attachments.push(attachment);
 							}
+							
 						}
 					}
 					else {

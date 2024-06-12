@@ -320,7 +320,7 @@ The dictionary can contain the following:
 
   * displayName: `String` that will be used to name the feed. For example, a RSS feed name or a Mastodon account.
   * icon: `String` for an image URL that will be presented alongside the display name.
-  * baseUrl: `String` that will be used to resolve relative URLs.
+  * baseUrl: `String` that will be used to resolve relative URLs. Anything other than the protocol and hostname will be discarded.
   
 When a string is returned, it will be used as a `displayName` with an empty `baseUrl` and default `icon`.
 

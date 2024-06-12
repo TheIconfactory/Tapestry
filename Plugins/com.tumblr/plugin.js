@@ -23,6 +23,8 @@ function verify() {
 	});
 }
 
+const imageRegex = /<img src="([^"]*)/;
+
 function load() {
 	sendRequest(site + "/v2/user/dashboard")
 	.then((text) => {
@@ -80,6 +82,7 @@ function load() {
 					const media = photo.original_size.url;
 					const attachment = MediaAttachment.createWithUrl(media);
 					attachment.text = item.summary;
+					attachment.mimeType = "image";
 					attachments.push(attachment);
 				}
 			}

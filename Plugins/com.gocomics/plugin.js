@@ -86,17 +86,21 @@ function load() {
 		const properties = extractProperties(html);
 		
 		const image = properties["og:image"];
+		const width = properties["og:image:width"];
+		const height = properties["og:image:height"];
 		const title = properties["og:title"];
 		const siteName = properties["og:site_name"];
 		const author = properties["article:author"];
 		const publishedTime = properties["article:published_time"];
 		
 		if (image != null) {
-			const media = image;
-			const attachment = MediaAttachment.createWithUrl(media);
+			const attachment = MediaAttachment.createWithUrl(image);
 			attachment.text = title;
-			// TODO: Use og:image:height and og:image:width to create aspect ratio
-			
+			if (width != null && height != null) {
+				attachment.aspectSize = { width: parseInt(width), height: parseInt(height) };
+			}
+			attachment.mimeType = "image";
+						
 			const localizedDate = new Date(publishedTime + "T00:00:00").toLocaleDateString();
 			const content = `<p>Published on ${localizedDate} at <a href="${url}">${siteName}</a></p>`;
 			
