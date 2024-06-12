@@ -193,10 +193,17 @@ function load() {
 				const jsonObject = JSON.parse(text);
 				let results = [];
 				for (const item of jsonObject) {
-					let postItem = item;
-	
-					const post = postForItem(postItem);
-	
+					let post = null;
+					if (item.reblog != null) {
+						post = postForItem(item.reblog);
+						annotation = Annotation.createWithText("Boosted by you");
+						annotation.uri = item.account["url"];
+						post.annotations = [annotation];
+					}
+					else {
+						post = postForItem(item);
+					}
+					
 					results.push(post);
 				}
 				processResults(results, true);

@@ -303,14 +303,12 @@ function attachmentsForEmbed(embed) {
 				let image = images[index];
 				const media = image.fullsize;
 				const attachment = MediaAttachment.createWithUrl(media);
+				if (image.aspectRatio != null) {
+					attachment.aspectSize = image.aspectRatio;
+				}
 				attachment.text = image.alt;
 				attachment.thumbnail = image.thumb;
-				if (media.endsWith("@jpeg")) {
-					attachment.mimeType = "image/jpeg";
-				}
-				else if (media.endsWith("@png")) {
-					attachment.mimeType = "image/png";
-				} 
+				attachment.mimeType = "image";
 				attachments.push(attachment);
 			}
 		}
