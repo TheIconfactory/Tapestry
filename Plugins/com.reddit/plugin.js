@@ -49,6 +49,8 @@ function load() {
 				content = content + processedContent;
 			}
 			
+			// TODO: Handle "crosspost_parent_list"
+
 			var attachments = null;
 			if (item["preview"] != null)  {
 				const images = item["preview"].images;
@@ -108,6 +110,9 @@ function load() {
 								if (mimeType != null) {
 									attachment.mimeType = mimeType;
 								}
+								else {
+									attachment.mimeType = "image";
+								}
 								attachments.push(attachment);
 							}
 							
@@ -123,12 +128,14 @@ function load() {
 				if (image != null) {
 					if (image.endsWith(".jpg") || image.endsWith(".jpeg")) {
 						const attachment = MediaAttachment.createWithUrl(image);
+						attachment.mimeType = "image/jpeg";
 						attachments = [attachment];
 					}
 					else {
 						const thumbnail = item["thumbnail"];
 						if (thumbnail != null && (thumbnail.endsWith(".jpg") || thumbnail.endsWith(".jpeg"))) {
 							const attachment = MediaAttachment.createWithUrl(thumbnail);
+							attachment.mimeType = "image/jpeg";
 							attachments = [attachment];
 						}
 					}
