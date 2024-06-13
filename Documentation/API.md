@@ -113,6 +113,17 @@ Up to four media attachments for the content. See below.
 
 _NOTE:_ Media attachments will be automatically created when inline images are used in the HTML of the `content` property unless the `providesAttachments` configuration parameter is set to true.
 
+#### shortcodes: Dictionary
+
+This property contains a dictionary of name and URL pairs. Shortcodes are used to process any content in the `Item` or the author `Identity`. Text that uses the `:shortcode:` convention will be replaced by an image at display. For example:
+
+```javascript
+item.body = "<p>THE :ONE: AND ONLY :CHOCK: WAS HEAR</p>";
+item.shortcodes = { "ONE": "https://example.com/one.jpg", "CHOCK": "https://chocklock.com/favicon.ico" };
+```
+
+Shortcode tokens must not contain spaces or additional colons: using `:my fancy code:` or `:what:the:hell:` is invalid and will be ignored. 
+
 ### Identity
 
 An `Item` can have a author that indicates how the content was created. It can be a person, a woman, a man, a camera, or a TV. The information is used to present an avatar and header in the timeline.
