@@ -82,6 +82,27 @@ function verify() {
 			};
 			processVerification(verification);
 		}
+		else if (jsonObject["rdf:RDF"] != null) {
+			// RSS 1.0
+			const baseUrl = jsonObject["rdf:RDF"].channel.link;
+			const displayName = jsonObject["rdf:RDF"].channel.title;
+
+			let icon = null;
+			if (jsonObject["rdf:RDF"].channel.image$attrs != null) {
+				icon = jsonObject["rdf:RDF"].channel.image$attrs["rdf:resource"];
+			}
+			if (icon === null) {
+				let feedUrl = baseUrl.split("/").splice(0,3).join("/");
+				icon = feedUrl + "/favicon.ico";
+			}
+
+			const verification = {
+				displayName: displayName,
+				icon: icon,
+				baseUrl: baseUrl
+			};
+			processVerification(verification);
+		}
 		else {
 			// Unknown
 			processError(Error("Unknown feed format"));
@@ -283,6 +304,45 @@ function load() {
 					if (attachment != null) {
 						resultItem.attachments = [attachment];
 					}
+				}
+					
+				results.push(resultItem);
+			}
+
+			processResults(results);
+		}
+		else if (jsonObject["rdf:RDF"] != null) {
+			// RSS 1.0
+			const feedUrl = jsonObject["rdf:RDF"].channel.link;
+			const feedName = jsonObject["rdf:RDF"].channel.title;
+
+			const items = jsonObject["rdf:RDF"].item;
+			var results = [];
+			for (const item of items) {
+				if (item["dc:date"] == null) {
+					continue;
+				}
+				const url = item.link;
+				const date = new Date(item["dc:date"]);
+				let title = item.title?.trim();
+				let content = item.description;
+
+				let identity = null;
+				const authorName = item["dc:creator"];
+				if (authorName != null) {
+					identity = Identity.createWithName(authorName);
+					identity.uri = feedUrl;
+				}
+				
+				const resultItem = Item.createWithUriDate(url, date);
+				if (title != null) {
+					resultItem.title = title;
+				}
+				if (content != null) {
+					resultItem.body = content;
+				}
+				if (identity != null) {
+					resultItem.author = identity;
 				}
 					
 				results.push(resultItem);
