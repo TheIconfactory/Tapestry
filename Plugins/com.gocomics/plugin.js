@@ -101,10 +101,10 @@ function load() {
 			}
 			attachment.mimeType = "image";
 						
-			const localizedDate = new Date(publishedTime + "T00:00:00").toLocaleDateString();
-			const content = `<p>Published on ${localizedDate} at <a href="${url}">${siteName}</a></p>`;
+			const publishedDate = new Date(publishedTime + "T00:00:00");
+			const content = `<p>Published on ${publishedDate.toLocaleDateString()} at <a href="${url}">${siteName}</a></p>`;
 			
-			const item = Item.createWithUriDate(url, date);
+			const item = Item.createWithUriDate(url, publishedDate);
 			item.body = content;
 			item.attachments = [attachment];
 
