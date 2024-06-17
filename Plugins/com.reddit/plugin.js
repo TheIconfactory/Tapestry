@@ -143,6 +143,43 @@ function itemForData(item) {
 			}
 		}
 	}
+	else if (item["media_metadata"] != null) {
+		attachments = [];
+		const mediaMetadata = item["media_metadata"];
+		for (let key in mediaMetadata) {
+			const metadata = mediaMetadata[key];
+			if (metadata.status == "valid") {
+				let width = null;
+				if (metadata.s.x != null) {
+					width = metadata.s.x;
+				}
+				let height = null;
+				if (metadata.s.y != null) {
+					height = metadata.s.y;
+				}
+				let mimeType = null;
+				if (metadata.m != null) {
+					mimeType = metadata.m;
+				}
+				const image = metadata.s.u;
+				// TODO: Use the metadata.p.u URL as a thumbnail.
+				// TODO: Use s.x and s.y to create aspect ratio
+				if (image != null && attachments.length < 4) {
+					const attachment = MediaAttachment.createWithUrl(image);
+					if (width != null && height != null) {
+						attachment.aspectSize = { width: width, height: height };
+					}
+					if (mimeType != null) {
+						attachment.mimeType = mimeType;
+					}
+					else {
+						attachment.mimeType = "image";
+					}
+					attachments.push(attachment);
+				}			
+			}
+		}
+	}
 	else {
 		const image = item["url"];
 		if (image != null) {
