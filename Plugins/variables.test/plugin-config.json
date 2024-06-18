@@ -3,6 +3,6 @@
 	"display_name": "Test Variables",
 	"icon": "https://iconfactory.com/favicon.ico",
 	"site": "https://variables.test",
-	"needsVerification": true,
+	"needs_verification": true,
 	"check_interval": 300
 }

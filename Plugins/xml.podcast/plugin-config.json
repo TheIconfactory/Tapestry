@@ -5,6 +5,6 @@
 	"icon": "https://usetapestry.com/icons/podcast.png",
 	"site_prompt": "Podcast URL",
 	"site_placeholder": "https://foo.com/feed",
-	"needsVerification": true,
+	"needs_verification": true,
 	"check_interval": 300
 }
