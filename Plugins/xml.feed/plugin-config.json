@@ -5,6 +5,7 @@
 	"icon": "https://usetapestry.com/icons/rss.png",
 	"site_prompt": "Feed URL",
 	"site_placeholder": "https://foo.com/feed.xml",
+	"site_help": "Enter the path to the website’s XML file.\n\nIf you don’t know this URL, use _Add a New Feed_ and enter a value like `daringfireball.net`",
 	"needs_verification": true,
 	"check_interval": 300
 }

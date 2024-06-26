@@ -532,10 +532,11 @@ Recommended properties:
 
   * site\_prompt: `String` with a prompt for user input.
   * site\_placeholder: 'String' with a placeholder for user input.
-  	- If no `site` is configured, these properties are required.
+    - If no `site` is configured, these properties are required.
+  * site\_help: `String` with a short description of what’s required for `site`.
  
-   * icon: `String` with a URL to an image that will be used as a default for this connector.
-   * item\_style: `String` with either "post" or "article" to define the content layout.
+  * icon: `String` with a URL to an image that will be used as a default for this connector.
+  * item\_style: `String` with either "post" or "article" to define the content layout.
  	
 Optional properties:
 

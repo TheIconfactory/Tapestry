@@ -3,8 +3,9 @@
 	"display_name": "YouTube Channel",
 	"service_name": "YouTube",
 	"icon": "https://www.youtube.com/s/desktop/905763c7/img/favicon_144x144.png",
-	"site_prompt": "Channel URL",
+	"site_prompt": "Feed URL",
 	"site_placeholder": "https://youtube.com/feeds/video.xml",
+	"site_help": "Enter the path for the channel’s XML file, not the page where you viewed the video.\n\nIf you don’t know this URL, use _Add a New Feed_ and enter a value like `youtube.com/@MKBHD`",
 	"needs_verification": true,
 	"check_interval": 300
 }
