@@ -12,5 +12,12 @@
 			"use": "href",
 			"variable": "site"
 		}
+	],
+	"raw": [
+		{
+			"match": "//channel/([^/]+)/videos/",
+			"replacement": "https://www.youtube.com/feeds/videos.xml?channel_id=$$",
+			"variable": "site"
+		}
 	]
 }

@@ -6,7 +6,15 @@
 			"prompt": "Satellite Location",
 			"value": "East Coast",
 			"choices": "East Coast, West Coast",
-			"placeholder": "Select satellite location."
+			"placeholder": "Select satellite location"
+		},
+		{
+			"name": "view",
+			"type": "choices",
+			"prompt": "View",
+			"value": "Continental US",
+			"choices": "Continental US, Full Disk",
+			"placeholder": "Select view"
 		},
 		{
 			"name": "image",
@@ -14,7 +22,7 @@
 			"prompt": "Image Type",
 			"value": "GEOCOLOR",
 			"choices": "GEOCOLOR, AirMass, DayNightCloudMicroCombo, DMW, Dust, FireTemperature, Sandwich",
-			"placeholder": "Select processing for satellite image."
+			"placeholder": "Select processing for satellite image"
 		}
 	]
 }

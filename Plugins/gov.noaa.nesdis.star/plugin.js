@@ -31,10 +31,18 @@ function load() {
 			directory = "GOES16";
 		}
 
-		let url = `https://cdn.star.nesdis.noaa.gov/${directory}/ABI/CONUS/${image}/2500x1500.jpg`;
+		let subdirectory = "CONUS";
+		let imageWidth = "2500";
+		let imageHeight = "1500";
+		if (view == "Full Disk") {
+			subdirectory = "FD";
+			imageWidth = "1808";
+			imageHeight = "1808";
+		}
+		let url = `https://cdn.star.nesdis.noaa.gov/${directory}/ABI/${subdirectory}/${image}/${imageWidth}x${imageHeight}.jpg`;
 		
 		const date = new Date();
-		const content = `<p>${image} image of Continental US (${satellite})</p><p><img src="${url}"/></p>`;
+		const content = `<p><img src="${url}" width="${imageWidth}" height="${imageHeight}"/></p><p>${image} image of Continental US (${satellite})</p>`;
 		var resultItem = Item.createWithUriDate(url, date);
 		resultItem.body = content;
 		

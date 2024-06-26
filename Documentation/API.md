@@ -829,6 +829,8 @@ The YouTube plugin will work on many different domains. Note that "youtube." wil
  	],
 ```
 
+Matches are case insensitive. If a user types "YouTube.com/@MKBHD", it will match the "youtube." rule above.
+
 If the sites rules do not match, no further checks are performed and the plugin is not suggested to the user.
 
 #### url
@@ -850,6 +852,8 @@ If the `extract` pattern is empty it's considered a match and the full URL will 
 ```
 
 The `extract` regex pattern begins and ends with a single slash ("/") character. The first capture group in the pattern is used to set the variable’s value. If no match is found, the rule fails and the plugin is not offered as a suggestion.
+
+All regular expressions are, like the web itself, case insensitive. The pattern "/foo/" will match "FOOBAR" in both the URL and HTML.
 
 If necessary, non-capturing groups like "(?:foo|bar)" can be used in the regular expression.
 
