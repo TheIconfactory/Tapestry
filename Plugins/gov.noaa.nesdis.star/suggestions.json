@@ -1,0 +1,14 @@
+{
+	"variables": [
+		{
+			"name": "satellite",
+			"value": "East Coast",
+			"title": "East Coast (USA)"
+		},
+		{
+			"name": "satellite",
+			"value": "West Coast",
+			"title": "West Coast (USA)"
+		}
+	]
+}

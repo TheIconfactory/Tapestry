@@ -109,7 +109,7 @@ The creator of the content. See `Identity` below.
 
 #### attachments: Array of Attachment
 
-Up to four media attachments for the content. See below.
+Media attachments for the content. See below.
 
 _NOTE:_ Media attachments will be automatically created when inline images are used in the HTML of the `content` property unless the `providesAttachments` configuration parameter is set to true.
 
@@ -181,7 +181,7 @@ A URI with more information about the annotation. For things like boosts/reposts
 
 ### MediaAttachment
 
-`Post`s can also have media attachments. Photos, videos, and audio are commonly available from APIs and other data sources, and this is how you get them into the timeline. They will be displayed under the HTML content.
+`Item`s can also have media attachments. Photos, videos, and audio are commonly available from APIs and other data sources, and this is how you get them into the timeline. They will be displayed under the HTML content.
 
 ```javascript
 const attachment = MediaAttachment.createWithUrl(url);

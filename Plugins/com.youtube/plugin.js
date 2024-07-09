@@ -88,74 +88,59 @@ function load() {
 			}
 			const feedName = jsonObject.feed.title;
 			
-// 			sendRequest(feedUrl)
-// 			.then((html) => {
-// 				const match = html.match(avatarRegex);
-// 				const avatar = match[1];
-// 
-// 				var identity = Identity.createWithName(feedName);
-// 				identity.uri = feedUrl;
-// 				identity.avatar = avatar;
-			
-				const entries = jsonObject.feed.entry;
-				var results = [];
-				for (const entry of entries) {
-					const entryAttributes = entry.link$attrs;
-					let entryUrl = null;
-					if (entryAttributes instanceof Array) {
-						for (const entryAttribute of entryAttributes) {
-						if (entryAttribute.rel == "alternate") {
-							entryUrl = entryAttribute.href;
-							break;
-						}
+			const entries = jsonObject.feed.entry;
+			var results = [];
+			for (const entry of entries) {
+				const entryAttributes = entry.link$attrs;
+				let entryUrl = null;
+				if (entryAttributes instanceof Array) {
+					for (const entryAttribute of entryAttributes) {
+					if (entryAttribute.rel == "alternate") {
+						entryUrl = entryAttribute.href;
+						break;
 					}
+				}
+				}
+				else {
+					if (entryAttributes.rel == "alternate") {
+						entryUrl = entryAttributes.href;
 					}
-					else {
-						if (entryAttributes.rel == "alternate") {
-							entryUrl = entryAttributes.href;
-						}
-					}
-
-					const url = entryUrl;
-					const date = new Date(entry.published); // could also be "entry.updated"
-				
-					// TODO: Use "media:content" to do content embed.
-					// <media:content url="https://www.youtube.com/v/TstuOX6NldA?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
-					
-					const mediaGroup = entry["media:group"];
-				
-					const thumbnail = mediaGroup["media:thumbnail$attrs"].url;
-					const attachment = MediaAttachment.createWithUrl(thumbnail);
-
-					const title = mediaGroup["media:title"];
-					let description = null;
-					if (mediaGroup["media:description"] != null) {
-						// NOTE: YouTube shorts do not have a description.
-						let rawDescription = mediaGroup["media:description"];
-						let linkedDescription = rawDescription.replace(urlRegex, "<a href=\"$1\">$1</a>");
-						let paragraphs = linkedDescription.split("\n\n");
-						description = paragraphs.map((paragraph) => {
-							let lines = paragraph.split("\n");
-							let breakLines = lines.join("<br/>");
-							return `<p>${breakLines}</p>`
-						}).join("\n")
-					}
-					const resultItem = Item.createWithUriDate(url, date);
-					resultItem.title = title;
-					if (description != null) {
-						resultItem.body = description;
-					}
-//					resultItem.author = identity;
-					resultItem.attachments = [attachment];
-				
-					results.push(resultItem);
 				}
 
-				processResults(results);
-// 			})
-// 			.catch((requestError) => {
-// 				processError(requestError);
-// 			});	
+				const url = entryUrl;
+				const date = new Date(entry.published); // could also be "entry.updated"
+			
+				const videoId = entry["yt:videoId"];
+				const embed = `<iframe id="player" type="text/html" width="640" height="390" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`
+				
+				const mediaGroup = entry["media:group"];
+			
+				const title = mediaGroup["media:title"];
+				let description = null;
+				if (mediaGroup["media:description"] != null) {
+					// NOTE: YouTube shorts do not have a description.
+					let rawDescription = mediaGroup["media:description"];
+					let linkedDescription = rawDescription.replace(urlRegex, "<a href=\"$1\">$1</a>");
+					let paragraphs = linkedDescription.split("\n\n");
+					description = paragraphs.map((paragraph) => {
+						let lines = paragraph.split("\n");
+						let breakLines = lines.join("<br/>");
+						return `<p>${breakLines}</p>`
+					}).join("\n")
+				}
+				const resultItem = Item.createWithUriDate(url, date);
+				resultItem.title = title;
+				if (description != null) {
+					resultItem.body = embed + description;
+				}
+				else {
+					resultItem.body = embed;
+				}
+			
+				results.push(resultItem);
+			}
+
+			processResults(results);
 		}
 		else if (jsonObject.rss != null) {
 			// RSS 2.0

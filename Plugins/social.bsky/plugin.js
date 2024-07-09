@@ -298,7 +298,7 @@ function attachmentsForEmbed(embed) {
 		const images = embed.images;
 		if (images != null) {
 			attachments = []
-			let count = Math.min(4, images.length);
+			let count = images.length;
 			for (let index = 0; index < count; index++) {
 				let image = images[index];
 				const media = image.fullsize;

@@ -2,7 +2,19 @@
 	"sites": [
 		{
 			"value": "https://feeds.kottke.org/main",
-			"title": "Kottke"
+			"title": "Kottke.org"
+		},
+		{
+			"value": "https://www.thisiscolossal.com/feed/",
+			"title": "Colossal"
+		},
+		{
+			"value": "https://mjtsai.com/blog/feed/",
+			"title": "Michael Tsai",
+		},
+		{
+			"value": "https://blog.iconfactory.com/feed/",
+			"title": "Iconfactory",
 		},
 		{
 			"value": "https://www.apple.com/newsroom/rss-feed.rss",
@@ -10,3 +22,5 @@
 		}
 	]
 }
+
+

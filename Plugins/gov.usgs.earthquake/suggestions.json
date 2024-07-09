@@ -1,0 +1,9 @@
+{
+	"variables": [
+		{
+			"name": "magnitude",
+			"value": "Over 4.5",
+			"title": "Earthquakes over 4.5"
+		}
+	]
+}

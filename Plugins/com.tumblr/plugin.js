@@ -76,7 +76,7 @@ function load() {
 							
 				attachments = [];
 				let photos = item.photos;
-				let count = Math.min(4, photos.length);
+				let count = photos.length;
 				for (let index = 0; index < count; index++) {
 					let photo = photos[index];
 					const media = photo.original_size.url;

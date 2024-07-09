@@ -122,7 +122,7 @@ function itemForData(item) {
 					const image = metadata.s.u;
 					// TODO: Use the metadata.p.u URL as a thumbnail.
 					// TODO: Use s.x and s.y to create aspect ratio
-					if (image != null && attachments.length < 4) {
+					if (image != null) {
 						const attachment = MediaAttachment.createWithUrl(image);
 						if (width != null && height != null) {
 							attachment.aspectSize = { width: width, height: height };
@@ -164,7 +164,7 @@ function itemForData(item) {
 				const image = metadata.s.u;
 				// TODO: Use the metadata.p.u URL as a thumbnail.
 				// TODO: Use s.x and s.y to create aspect ratio
-				if (image != null && attachments.length < 4) {
+				if (image != null) {
 					const attachment = MediaAttachment.createWithUrl(image);
 					if (width != null && height != null) {
 						attachment.aspectSize = { width: width, height: height };
