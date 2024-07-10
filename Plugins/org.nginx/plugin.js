@@ -30,19 +30,13 @@ function verify() {
 				displayName = displayName.replace("http://", "");
 			}
 
-			let icon = null;		
-			if (siteUrl.endsWith("/")) {
-				icon = siteUrl + "favicon.ico";
-			}
-			else {
-				icon = siteUrl + "/favicon.ico";
-			}
-			
-			const verification = {
-				displayName: displayName,
-				icon: icon
-			};
-			processVerification(verification);
+			lookupIcon(siteUrl).then((icon) => {
+				const verification = {
+					displayName: displayName,
+					icon: icon
+				};
+				processVerification(verification);
+			});
 		}
 		else {
 			processError(Error("Invalid status endpoint"));

@@ -22,7 +22,14 @@ function verify() {
 				displayName = displayName.substring(0, displayName.length - 1);
 			}
 			
-			processVerification(displayName);
+			lookupIcon(site).then((icon) => {
+				const verification = {
+					displayName: displayName,
+					icon: icon
+				};
+				processVerification(verification);				
+			});
+			//processVerification(displayName);
 		}
 		else {
 			processError(Error("Failed to load site"));

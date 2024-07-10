@@ -27,7 +27,7 @@ function verify() {
 				}
 				if (icon === null) {
 					let baseUrl = baseUrl.split("/").splice(0,3).join("/");
-					icon = baseUrl + "/favicon.ico";
+					icon = lookupUrl(baseUrl);
 				}
 			}
 			

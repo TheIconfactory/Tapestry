@@ -27,13 +27,26 @@ function verify() {
 			let icon = null;
 			if (jsonObject.feed.icon != null) {
 				icon = jsonObject.feed.icon;
+				const verification = {
+					displayName: displayName,
+					icon: icon,
+					baseUrl: baseUrl
+				};
+				processVerification(verification);
 			}
 			if (baseUrl != null && icon === null) {
 				let siteUrl = baseUrl.split("/").splice(0,3).join("/");
-				icon = siteUrl + "/favicon.ico";
+				lookupIcon(siteUrl).then((icon) => {
+					const verification = {
+						displayName: displayName,
+						icon: icon,
+						baseUrl: baseUrl
+					};
+					processVerification(verification);
+				});
 			}
 			else {
-				// try to get icon from the fe
+				// try to get icon from the feed
 				let feedUrl = null;
 				if (feedAttributes instanceof Array) {
 					for (const feedAttribute of feedAttributes) {
@@ -50,58 +63,79 @@ function verify() {
 				}
 				if (feedUrl != null) {
 					let siteUrl = feedUrl.split("/").splice(0,3).join("/");
-					icon = siteUrl + "/favicon.ico";
+					lookupIcon(siteUrl).then((icon) => {
+						const verification = {
+							displayName: displayName,
+							icon: icon,
+							baseUrl: baseUrl
+						};
+						processVerification(verification);
+					});
+				}
+				else {
+					const verification = {
+						displayName: displayName,
+						icon: null,
+						baseUrl: baseUrl
+					};
+					processVerification(verification);
 				}
 			}
 			
-			const verification = {
-				displayName: displayName,
-				icon: icon,
-				baseUrl: baseUrl
-			};
-			processVerification(verification);
 		}
 		else if (jsonObject.rss != null) {
 			// RSS 2.0
 			const baseUrl = jsonObject.rss.channel.link;
 			const displayName = jsonObject.rss.channel.title;
 
-			let icon = null;
 			if (jsonObject.rss.channel.image != null) {
 				icon = jsonObject.rss.channel.image.url;
+				const verification = {
+					displayName: displayName,
+					icon: icon,
+					baseUrl: baseUrl
+				};
+				processVerification(verification);
 			}
-			if (icon === null) {
+			else {
 				let feedUrl = baseUrl.split("/").splice(0,3).join("/");
-				icon = feedUrl + "/favicon.ico";
+				lookupIcon(feedUrl).then((icon) => {
+					const verification = {
+						displayName: displayName,
+						icon: icon,
+						baseUrl: baseUrl
+					};
+					processVerification(verification);
+				});
 			}
-
-			const verification = {
-				displayName: displayName,
-				icon: icon,
-				baseUrl: baseUrl
-			};
-			processVerification(verification);
 		}
 		else if (jsonObject["rdf:RDF"] != null) {
 			// RSS 1.0
 			const baseUrl = jsonObject["rdf:RDF"].channel.link;
 			const displayName = jsonObject["rdf:RDF"].channel.title;
 
-			let icon = null;
-			if (jsonObject["rdf:RDF"].channel.image$attrs != null) {
-				icon = jsonObject["rdf:RDF"].channel.image$attrs["rdf:resource"];
-			}
-			if (icon === null) {
+// NOTE: In theory, you can get the icon from the RDF channel. In practice, places like
+// Slashdot haven't updated this image since the beginning of this century.
+// 			if (jsonObject["rdf:RDF"].channel.image$attrs != null) {
+// 				icon = jsonObject["rdf:RDF"].channel.image$attrs["rdf:resource"];
+// 				const verification = {
+// 					displayName: displayName,
+// 					icon: icon,
+// 					baseUrl: baseUrl
+// 				};
+// 				processVerification(verification);
+// 			}
+// 			else {
 				let feedUrl = baseUrl.split("/").splice(0,3).join("/");
-				icon = feedUrl + "/favicon.ico";
-			}
-
-			const verification = {
-				displayName: displayName,
-				icon: icon,
-				baseUrl: baseUrl
-			};
-			processVerification(verification);
+				lookupIcon(feedUrl).then((icon) => {
+					const verification = {
+						displayName: displayName,
+						icon: icon,
+						baseUrl: baseUrl
+					};
+					processVerification(verification);
+				});
+//			}
 		}
 		else {
 			// Unknown

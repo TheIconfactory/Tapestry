@@ -12,17 +12,24 @@ function verify() {
 		var icon = null;
 		if (jsonObject["icon"] != null) {
 			icon = jsonObject["icon"];
+			const verification = {
+				displayName: displayName,
+				icon: icon,
+				baseUrl: baseUrl
+			};
+			processVerification(verification);
 		}
 		else {
-			icon = baseUrl + "/favicon.ico"
+			lookupIcon(baseUrl).then((icon) => {
+				const verification = {
+					displayName: displayName,
+					icon: icon,
+					baseUrl: baseUrl
+				};
+				processVerification(verification);
+			});
 		}
 
-		const verification = {
-			displayName: displayName,
-			icon: icon,
-			baseUrl: baseUrl
-		};
-		processVerification(verification);
 	})
 	.catch((requestError) => {
 		processError(requestError);

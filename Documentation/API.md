@@ -502,6 +502,12 @@ Note that old style property lists or JSON property lists are not supported.
   
 Returns an `Object` representation containing the HTML’s properties. These values can be used to generate link previews or enhance the content without scraping the markup.
 
+### lookupIcon(url) → Promise
+
+  * url: `String` with a path to an HTML page
+  
+Returns a `Promise` with a resolve handler that includes a `String` parameter with a path to an icon for the page. If no icon can be found, a `null` value is returned.
+
 ## Configuration
 
 Each connector plug-in is defined using the following files:
