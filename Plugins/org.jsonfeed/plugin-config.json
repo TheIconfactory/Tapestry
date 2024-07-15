@@ -5,7 +5,7 @@
 	"icon": "https://micro.blog/jsonfeed/favicon.png",
 	"site_prompt": "Feed URL",
 	"site_placeholder": "https://foo.com/feed.json",
-	"site_help": "Enter the path to the website’s JSON file.\n\nIf you don’t know this URL, use _Add a New Feed_ and enter a value like `daringfireball.net`",
+	"site_help": "Enter the path to the website’s JSON file.\n\nIf you don’t know this URL, use the _Feed Finder_ and enter a value like `daringfireball.net`",
 	"needs_verification": true,
 	"check_interval": 300
 }
