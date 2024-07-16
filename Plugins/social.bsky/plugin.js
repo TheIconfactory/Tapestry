@@ -119,8 +119,7 @@ function load() {
 					alt
 					thumb
 */				
-			
-			
+						
 			let content = contentForRecord(item.post.record);
 			
 			let annotation = null;
@@ -136,30 +135,44 @@ function load() {
 				annotation = annotationForRepost(item.reason);
 				content = repostContent + content;
 			}
-			
-			const embedContent = contentForEmbed(item.post.embed);
-			if (embedContent != null) {
-				content = content + embedContent;
+
+			let showItem = true;
+			if (includeReposts != "on") {
+				if (repostContent != null) {
+					showItem = false;
+				}
 			}
-			let attachments = attachmentsForEmbed(item.post.embed);
-			
-			// item.post.uri:	at://did:plc:aidmyvxy7lln7l5fzkv4gvxa/app.bsky.feed.post/3jvi6bseuzu2x
-			// web url:			https://staging.bsky.app/profile/nanoraptor.danamania.com/post/3jvi6bseuzu2x 
-			
-			const itemIdentifier = item.post.uri.split("/").pop();
-			const postUri = uriPrefix + "/profile/" + author.handle + "/post/" + itemIdentifier;
-			
-			const post = Item.createWithUriDate(postUri, date);
-			post.body = content;
-			post.author = identity;
-			if (attachments != null) {
-				post.attachments = attachments
-			}
-			if (annotation != null) {
-				post.annotations = [annotation];
+			if (includeReplies != "on") {
+				if (repostContent == null && replyContent != null) { // filter out replies only if they are not reposted
+					showItem = false;
+				}
 			}
 			
-			results.push(post);
+			if (showItem) {
+				const embedContent = contentForEmbed(item.post.embed);
+				if (embedContent != null) {
+					content = content + embedContent;
+				}
+				let attachments = attachmentsForEmbed(item.post.embed);
+				
+				// item.post.uri:	at://did:plc:aidmyvxy7lln7l5fzkv4gvxa/app.bsky.feed.post/3jvi6bseuzu2x
+				// web url:			https://staging.bsky.app/profile/nanoraptor.danamania.com/post/3jvi6bseuzu2x 
+				
+				const itemIdentifier = item.post.uri.split("/").pop();
+				const postUri = uriPrefix + "/profile/" + author.handle + "/post/" + itemIdentifier;
+				
+				const post = Item.createWithUriDate(postUri, date);
+				post.body = content;
+				post.author = identity;
+				if (attachments != null) {
+					post.attachments = attachments
+				}
+				if (annotation != null) {
+					post.annotations = [annotation];
+				}
+				
+				results.push(post);
+			}
 		}
 
 		processResults(results);
