@@ -7,5 +7,6 @@
 	"site": "https://bsky.social",
 	"jwt_authorize": "/xrpc/com.atproto.server.createSession",
 	"jwt_refresh": "/xrpc/com.atproto.server.refreshSession",
+	"provides_attachments": true,
 	"check_interval": 300
 }
