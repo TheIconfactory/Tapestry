@@ -240,8 +240,6 @@ function load() {
 							return false;
 						}
 					})
-					// Tapestry supports at most four images.
-					.slice(0, 4)
 					.map(link => {
 						const attachment = MediaAttachment.createWithUrl(link.href);
 						attachment.text = link.title || link.text;

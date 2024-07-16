@@ -25,7 +25,7 @@ async function loadAsync() {
     creator.avatar = message.user.image_192
     post.creator = creator
     if (message.files) {
-      post.attachments = message.files.slice(0, 4).map(file => {
+      post.attachments = message.files.map(file => {
         const attachment = MediaAttachment.createWithUrl(file.url_private)
         attachment.text = file.title
         attachment.thumbnail = file.thumb_360
