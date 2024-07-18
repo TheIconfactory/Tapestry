@@ -107,11 +107,13 @@ Adds a content warning to the item and blurs any attachments.
 
 The creator of the content. See `Identity` below.
 
-#### attachments: Array of Attachment
+#### attachments: Array of MediaAttachment and LinkAttachment
 
-Media attachments for the content. See below.
+Media and link attachments for the content. See below.
 
-_NOTE:_ Media attachments will be automatically created when inline images are used in the HTML of the `content` property unless the `providesAttachments` configuration parameter is set to true.
+_NOTE:_ Media attachments will be automatically created when inline images are used in the HTML of the `body` property unless the `providesAttachments` configuration parameter is set to true.
+
+_NOTE:_ Link attachments will be automatically created from the first link in the first paragraph of the `body` HTML unless the `providesAttachments` configuration parameter is set to true.
 
 #### shortcodes: Dictionary
 
@@ -251,6 +253,30 @@ An object with `width` and `height` properties. The values are used to optimize 
 #### focalPoint: Object
 
 An object with `x` and `x` properties. The values are used to center media in the timeline. If no values are specified, the center at (0, 0) is assumed.
+
+### LinkAttachment
+
+#### url: String (required)
+
+A string containing the URL for the link on the Internet
+
+#### type: String
+
+#### title: String
+
+#### subtitle: String aka "description"
+
+#### siteName: String
+
+#### authorName: String
+
+#### authorProfile: String
+
+#### image: String
+
+#### blurhash: String
+
+#### aspectSize: Object
 
 
 ## Actions
@@ -498,7 +524,7 @@ Note that old style property lists or JSON property lists are not supported.
 
 ### extractProperties(text) → Object
 
-  * text: `String` is HTML content with `<meta>` properties (such as OpenGraph).
+  * text: `String` is HTML content with `<meta>` properties (such as Open Graph).
   
 Returns an `Object` representation containing the HTML’s properties. These values can be used to generate link previews or enhance the content without scraping the markup.
 
@@ -548,7 +574,7 @@ Optional properties:
 
   * needs\_verification: `Boolean` with true if verification is needed (by calling `verify()`)
   * verify\_variables: 'Boolean' with true if variable changes cause verification. Use this option if changing a variable will affect  loading content (because its a part of a URL, for example).
-  * provides\_attachments: `Boolean` with true if connector generates attachments directly, otherwise post-processing of HTML content will be used to capture images & video.
+  * provides\_attachments: `Boolean` with true if connector generates attachments directly, otherwise post-processing of HTML content will be used to capture images, videos, and link previews.
   * authorization\_header: `String` with a template for the authorization header. If no value is specified, "Bearer \_\_ACCESS\_TOKEN\_\_" will be used. See below for options.
   * check\_interval: `Number` with number of seconds between load requests (currently unimplemented).
 
@@ -939,7 +965,7 @@ A simpler example just checks if there is a subscribe URL for Micro.blog without
 	]
 ```
 
-If there are multiple rules, they must all pass. For example, the first rule below checks if there is an OpenGraph `og:site_name` meta property that contains the word "Mastodon". If it does, there is another check for the `og:url` property where the `site` variable can be extracted:
+If there are multiple rules, they must all pass. For example, the first rule below checks if there is an Open Graph `og:site_name` meta property that contains the word "Mastodon". If it does, there is another check for the `og:url` property where the `site` variable can be extracted:
 
 ```json
 	"html": [
@@ -985,7 +1011,7 @@ The first rule checks that there is an RSS feed while the second rule checks if 
 
 ### How Tapestry uses HTML
 
-Tapestry's `Post` object uses HTML as its native content type. The `content` property will be used in two ways:
+Tapestry's `Item` object uses HTML as its native content type. The `body` property will be used in two ways:
 
   1. To preview the post in the main timeline. A limited number of words (100-200) in the content will be displayed as formatted text. HTML tags can be used to influence this formatting (e.g. `<strong>` making bold text). Any content that won’t fit in the available space will end with "More…".
   2. The post’s detail view will display the full HTML content with styling provided by Tapestry’s current theme (e.g. dark vs. light). This content will be displayed as a web view.
@@ -1006,7 +1032,7 @@ The following tags are supported:
   * `<blockquote>` for quoted text.
   * `<br>` for a newline in the context of a paragraph. Ignored outside a paragraph.
 
-For example, if your plugin provides the following `content`:
+For example, if your plugin provides the following `body`:
 
 ```html
 <p><b>Bold</b>, <i>italic</i>, <b><i>both</i></b>,<br/> and <a href="#">link</a>.</p>

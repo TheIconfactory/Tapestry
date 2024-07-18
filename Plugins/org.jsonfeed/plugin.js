@@ -52,6 +52,11 @@ function load() {
 			const content = item['content_html'];
 			const authors = item["authors"];
 			
+			let linkAttachment = null;
+			if (item["external_url"] != null) {
+				linkAttachment = LinkAttachment.createWithUrl(item["external_url"]);
+			}
+			
 			let identity = null;
 			if (authors != null && authors.length > 0) {
 				const authorName = authors[0].name;
@@ -68,6 +73,9 @@ function load() {
 			resultItem.title = title;
 			resultItem.body = content;
 			resultItem.author = identity;
+			if (linkAttachment != null) {
+				resultItem.attachments = [linkAttachment];
+			}
 			
 			results.push(resultItem);
 		}

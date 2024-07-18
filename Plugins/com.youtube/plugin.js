@@ -113,6 +113,9 @@ function load() {
 				const videoId = entry["yt:videoId"];
 				const embed = `<iframe id="player" type="text/html" width="640" height="390" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`
 				
+				const linkUrl = `https://www.youtube.com/watch?v=${videoId}`;
+				const linkAttachment = LinkAttachment.createWithUrl(linkUrl);
+				
 				const mediaGroup = entry["media:group"];
 			
 				const title = mediaGroup["media:title"];
@@ -136,6 +139,7 @@ function load() {
 				else {
 					resultItem.body = embed;
 				}
+				resultItem.attachments = [linkAttachment];
 			
 				results.push(resultItem);
 			}
