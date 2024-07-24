@@ -88,26 +88,27 @@ function verify() {
 			const baseUrl = jsonObject.rss.channel.link;
 			const displayName = jsonObject.rss.channel.title;
 
-			if (jsonObject.rss.channel.image != null) {
-				icon = jsonObject.rss.channel.image.url;
+// NOTE: In theory, the channel image could be used to get an icon for the feed. But some
+// use non-square images that look bad when squished. For example, the New York Times feed
+// uses a 240x40 image.
+//			if (jsonObject.rss.channel.image != null) {
+//				icon = jsonObject.rss.channel.image.url;
+//				const verification = {
+//					displayName: displayName,
+//					icon: icon,
+//					baseUrl: baseUrl
+//				};
+//				processVerification(verification);
+//			}
+			let feedUrl = baseUrl.split("/").splice(0,3).join("/");
+			lookupIcon(feedUrl).then((icon) => {
 				const verification = {
 					displayName: displayName,
 					icon: icon,
 					baseUrl: baseUrl
 				};
 				processVerification(verification);
-			}
-			else {
-				let feedUrl = baseUrl.split("/").splice(0,3).join("/");
-				lookupIcon(feedUrl).then((icon) => {
-					const verification = {
-						displayName: displayName,
-						icon: icon,
-						baseUrl: baseUrl
-					};
-					processVerification(verification);
-				});
-			}
+			});
 		}
 		else if (jsonObject["rdf:RDF"] != null) {
 			// RSS 1.0
@@ -125,17 +126,15 @@ function verify() {
 // 				};
 // 				processVerification(verification);
 // 			}
-// 			else {
-				let feedUrl = baseUrl.split("/").splice(0,3).join("/");
-				lookupIcon(feedUrl).then((icon) => {
-					const verification = {
-						displayName: displayName,
-						icon: icon,
-						baseUrl: baseUrl
-					};
-					processVerification(verification);
-				});
-//			}
+			let feedUrl = baseUrl.split("/").splice(0,3).join("/");
+			lookupIcon(feedUrl).then((icon) => {
+				const verification = {
+					displayName: displayName,
+					icon: icon,
+					baseUrl: baseUrl
+				};
+				processVerification(verification);
+			});
 		}
 		else {
 			// Unknown
@@ -313,6 +312,8 @@ function load() {
 					resultItem.author = identity;
 				}
 			
+				let attachments = []
+				
 				// extract any media from RSS: https://www.rssboard.org/media-rss
 				if (item["media:group"] != null) {
 					const mediaGroup = item["media:group"];
@@ -320,24 +321,45 @@ function load() {
 					const mediaAttributes = mediaGroup["media:thumbnail$attrs"];
 					let attachment = attachmentForAttributes(mediaAttributes);
 					if (attachment != null) {
-						resultItem.attachments = [attachment];
+						attachments.push(attachment);
 					}
 				}
 				else if (item["media:thumbnail$attrs"] != null) {
 					const mediaAttributes = item["media:thumbnail$attrs"];
 					let attachment = attachmentForAttributes(mediaAttributes);
 					if (attachment != null) {
-						resultItem.attachments = [attachment];
+						attachments.push(attachment);
 					}
 				}
 				else if (item["media:content$attrs"] != null) {
 					const mediaAttributes = item["media:content$attrs"];
 					let attachment = attachmentForAttributes(mediaAttributes);
 					if (attachment != null) {
-						resultItem.attachments = [attachment];
+						attachments.push(attachment);
 					}
 				}
-					
+				else if (item["enclosure$attrs"] != null) {
+					let enclosure = item["enclosure$attrs"];
+					if (enclosure.url != null) {
+						let attachment = MediaAttachment.createWithUrl(enclosure.url);
+						attachments.push(attachment);
+					}
+				}
+				
+				// add link attachment for link that isn't on this site (e.g. a link blog)
+				{
+					let linkPrefix = url.split("/").splice(0,3).join("/");
+					let feedPrefix = feedUrl.split("/").splice(0,3).join("/");
+					if (linkPrefix != feedPrefix) {
+						let attachment = LinkAttachment.createWithUrl(item["link"]);
+						attachments.push(attachment);
+					}
+				}
+				
+				if (attachments.length > 0) {
+					resultItem.attachments = attachments;
+				}
+				
 				results.push(resultItem);
 			}
 
