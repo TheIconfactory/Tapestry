@@ -1,25 +1,29 @@
 {
 	"sites": [
 		{
-			"value": "https://feeds.kottke.org/main",
-			"title": "Kottke.org"
+			"value": "https://www.apple.com/newsroom/rss-feed.rss",
+			"title": "Apple Newsroom"
 		},
 		{
 			"value": "https://www.thisiscolossal.com/feed/",
 			"title": "Colossal"
 		},
 		{
-			"value": "https://mjtsai.com/blog/feed/",
-			"title": "Michael Tsai",
-		},
-		{
 			"value": "https://blog.iconfactory.com/feed/",
 			"title": "Iconfactory",
 		},
 		{
-			"value": "https://www.apple.com/newsroom/rss-feed.rss",
-			"title": "Apple Newsroom"
-		}
+			"value": "https://feeds.kottke.org/main",
+			"title": "Kottke.org"
+		},
+		{
+			"value": "https://mjtsai.com/blog/feed/",
+			"title": "Michael Tsai",
+		},
+		{
+			"value": "https://www.smithsonianmag.com/rss/latest_articles/",
+			"title": "Smithsonian Magazine"
+		}		
 	]
 }
 
