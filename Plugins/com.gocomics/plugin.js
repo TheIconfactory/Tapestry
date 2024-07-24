@@ -76,6 +76,8 @@ function load() {
 	
 	const timestamp = String(year) + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
 	
+	console.log(`timestamp = ${timestamp}`);
+	
 	if (timestamp == lastTimestamp) {
 		return;
 	}
@@ -100,6 +102,7 @@ function load() {
 				attachment.aspectSize = { width: parseInt(width), height: parseInt(height) };
 			}
 			attachment.mimeType = "image";
+			console.log(`image = ${image}`);
 						
 			const publishedDate = new Date(publishedTime + "T00:00:00");
 			const content = `<p>Published on ${publishedDate.toLocaleDateString()} at <a href="${url}">${siteName}</a></p>`;

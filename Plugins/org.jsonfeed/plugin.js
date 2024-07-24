@@ -40,7 +40,8 @@ function load() {
 	sendRequest(site)
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
-
+		//console.log(JSON.stringify(jsonObject, null, "  "));
+		
 		const feedUrl = jsonObject["home_page_url"];
 		
 		const items = jsonObject["items"];

@@ -25,6 +25,7 @@ const uriPrefix = "https://bsky.app";
 function load() {
 	sendRequest(site + "/xrpc/app.bsky.feed.getTimeline?algorithm=reverse-chronological&limit=100")
 	.then((text) => {
+		//console.log(text);
 		const jsonObject = JSON.parse(text);
 
 		const items = jsonObject.feed

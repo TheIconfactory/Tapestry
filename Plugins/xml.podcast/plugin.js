@@ -49,7 +49,6 @@ function verify() {
 }
 
 function load() {	
-	console.log("load")
 	sendRequest(site)
 	.then((xml) => {
 		let jsonObject = xmlParse(xml);

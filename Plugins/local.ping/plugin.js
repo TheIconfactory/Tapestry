@@ -41,10 +41,11 @@ function verify() {
 }
 
 function load() {
+	console.log(`site = ${site}`);
 	sendRequest(site, "HEAD")
 	.then((dictionary) => {
 		const jsonObject = JSON.parse(dictionary);
-
+		
 		const responseStatus = jsonObject["status"];
 		if (responseStatus != 200) {
 			let date = new Date();
@@ -53,6 +54,9 @@ function load() {
 			const resultItem = Item.createWithUriDate(uri, date);
 			resultItem.body = content;
 			processResults([resultItem]);
+		}
+		else {
+			console.log(JSON.stringify(jsonObject, null, "    "));
 		}
 	})
 	.catch((requestError) => {
