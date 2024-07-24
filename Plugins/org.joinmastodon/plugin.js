@@ -44,10 +44,9 @@ function postForItem(item, date = null) {
 	post.body = content;
 	post.author = identity;
 
-	let attachments = null;
+	let attachments = [];
 	const mediaAttachments = item["media_attachments"];
 	if (mediaAttachments != null && mediaAttachments.length > 0) {
-		attachments = []
 		for (const mediaAttachment of mediaAttachments) {
 			const media = mediaAttachment["url"]
 			const attachment = MediaAttachment.createWithUrl(media);
@@ -100,8 +99,40 @@ function postForItem(item, date = null) {
 			attachments.push(attachment);
 		}
 	}
-	post.attachments = attachments;
-
+	const card = item["card"];
+	if (card != null && card.url != null) {
+		let attachment = LinkAttachment.createWithUrl(card.url);
+		if (card.type != null && card.type.length > 0) {
+			attachment.type = card.type;
+		}
+		if (card.title != null && card.title.length > 0) {
+			attachment.title = card.title;
+		}
+		if (card.description != null && card.description.length > 0) {
+			attachment.subtitle = card.description;
+		}
+		if (card.author_name != null && card.author_name.length > 0) {
+			attachment.authorName = card.author_name;
+		}
+		if (card.author_url != null && card.author_url.length > 0) {
+			attachment.authorProfile = card.author_url;
+		}
+		if (card.image != null && card.image.length > 0) {
+			attachment.image = card.image;
+		}
+		if (card.blurhash != null && card.blurhash.length > 0) {
+			attachment.blurhash = card.blurhash;
+		}
+		if (card.width != null && card.height != null) {
+			attachment.aspectSize = {width : card.width, height: card.height};
+		}
+		attachments.push(attachment);
+	}
+	
+	if (attachments.length > 0) {
+		post.attachments = attachments;
+	}
+	
 	return post;
 }
 
@@ -109,6 +140,7 @@ function load() {
 	if (includeHome == "on") {
 		sendRequest(site + "/api/v1/timelines/home?limit=40", "GET")
 		.then((text) => {
+			//console.log(text);
 			const jsonObject = JSON.parse(text);
 			let results = [];
 			for (const item of jsonObject) {
