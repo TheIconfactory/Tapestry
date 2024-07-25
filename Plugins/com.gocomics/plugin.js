@@ -1,38 +1,9 @@
 
 // com.gocomics
 
-function identify() {
-	if (comicId != null && comicId.length > 0) {
-		const baseUrl = "https://www.gocomics.com";
-		const url = baseUrl + "/" + comicId;
-		sendRequest(url, "HEAD")
-		.then((dictionary) => {
-			const jsonObject = JSON.parse(dictionary);
-			
-			const responseUrl = jsonObject["url"];
-			
-			// NOTE: If the responseUrl is the same as the original url, there was no redirect
-			// and the comicId is valid.
-			if (responseUrl == url) {
-				setIdentifier(comicId);
-			}
-			else {
-				setIdentifier(null);
-			}
-		})
-		.catch((requestError) => {
-			setIdentifier(null);
-		});
-	}
-	else {
-		setIdentifier(null);
-	}
-}
-
-
 /*
- NOTE: The regular expression below will match the meta properties in the HTML, which are then put into a
- dictionary as key/value pairs.
+ NOTE: This plugin relies on the meta properties in the HTML. They are obtained by the extractProperties() function
+ supplied by Tapestry.
  
  This is a sample of what the properties look like:
  
@@ -52,27 +23,51 @@ function identify() {
  <meta property="article:tag" content="" />
  */
 
-const metaRegex = /<meta\s+property=\"(.*)\"\s+content=\"(.*)\".*>/g
-
-function metaProperties(html) {
-	var properties = {};
-	
-	const matches = html.matchAll(metaRegex);
-	for (const match of matches) {
-		const key = match[1];
-		const value = match[2];
-		properties[key] = value;
-	}
-
-	return properties;
-}
-
+// NOTE: Regular expressions can be used to extract information from the HTML, too.
 const avatarRegex = /<div class="gc-avatar gc-avatar--creator xs"><img[^]*?src="(.*)"/
+
+function verify() {
+	let date = new Date();
+	date.setDate(date.getDate() - 1); // https://stackoverflow.com/questions/5511323/calculate-the-date-yesterday-in-javascript
+	
+	const year = date.getFullYear();
+	const month = date.getMonth() + 1;
+	const day = date.getDate();
+
+	const timestamp = String(year) + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
+
+	const url = site + "/" + comicId + "/" + timestamp;
+	sendRequest(url)
+	.then((html) => {
+		const properties = extractProperties(html);
+	
+		const title = properties["og:title"];
+		if (title != null) {
+			const displayName = title.replace(/ by.*$/, "");
+			const match = html.match(avatarRegex);
+			let icon = match[1];
+			if (icon == null) {
+				icon = "https://assets.gocomics.com/assets/favicons/favicon-96x96-92f1ac367fd0f34bc17956ef33d79433ddbec62144ee17b40add7a6a2ae6e61a.png";
+			}
+
+			const verifcation = {
+				displayName: displayName,
+				icon: icon
+			};
+			processVerification(verifcation);
+		}
+		else {
+			processError(Error("Invalid Comic ID"));
+		}
+	})
+	.catch((requestError) => {
+		processError(requestError);
+	});
+}
 
 var lastTimestamp = null
 
 function load() {
-	const baseUrl = "https://www.gocomics.com";
 	const date = new Date();
 	
 	const year = date.getFullYear();
@@ -81,43 +76,48 @@ function load() {
 	
 	const timestamp = String(year) + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
 	
+	console.log(`timestamp = ${timestamp}`);
+	
 	if (timestamp == lastTimestamp) {
 		return;
 	}
 	
-	const url = baseUrl + "/" + comicId + "/" + timestamp;
+	const url = site + "/" + comicId + "/" + timestamp;
 	sendRequest(url)
 	.then((html) => {
-		const properties = metaProperties(html);
+		const properties = extractProperties(html);
 		
 		const image = properties["og:image"];
+		const width = properties["og:image:width"];
+		const height = properties["og:image:height"];
 		const title = properties["og:title"];
-		const url = properties["og:url"];
 		const siteName = properties["og:site_name"];
 		const author = properties["article:author"];
+		const publishedTime = properties["article:published_time"];
 		
 		if (image != null) {
-			const media = image;
-			const attachment = Attachment.createWithMedia(media);
+			const attachment = MediaAttachment.createWithUrl(image);
 			attachment.text = title;
+			if (width != null && height != null) {
+				attachment.aspectSize = { width: parseInt(width), height: parseInt(height) };
+			}
+			attachment.mimeType = "image";
+			console.log(`image = ${image}`);
+						
+			const publishedDate = new Date(publishedTime + "T00:00:00");
+			const content = `<p>Published on ${publishedDate.toLocaleDateString()} at <a href="${url}">${siteName}</a></p>`;
 			
-			const text = title.replace(/\| GoComics.com$/, "at <a href=\"" + url + "\">" + siteName + "</a>");
-			
-			const content = "<p>" + text + "</p>";
-			const post = Post.createWithUriDateContent(url, date, content);
-			post.attachments = [attachment];
+			const item = Item.createWithUriDate(url, publishedDate);
+			item.body = content;
+			item.attachments = [attachment];
 
-			const match = html.match(avatarRegex);
-			const avatar = match[1];
-
-			const creatorUrl = baseUrl + "/" + comicId;
-			const creatorName = author;
-			const creator = Creator.createWithUriName(creatorUrl, creatorName);
-			creator.avatar = avatar;
+			if (author != null) {
+				let identity = Identity.createWithName(author);
+				identity.uri = site + "/" + comicId;
+				item.author = identity;
+			}
 			
-			post.creator = creator;
-			
-			processResults([post]);
+			processResults([item]);
 			
 			lastTimestamp = timestamp;
 		}

@@ -1,0 +1,1 @@
+This connector checks a website and posts a status message to your timeline if there is a problem loading the site.

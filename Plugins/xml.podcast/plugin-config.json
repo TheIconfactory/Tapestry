@@ -1,6 +1,11 @@
 {
 	"id": "xml.podcast",
 	"display_name": "Podcast Feed",
-	"needsVerification": true,
+	"service_name": "Podcast",
+	"icon": "https://usetapestry.com/icons/podcast.png",
+	"site_prompt": "Podcast URL",
+	"site_placeholder": "https://foo.com/feed",
+	"needs_verification": true,
+	"provides_attachments": true,
 	"check_interval": 300
 }

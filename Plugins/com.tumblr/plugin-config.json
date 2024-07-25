@@ -1,6 +1,10 @@
 {
 	"id": "com.tumblr",
 	"display_name": "Tumblr",
+	"service_name": "Tumblr",
+	"icon": "https://assets.tumblr.com/pop/manifest/favicon-0e3d244a.ico",
+	"item_style": "post",
+	"site": "https://api.tumblr.com",
 	"oauth_authorize": "https://www.tumblr.com/oauth2/authorize",
 	"oauth_token": "https://api.tumblr.com/v2/oauth2/token",
 	"oauth_type": "code",

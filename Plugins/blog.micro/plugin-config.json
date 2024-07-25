@@ -1,6 +1,10 @@
 {
 	"id": "blog.micro",
 	"display_name": "Micro.blog",
+	"service_name": "Micro.blog",
+	"icon": "https://cdn.micro.blog/images/icons/favicon_192.png",
+	"item_style": "post",
+	"site": "https://micro.blog",
 	"oauth_authorize": "/indieauth/auth",
 	"oauth_token": "/indieauth/token",
 	"oauth_type": "code",

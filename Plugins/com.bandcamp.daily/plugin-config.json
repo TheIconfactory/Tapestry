@@ -1,6 +1,8 @@
 {
   "id": "com.bandcamp.daily",
   "display_name": "Bandcamp Daily",
-  "providesAttachments": true,
+  "icon": "https://s4.bcbits.com/img/favicon/apple-touch-icon.png",
+  "site": "https://daily.bandcamp.com",
+  "provides_attachments": true,
   "check_interval": 300
 }

@@ -1,0 +1,62 @@
+{
+	"inputs": [
+		{
+			"name": "minimum_requirement"
+		},
+		{
+			"name": "title",
+			"type": "text",
+			"prompt": "A Title",
+			"placeholder": "Enter title"
+		},
+		{
+			"name": "value",
+			"type": "text",
+			"prompt": "Default Value",
+			"value": "1234",
+			"placeholder": "Enter value"
+		},
+		{
+			"name": "reticulate_splines",
+			"type": "switch",
+			"prompt": "Reticulate Splines",
+			"value": "on",
+			"placeholder": "When enabled, splines will be reticulated."
+		},
+		{
+			"name": "turbo",
+			"type": "switch",
+			"prompt": "TURBO",
+			"placeholder": "No default value, will be 'off'."
+		},
+		{
+			"name": "dessert_choice",
+			"type": "choices",
+			"prompt": "Dessert Choice",
+			"value": "Banana Cream Pie",
+			"choices": "Apple Pie,   Banana Cream Pie,Chestnut Pie, Doomsday Cake, Everything Bagel",
+			"placeholder": "Choose your dessert."
+		},
+		{
+			"name": "default_choice",
+			"type": "choices",
+			"prompt": "Default Choice",
+			"choices": "One For The Money\n,   Two For the Show   ,\n\nThree to Get Ready, Four Cat Go!",
+			"placeholder": "Choose your number."
+		},
+		{
+			"name": "bad_choices",
+			"type": "choices",
+			"prompt": "Bad Choices",
+			"choices": "A",
+			"placeholder": "Nothing to choose."
+		},
+		{
+			"name": "invalid",
+			"type": "whoops",
+			"prompt": "A Misteak!",
+			"placeholder": "Good luck."
+		}
+
+	]
+}

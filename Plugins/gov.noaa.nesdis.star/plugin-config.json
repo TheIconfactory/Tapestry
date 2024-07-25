@@ -1,5 +1,9 @@
 {
 	"id": "gov.noaa.nesdis.star",
 	"display_name": "NOAA Satellite",
+	"icon": "https://usetapestry.com/icons/noaa.png",
+	"site": "https://www.star.nesdis.noaa.gov",
+	"needs_verification": true,
+	"verify_variables": true,
 	"check_interval": 300
 }

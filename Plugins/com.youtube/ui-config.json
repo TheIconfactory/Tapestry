@@ -1,11 +1,4 @@
 {
 	"inputs": [
-		{
-			"name": "site",
-			"type": "url",
-			"prompt": "Channel URL",
-			"validate_as": "url",
-			"placeholder": "https://youtube.com/feeds/video.xml"
-		}
 	]
 }

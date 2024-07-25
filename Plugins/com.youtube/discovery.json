@@ -1,0 +1,23 @@
+{
+ 	"sites": [
+ 		"youtube.",
+ 		"youtu.be",
+ 		"youtubekids.com"
+ 	],
+	"html": [
+		{
+			"element": "link",
+			"check": "type",
+			"match": "application/rss+xml",
+			"use": "href",
+			"variable": "site"
+		}
+	],
+	"raw": [
+		{
+			"match": "//channel/([^/]+)/videos/",
+			"replacement": "https://www.youtube.com/feeds/videos.xml?channel_id=$$",
+			"variable": "site"
+		}
+	]
+}

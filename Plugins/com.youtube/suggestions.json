@@ -1,0 +1,16 @@
+{
+	"sites": [
+		{
+			"value": "https://www.youtube.com/feeds/videos.xml?channel_id=UCBJycsmduvYEL83R_U4JriQ",
+			"title": "MKBHD"
+		},
+		{
+			"value": "https://www.youtube.com/feeds/videos.xml?channel_id=UCy0tKL1T7wFoYcxCe0xjN6Q",
+			"title": "Technology Connections"
+		},
+		{
+			"value": "https://www.youtube.com/feeds/videos.xml?channel_id=UCI208kAmpJNUrLrBz77ZTAA",
+			"title": "BigZaphod"
+		}
+	]
+}

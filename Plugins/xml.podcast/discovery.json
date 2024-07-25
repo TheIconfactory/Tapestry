@@ -1,0 +1,16 @@
+{
+	"html": [
+		{
+			"element": "link",
+			"check": "type",
+			"match": "application/rss+xml",
+			"use": "href",
+			"variable": "site"
+		},
+		{
+			"element": "a",
+			"check": "href",
+			"match": "///(?:podcasts.apple.com|apple.co)//"
+		}
+	]
+}

@@ -1,11 +1,14 @@
 {
 	"inputs": [
 		{
-			"name": "site",
-			"type": "url",
-			"prompt": "Site",
-			"validate_as": "url",
-			"value": "https://bsky.social"
+			"name": "includeReposts",
+			"type": "switch",
+			"prompt": "Include Reposts"
+		},
+		{
+			"name": "includeReplies",
+			"type": "switch",
+			"prompt": "Include Replies"
 		}
 	]
 }

@@ -1,11 +1,10 @@
 {
 	"inputs": [
 		{
-			"name": "site",
-			"type": "url",
-			"prompt": "API",
-			"validate_as": "url",
-			"value": "https://www.reddit.com"
+			"name": "subreddit",
+			"type": "text",
+			"prompt": "Subreddit",
+			"placeholder": "weirdwheels"
 		}
 	]
 }

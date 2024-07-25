@@ -1,0 +1,24 @@
+{
+	"variables": [
+		{
+			"name": "dessert_choice",
+			"value": "Apple Pie",
+			"title": "American as..."
+		},
+		{
+			"name": "reticulate_splines",
+			"value": "false",
+			"title": "ECO Mode"
+		},
+		{
+			"name": "title",
+			"value": "Now is the time for all good men to come to the aid of their party",
+			"title": "Long Title"
+		},
+		{
+			"name": "title",
+			"value": "Hello",
+			"title": "Short"
+		}
+	]
+}

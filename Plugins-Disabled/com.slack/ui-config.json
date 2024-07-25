@@ -1,0 +1,10 @@
+{
+  "inputs": [
+	  {
+		"name": "channel",
+		"type": "text",
+		"prompt": "Channel",
+		"placeholder": "lounge"
+	  }
+  ]
+}

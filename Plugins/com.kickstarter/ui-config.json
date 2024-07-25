@@ -4,15 +4,13 @@
       "name": "creator_username",
       "type": "text",
       "prompt": "Creator",
-      "value": "iconfactory",
-      "placeholder": "username"
+      "placeholder": "iconfactory"
     },
     {
       "name": "project_slug",
       "type": "text",
       "prompt": "Project",
-      "value": "project-tapestry",
-      "placeholder": "slug"
+      "placeholder": "project-tapestry"
     }
   ]
 }

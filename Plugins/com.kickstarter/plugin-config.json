@@ -1,5 +1,9 @@
 {
   "id": "com.kickstarter",
   "display_name": "Kickstarter",
+  "icon": "https://a.kickstarter.com/assets/touch-icon-192x192-710ace6840055401ec231c1d86ce7312c56bb510fad8b775229b0ce73d0054c5.png",
+  "site": "https://kickstarter.com",
+  "needs_verification": true,
+  "verify_variables": true,
   "check_interval": 86400
 }

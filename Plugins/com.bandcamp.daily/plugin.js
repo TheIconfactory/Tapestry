@@ -7,9 +7,8 @@ async function loadAsync() {
   const { item: items, link } = xmlParse(text).rss.channel;
 
   return items.map((item) => {
-    const creator = Creator.createWithUriName(link, item["dc:creator"]);
-
-    creator.avatar = "https://s4.bcbits.com/img/favicon/apple-touch-icon.png";
+    const identity = Identity.createWithName(item["dc:creator"]);
+    identity.uri = link;
 
     let paragraphs = item.description.match(/<p>.*?<\/p>/g);
 
@@ -17,18 +16,17 @@ async function loadAsync() {
 
     paragraphs = (media ? paragraphs.slice(1) : paragraphs);
 
-    paragraphs.unshift(`<p><b>${item.title}</b></p>`);
-
-    const post = Post.createWithUriDateContent(item.link, new Date(item["dc:date"]), paragraphs.join(''));
-
+    const resultItem = Item.createWithUriDate(item.link, new Date(item["dc:date"]));
+    resultItem.title = item.title;
+	resultItem.body = paragraphs.join('');
     if (media) {
-      const attachment = Attachment.createWithMedia(media);
+      const attachment = MediaAttachment.createWithUrl(media);
 
-      post.attachments = [attachment];
+      resultItem.attachments = [attachment];
     }
 
-    post.creator = creator;
+    resultItem.author = identity;
 
-    return post;
+    return resultItem;
   });
 }
