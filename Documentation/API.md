@@ -551,7 +551,7 @@ The contents of each of these files is discussed below.
 Required properties:
 
   * id: `String` with reverse domain name for uniqueness (e.g. org.joinmastodon or blog.micro)
-  * displayName: `String` with name that will be displayed in user interface
+  * display_name: `String` with name that will be displayed in user interface
 
 Recommended properties:
 
