@@ -3,15 +3,35 @@
 
 ## Introduction
 
-(Intro about Mystic 9-Ball)
+Tapestry ...
+
+### Connectors
+
+Tapestry is built around the concept of connectors. A connector is a collection of configuration files and code that allow a feed to gather data. Connectors are created by developers; feeds are created by users.
+
+A familiar example is an RSS connector: it processes XML text with JavaScript to generate item objects for a blog feed. Tapestry then takes these objects and displays them chronologically in the user’s timeline.
+
+Connectors are simple by design: everything is just a text files that you can edit with your favorite editor. As you’re developing these connectors, a tool called [Tapestry Loom](https://testflight.apple.com/join/SMcNQbCs) will help you build and test your project.
+
+Think of this setup like creating a web page: you edit HTML and refresh your browser to see the changes. In this scenario, Tapestry Loom is the browser.
+
+### The Mystic 9-Ball
+
+Think how much easier life would be if we could predict the future. Thanks to the [Mystic 9-Ball website](https://usetapestry.com/samples/mystic9ball), now we can!
+
+These predictions help us plan our future, so wouldn’t it be great if we could put them in our Tapestry timeline?
+
+Probably not, but it _would_ be a helpful to show you how to build your first connector for Tapestry. At the end of this tutorial, you'll be able to see the Mystic 9-Ball’s prognostications  in your universal timeline.
+
+Let's get started!
 
 ## Your First Connector
 
-Create a folder on your Mac named "Connectors".
+Start by creating a folder on your Mac named "Connectors". It doesn't matter where that folder is, but you may want to make it a part of a version control repository so it's easy to track changes.
 
-In that folder, create another folder called "com.usetapestry.mystic9ball"
+In that folder, create another folder called "com.usetapestry.mystic9ball". This is the folder where we will be collecting the text files that Tapestry uses.
 
-(Explain RDNS)
+Tapestry uses [reverse domain names](https://en.wikipedia.org/wiki/Reverse_domain_name_notation) to identify connectors. Every connector needs a unique identifier, and this is the simplest way to accomplish that.
 
 In the "com.usetapestry.mystic9ball" folder, create the two files that are required for a connector:
 
@@ -101,11 +121,11 @@ So what just happened here? Let's go through it line-by-line.
 
 An item in the timeline _must_ have two things: a URI and a date.
 
-The URI is a [unique identifier](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier) that lets Tapestry manage all the items in your timeline. The URI will usually be a URL, which is a unique place on the Internet. Tapestry presents items chronologically using the date.
+The URI is a [unique identifier](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier) that lets Tapestry manage all the items in your timeline. The URI will usually be a URL, which is a unique place on the Internet. The date is required so that Tapestry can present the items chronologically.
 
 To start, we'll use the unique address of the website that was defined in `plugin-config.json`. We get that information using a `site` variable that Tapestry provides to every script. Note that in some cases, such as with an RSS feed or Mastodon account, the `site` variable is specified by the end user. But no matter where it comes from, your code is guaranteed to get a string that contains a valid URL.
 
-The `new Date()` code provides the current date and time.
+The `new Date()` provides the current date and time.
 
 Together, a JavaScript `Item` object is created using `Item.createWithUriDate(uri, date)`. Once we have that object we can add content by setting its `body` property. In this example, the content is plain text, but it can also be HTML (more about that in the next section).
 
