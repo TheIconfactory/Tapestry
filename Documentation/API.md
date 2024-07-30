@@ -709,6 +709,7 @@ A JavaScript file that implements the Actions specified above using the Function
 
 The following `plugin.js` script is used in a connector that retrieves all recent earthquakes from the U.S. Geological Survey (USGS). This is all that's needed to create posts for the universal timeline:
 
+❗️ Update this code: no more Creator or Post
 ```javascript
 function load() {
 	const endpoint = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson";
