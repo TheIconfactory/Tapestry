@@ -226,7 +226,7 @@ An HLS playlist (.m3u8) should be specified explicitly as "video" or "audio" sin
 
 #### url: String (required)
 
-A string containing the URL for the media on the Internet
+A string containing the URL for the media on the Internet.
 
 #### thumbnail: String
 
@@ -258,25 +258,43 @@ An object with `x` and `x` properties. The values are used to center media in th
 
 #### url: String (required)
 
-A string containing the URL for the link on the Internet
+A string containing the URL for the link on the Internet.
 
 #### type: String
 
+The type of link, typically an Open Graph [og:type](https://ogp.me/#types).
+
 #### title: String
+
+The title for the link, typically an Open Graph [og:title](https://ogp.me/#metadata).
 
 #### subtitle: String aka "description"
 
+The subtitle for the link, typically an Open Graph [og:description](https://ogp.me/#optional).
+
 #### siteName: String
+
+The site name for the link, typically an Open Graph [og:site\_name](https://ogp.me/#optional).
 
 #### authorName: String
 
+The author's name, typically as [HTML author metadata](https://www.w3.org/TR/2011/WD-html5-author-20110809/the-meta-element.html#meta-author).
+
 #### authorProfile: String
+
+A URL for the author, typically from [fediverse:creator](https://blog.joinmastodon.org/2024/07/highlighting-journalism-on-mastodon/).
 
 #### image: String
 
+An image for the link, typically the Open Graph [og:image](https://ogp.me/#metadata).
+
 #### blurhash: String
 
+A string that provides a placeholder image.
+
 #### aspectSize: Object
+
+An object with `width` and `height` properties, typically from Open Graph [og:image:width](https://ogp.me/#structured) and [og:image:height](https://ogp.me/#structured).
 
 
 ## Actions
@@ -709,18 +727,16 @@ A JavaScript file that implements the Actions specified above using the Function
 
 The following `plugin.js` script is used in a connector that retrieves all recent earthquakes from the U.S. Geological Survey (USGS). This is all that's needed to create posts for the universal timeline:
 
-❗️ Update this code: no more Creator or Post
 ```javascript
 function load() {
-	const endpoint = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson";
+
+	let summaryName = "4.5_day";
+	
+	const endpoint = `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/${summaryName}.geojson`;
+
 	sendRequest(endpoint)
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
-
-		const creatorUrl = "https://earthquake.usgs.gov/";
-		const creatorName = "USGS – Latest Earthquakes";
-		let creator = Creator.createWithUriName(creatorUrl, creatorName);
-		creator.avatar = "https://earthquake.usgs.gov/earthquakes/map/assets/pwa/icon-192x192.png";
 
 		const features = jsonObject["features"];
 		
@@ -735,14 +751,14 @@ function load() {
 			const coordinates = geometry["coordinates"];
 			const latitude = coordinates[1];
 			const longitude = coordinates[0];
-			const mapsUrl = "https://maps.apple.com/?ll=" + latitude + "," + longitude + "&spn=15.0";
+			const mapsUrl = "https://maps.apple.com/?ll=" + latitude + "," + longitude + "&z=8";
 			
-			const content = "<p>" + text + " <a href=\"" + mapsUrl + "\">Open Map</a><p>"
+			const content = "<p>" + text + " <a href=\"" + mapsUrl + "\">Open Map</a></p>"
 			
-			let post = Post.createWithUriDateContent(url, date, content);
-			post.creator = creator;
+			let resultItem = Item.createWithUriDate(url, date);
+			resultItem.body = content;
 			
-			results.push(post);
+			results.push(resultItem);
 		}
 		processResults(results);
 	})
@@ -1051,7 +1067,7 @@ As with all HTML, unclosed tags will provide unpredictable results. Close your t
 
 Some attachments are easier to deal with as inline content. For example, a blog feed may contain several `<img>` tags that you want to see as images in the timeline.
 
-As a part of the step to create the timeline preview, images can automatically be extracted from the HTML content and assigned as `Attachment` objects.
+As a part of the step to create the timeline preview, images can automatically be extracted from the HTML content and assigned as `MediaAttachment` objects.
 
 For example, if your plugin provides this content:
 ```
@@ -1065,5 +1081,7 @@ Tapestry will create an attachment for this image:
 
 If the `<img>` tag includes an `alt` attribute, that text will be included in the attachment and used to improve accessibility in the timeline.
 
-This behavior can be disabled with `"providesAttachments": true` in `plugin-config.json`. The Mastodon plug-in is an example of where this is used because the API provides media attachments directly.
+A `LinkAttachment` can also be created automatically. Tapestry will check the first link in the first paragraph and show the preview card in the timeline if the link contains Open Graph information.
+
+This behavior can be disabled with `"providesAttachments": true` in `plugin-config.json`. The Mastodon plug-in is an example of where this is used because its API provides attachments directly in the payload.
 
