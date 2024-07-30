@@ -32,13 +32,13 @@ With that, your connector [appears](images/GettingStarted_1.png) in Tapestry Loo
 
 ![Tapestry Loom with com.usetapestry.mystic9ball connector being displayed](images/1-UpAndRunning.png)
 
-An important first step - your work is now showing up in the Connector (left-most) panel of the app!
+An important first step - your work is now showing up in the _Connector_ (left-most) panel of the app!
 
 ## What Are You Connecting To?
 
-A connector that doens't connect to anything isn’t very useful. Let’s fix that!
+A connector that doesn't connect to anything isn’t very useful. Let’s fix that!
 
-In Tapestry, a `site` specifies a location on the Internet where data can be collected. In this case, we're connecting to the Magic 9-Ball, so we’ll set it to `https://usetapestry.com/samples/mystic9ball` and have this in our `plugin-config.json`:
+In Tapestry, the `site` specifies a location on the Internet where data can be collected. In this case, we're connecting to the Magic 9-Ball, so we’ll set it to `https://usetapestry.com/samples/mystic9ball` and have this in our `plugin-config.json`:
 
 ```json
 {
@@ -48,7 +48,7 @@ In Tapestry, a `site` specifies a location on the Internet where data can be col
 }
 ```
 
-We now need to let Loom know about the changes we've made. Click on the **↻** button in the lower-left corner of the window and you'll see `site` show up in the Connector panel. The next panel to the right, called the Feed panel, also has some information, too.
+We now need to let Loom know about the changes we've made. Click on the **↻** button in the lower-left corner of the window and you'll see `site` show up in the _Connector_ panel. The next panel to the right, called the _Feed_ panel, also has some information.
 
 Let’s fill in some of the other configuration values to get a better icon:
 
@@ -61,21 +61,21 @@ Let’s fill in some of the other configuration values to get a better icon:
 }
 ```
 
-We’ll need to refresh again, but this time try using the keyboard with Cmd-R.
+We’ll need to refresh again because of these changes, but try using the **Cmd-R** keyboard shortcut this time.
 
-Our connector is now ready for the next step — feeding information to the Tapestry app.
+Our connector is now ready for the next step — collecting information to the Tapestry app.
 
 ## Feed Me!
 
 There isn’t anything else needed to make a feed with the Mystic 9-Ball connector, so just press **Save Feed** to create a test feed.
 
-Our focus now shifts to the third panel where results are show. The table is currently empty, but will fill in with items loaded by your connector.
+Our focus now shifts to the third panel where _Results_ are show. The table is currently empty, but will fill up with items loaded by your connector.
 
-Press the **Load** button and Tapestry will try to load items using your connector. You'll notice that a red dot appears next to the document icon at the bottom of the panel. When you click on this button, you'll see all the messages logged while running `plugin.js`.
+Press the **Load** button and Tapestry will try to load items using your connector. You'll notice that a red dot appears next to the document icon at the bottom of the _Results_ panel. When you click on this button, you'll see all the messages logged while running `plugin.js`.
 
 But what does `EXCEPTION: ReferenceError: Can't find variable: load` mean?
 
-This is caused by Tapestry trying to call a [load](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#load) function in the JavaScript code and failing. So let's update or `plugin.js` code to load data!
+This is caused by Tapestry trying to call a [load](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#load) function in your JavaScript code and failing. So let's update or `plugin.js` code to load some data!
 
 Add this to your `plugin.js`:
 
@@ -93,7 +93,7 @@ function load() {
 }
 ```
 
-You just changed the JavaScript code, so you need to refresh in the Connector panel so the code gets loaded (use the **↻** button or Cmd-R). When you press the **Load** button, the JavaScript `load()` function is called and you'll see your first item in the Results panel. And when you click on that result, you'll see it in the right-most Preview panel. Woo-hoo! 
+You just changed the JavaScript code, so you need to refresh the connector and load the changes (use the **↻** button or **Cmd-R**). When you press the **Load** button, the JavaScript `load()` function is called and you'll see your first item in the _Results_ panel. And when you click on that result, you'll see it in the right-most _Preview_ panel. Woo-hoo! 
  
 ![The com.usetapestry.mystic9ball connector displaying result and a preview](images/2-HelloWorld.png)
 
@@ -109,11 +109,11 @@ The `new Date()` code provides the current date and time.
 
 Together, a JavaScript `Item` object is created using `Item.createWithUriDate(uri, date)`. Once we have that object we can add content by setting its `body` property. In this example, the content is plain text, but it can also be HTML (more about that in the next section).
 
-The `Item` has [other properties](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#item), such as a `title`, `contentWarning`, and `attachments`.
+The `Item` has [other properties](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#item), such as a `title`, `contentWarning`, and `attachments` which we'll cover later.
 
 Once the item has been created and all its properties set, it is returned as an array via `processResults`. This is the point where all the information that your connector has collected gets processed and stored by Tapestry.
 
-Tapestry Loom uses the same processing pipeline that is used in the app, so that makes it easy for you to test and preview any changes that you make to your connector. The text editor save, Cmd-R reload, and **Load** button press is a sequence you'll repeat frequently.
+Tapestry Loom uses the same processing pipeline that is used in the app, so that makes it easy for you to test and preview any changes that you make to your connector. Saving in your text editor, followed by a **Cmd-R** reload and **Load** button press is a sequence you'll repeat frequently.
 
 ## But Is It Useful?
 
@@ -145,13 +145,13 @@ function load() {
 
 The first thing we do is create an `endpoint` that points to the site's API. That endpoint is used with the [sendRequest](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#sendrequesturl-method-parameters-extraheaders--promise) function provided by Tapestry.
 
-(Note: If you've used the fetch API in a browser, you’ll already power user have a good idea on how it works. The main difference is that Tapestry also securely adds Authorization headers on the request if the connector uses OAuth or JWT. If none of this makes sense to you, don't worry - it's not required to write a connector!)
+(Note: If you've used the fetch API in a browser, you’re power user that already has a good idea on how this works. The main difference with Tapestry is that it securely adds Authorization headers on the request if the connector uses OAuth or JWT. If none of this makes sense to you, don't worry - it's not required to write a basic connector!)
 
 After the request completes, you'll have some `text` to process. At this point we can just output it with `console.log` and return the results like before.
 
 If the request can't complete, you should catch that `requestError` and send it back to Tapestry so it can be displayed in the user interface.
 
-After doing Cmd-R and **Load**, you'll see the document icon update because of the log message you just added. When you press that button, you'll see something like this:
+After doing **Cmd-R** and **Load**, you'll see the document icon update because of the log message you just added. When you press that button, you'll see something like this:
 
 ```
 text = {
@@ -192,40 +192,24 @@ function load() {
 
 The first thing you'll do with the text is convert it to a JSON object with `json = JSON.parse(text)`. Then `json.timestamp`, `json.description`, and `json.image` can be used to improve the item for our connector.
 
-An important change is that the [body is HTML](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#html-content) now.
+Also note that the item’s body is now specified using HTML. Even if you’re familiar with the markup, you should check out [how Tapestry uses  HTML](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#html-content). 
 
-Now about that URI...
+One issue with the script above is that the URI never changes; only the date gets updated. Tapestry will detect this and constantly put the item at the top of the timeline. From a user’s point-of-view, it’s better to make sure that each URI produced is unique and keeps it’s place in the universal timeline.
+
+Luckily, we can easily do this using information in the JSON data:
 
 ```javascript
-function load() {
-	const endpoint = `${site}/api`;
-	sendRequest(endpoint)
-	.then((text) => {
-		const json = JSON.parse(text);
-
 		let uri = site + `?value=${json.value}&timestamp=${json.timestamp}`;
-		let date = new Date(json.timestamp * 1000); // seconds → milliseconds
-	
-		let src = "https://usetapestry.com" + json.image; // relative → absolute url
-		
-		let item = Item.createWithUriDate(uri, date);
-		item.body = `<p>The Mystic 9-Ball says: ${json.description}<img src="${src}" /></p>`;
-
-		let items = [item];
-
-		processResults(items);
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
-}
 ```
+
+By adding both the `json.value` and `json.timestamp` as query parameters, a unique URL is formed. An added benefit is that this URL can now be shared by folks that are using your connector. If they get a [“Nailed It”](https://usetapestry.com/samples/mystic9ball/?value=3&timestamp=1722038267), all their friends can see it!
+
 
 ## Just How You Like it
 
-There's a problem with our connector: it loads every time you refresh the feeds in Tapestry. You don’t need that many prognostications!
+There's another problem with our connector: it loads every time you refresh the feeds in Tapestry. We don’t need that many prognostications!
 
-To tackle this, we'll create a variable for our JavaScript to use. This variable can be set by whoever uses the connector so everyone gets the behavior that best fits their needs.
+To tackle this, we'll create a variable for our JavaScript to use. This variable can be set by whoever uses the connector to get the behavior that best fits their needs.
 
 Let's start by creating a `ui-config.json` file in our `com.usetapestry.mystic9ball` folder:
 
@@ -235,7 +219,7 @@ Let's start by creating a `ui-config.json` file in our `com.usetapestry.mystic9b
 		{
 			"name": "interval",
 			"type": "choices",
-			"prompt": "Shake Interval (Minutes)",
+			"prompt": "Minutes Between Shakes",
 			"value": "30",
 			"choices": "1, 5, 15, 30, 60, 90"
 		}
@@ -243,9 +227,9 @@ Let's start by creating a `ui-config.json` file in our `com.usetapestry.mystic9b
 }
 ```
 
-This creates a JavaScript String variable named `interval` that contains one of the values in `choices`. The default value is "30".
+This creates a JavaScript String variable named `interval` that contains one of the values in `choices`. The default value is “30”.
 
-Now we update our script to use the variable:
+This new variable is added to our script:
 
 ```javascript
 var lastUpdate = null;
@@ -290,11 +274,10 @@ function load() {
 }
 ```
 
-TODO: Settings
+Reload the connector and the _Feed_ panel will show the new _Minutes Between Shakes_ setting with your list of choices. Try setting it to “1” and then **Save Feed**.
 
-TODO: Explain difference between post and article (including images from Ged)
+Now, the **Load** button will only update the Results list if a minute has passed. The log button shows information that lets you verify that everything is working correctly.
 
-![A comparison of post and article styles with callouts for properties](images/3-TimelineItems.jpg)
 
 ## The Fine Manual
 
@@ -311,6 +294,40 @@ The [source code](https://github.com/TheIconfactory/Tapestry/Plugins/com.usetape
 
 ```
 
-You can preview the content using the **Read Me** button in the Connector panel.
+You can preview the content using the **Read Me** button in the _Connector_ panel.
 
-![Tapestry Loom display a preview of the README](images/4-README.png)
+![Tapestry Loom displaying a preview of the README](images/3-README.png)
+
+
+## Finding Yourself
+
+Tapestry’s _Feed Finder_ is a powerful way for people to find your connector: all they need to know is a URL. With that information, the app can check for connectors that can be used on the site.
+
+(Note: Eventually, this functionality will be available as an extension, so folks can find feeds directly from the web browser.)
+
+This feature works by using a `discovery.json` file in your connector folder. Create one with this information:
+
+```json
+{
+	"sites": [
+		"usetapestry.com"
+	]
+}
+```
+
+After reloading the connector, the magnifying glass icon in the lower-left of the _Connector_ panel opens a sheet where you can test the Feed Finder. Any URL on `usetapestry.com` will now suggest our connector. Cool!
+
+![Tapestry Loom displaying the Feed Finder tester](images/4-Discovery.png)
+
+This is a simple example: there are cases where the contents of the page need to be examined and extracted. These are covered in the [file’s documentation](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#discoveryjson)
+
+LAST EDIT
+
+## The Power of Items
+
+We’ve design the `Item` to be flexible and usable for many different needs. As a result, there are many things your connector can tune to get the best looking content in Tapestry.
+
+TODO: Explain difference between post and article
+
+![A comparison of post and article styles with callouts for properties](images/X-TimelineItems.jpg)
+
