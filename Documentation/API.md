@@ -575,7 +575,7 @@ Recommended properties:
 
   * site: `String` with the primary endpoint for the plugin's API. This parameter is used in several different contexts:
   
-  	- If not provided, the user will be prompted for a URL during setup. If you are accessing an API with a single endpoint, please provide a value. In cases where each instance of the source will need its own site, for example a Mastodon instance or an RSS feed, do not provide a value and let the user can set it up.
+  	- If not provided, the user will be prompted for a URL during setup. If you are accessing an API with a single endpoint, please provide a value. In cases where each instance of the source will need its own site, for example a Mastodon instance or an RSS feed, do not provide a value and let the user set it up.
   	- The value will also be used as a base URL for relative authentication URLs (see the _NOTE_ below).
   	- The configured value or a value provided by the user will be provided as as JavaScript variable.
   	- The configured value or a value provided by the user will be used to control when Tapestry sends an "Authorization" HTTP header. If the request's scheme is "https" on the default port (443) and the same domain or subdomain of `site`, the header will be included. 
