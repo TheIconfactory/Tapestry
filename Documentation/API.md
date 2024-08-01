@@ -309,6 +309,12 @@ Determines if a site is reachable and gathers properties for the feed. After `pr
 
 The properties returned can be user visible or used internally. An example of the former case is a display name will be used identify the feed. The latter case is a base URL that will be used to handle relative paths in the feed.
 
+When you call `processVerification` you can supply an object with these properties:
+
+  * displayName: `String` with a suggested name for a feed (e.g. an account name, blog name, etc.).
+  * icon: `String` with a URL to an image that can be used as a graphic attached to the feed (e.g. an avatar).
+  * baseUrl: `String` with a URL prefix for relative paths.
+
 This function will only be called if `needsVerification` is set to true in the plug-in’s configuration.
 
 ### load()
