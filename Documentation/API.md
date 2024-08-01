@@ -111,9 +111,7 @@ The creator of the content. See `Identity` below.
 
 Media and link attachments for the content. See below.
 
-_NOTE:_ Media attachments will be automatically created when inline images are used in the HTML of the `body` property unless the `providesAttachments` configuration parameter is set to true.
-
-_NOTE:_ Link attachments will be automatically created from the first link in the first paragraph of the `body` HTML unless the `providesAttachments` configuration parameter is set to true.
+_NOTE:_ If the `provides_attachments` configuration parameter is not set or false, attachments will be generated automatically using the elements of the `body` HTML. Inline images and videos will result in media attachments, and the first link in the first paragraph will be checked as a link attachment.
 
 #### shortcodes: Dictionary
 
@@ -648,7 +646,7 @@ The configuration for the Mastodon connector is:
 	"oauth_code_key": "code",
 	"oauth_scope": "read+write+push",
 	"oauth_grant_type": "authorization_code",
-	"providesAttachments": true,
+	"provides_attachments": true,
 	"canPost": true,
 	"check_interval": 300
 }
@@ -1089,5 +1087,5 @@ If the `<img>` tag includes an `alt` attribute, that text will be included in th
 
 A `LinkAttachment` can also be created automatically. Tapestry will check the first link in the first paragraph and show the preview card in the timeline if the link contains Open Graph information.
 
-This behavior can be disabled with `"providesAttachments": true` in `plugin-config.json`. The Mastodon plug-in is an example of where this is used because its API provides attachments directly in the payload.
+This behavior can be disabled with `"provides_attachments": true` in `plugin-config.json`. The Mastodon plug-in is an example of where this is used because its API provides attachments directly in the payload.
 

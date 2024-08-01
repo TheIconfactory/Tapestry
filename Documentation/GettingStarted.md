@@ -392,13 +392,15 @@ You’re done making a connector, but this tutorial has taken the simplest path 
 
 ### Stylish Items
 
-We’ve design the `Item` to be flexible and usable for many different needs. One of the first things you’ll need to consider is whether you want an “article” or “post” presentation. The article style, which is the default, places the emphasis on the source and title of the content. The post style places the emphasis on the creator of the content.
+We’ve designed the `Item` to be flexible and usable for many different needs.
+
+One of the first things you’ll need to consider is whether you want an “article” or “post” presentation. The article style, which is the default, places the emphasis on the source and title of the content. The post style places the emphasis on the creator of the content.
 
 Information feeds, such as RSS, benefit from the article style. Social network feeds, such as Mastodon, benefit from the post style.
 
 ![A comparison of post and article styles with callouts for properties](images/6-TimelineItems.jpg)
 
-The style is defined in `plugin-config.json`: add an `item_style` property with a `post` or `article` value.
+The style is defined in `plugin-config.json` with an `item_style` property and a `post` or `article` value.
 
 ```json
 {
@@ -521,8 +523,27 @@ First, you'll want to go into Safari’s _Develop_ menu, find your Mac in the li
 After Safari is configured, you can then start using the ladybug icons at the bottom of the _Feed_ and _Results_ panels. When these buttons are highlighted, the Web Inspector will be opened before `verify()` and `load()` are called. This lets you set breakpoints in your script, see variables, and step through code.
 
 
+### Authorization
+
+As was alluded to previously, Tapestry handles OAuth and JWT authentication for your script. And anyone who’s done authorization on the web know that this is the most advanced of topics! 😀
+
+The API documentation includes all of the [OAuth and JWT configuration properties](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#plugin-configjson). It’s also instructive to look at some of the other connectors that use OAuth:
+
+  * [Mastodon](https://github.com/TheIconfactory/Tapestry/blob/main/Plugins/org.joinmastodon/plugin-config.json)
+  * [Tumblr](https://github.com/TheIconfactory/Tapestry/blob/main/Plugins/com.tumblr/plugin-config.json)
+  * [Micro.blog](https://github.com/TheIconfactory/Tapestry/blob/main/Plugins/blog.micro/plugin-config.json)
+  
+Or JWT:
+
+  * [Bluesky](https://github.com/TheIconfactory/Tapestry/blob/main/Plugins/social.bsky/plugin-config.json)
+
+If you come across a situation where Tapestry can't authorize with OAuth or JWT, please open an issue and we’ll try to sort it out.
+
+
 ## Conclusion
 
-Hopefully this has been an enjoyable excursion through the Tapestry API and inspires you to make connectors of your own.
+Hopefully this has been an enjoyable excursion through the Tapestry API and inspires you to make connectors of your own. We truly believe that this approach will help the open web to flourish, and that can’t happen without your help!
+
+If you find errors or omissions in this documentation, please feel free ot open an issue.
 
 
