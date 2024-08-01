@@ -99,34 +99,36 @@ function postForItem(item, date = null) {
 			attachments.push(attachment);
 		}
 	}
-	const card = item["card"];
-	if (card != null && card.url != null) {
-		let attachment = LinkAttachment.createWithUrl(card.url);
-		if (card.type != null && card.type.length > 0) {
-			attachment.type = card.type;
+	else {
+		const card = item["card"];
+		if (card != null && card.url != null) {
+			let attachment = LinkAttachment.createWithUrl(card.url);
+			if (card.type != null && card.type.length > 0) {
+				attachment.type = card.type;
+			}
+			if (card.title != null && card.title.length > 0) {
+				attachment.title = card.title;
+			}
+			if (card.description != null && card.description.length > 0) {
+				attachment.subtitle = card.description;
+			}
+			if (card.author_name != null && card.author_name.length > 0) {
+				attachment.authorName = card.author_name;
+			}
+			if (card.author_url != null && card.author_url.length > 0) {
+				attachment.authorProfile = card.author_url;
+			}
+			if (card.image != null && card.image.length > 0) {
+				attachment.image = card.image;
+			}
+			if (card.blurhash != null && card.blurhash.length > 0) {
+				attachment.blurhash = card.blurhash;
+			}
+			if (card.width != null && card.height != null) {
+				attachment.aspectSize = {width : card.width, height: card.height};
+			}
+			attachments.push(attachment);
 		}
-		if (card.title != null && card.title.length > 0) {
-			attachment.title = card.title;
-		}
-		if (card.description != null && card.description.length > 0) {
-			attachment.subtitle = card.description;
-		}
-		if (card.author_name != null && card.author_name.length > 0) {
-			attachment.authorName = card.author_name;
-		}
-		if (card.author_url != null && card.author_url.length > 0) {
-			attachment.authorProfile = card.author_url;
-		}
-		if (card.image != null && card.image.length > 0) {
-			attachment.image = card.image;
-		}
-		if (card.blurhash != null && card.blurhash.length > 0) {
-			attachment.blurhash = card.blurhash;
-		}
-		if (card.width != null && card.height != null) {
-			attachment.aspectSize = {width : card.width, height: card.height};
-		}
-		attachments.push(attachment);
 	}
 	
 	if (attachments.length > 0) {
