@@ -59,7 +59,7 @@ The `plugin.js` file can be empty for now, but the `plugin-config.json` file req
 
 ```
 
-## Check It Out
+### Check It Out
 
 At this point, you could put the connector on your device and try it out. But that means transferring it to your device, installing it in the app, and creating a test feed. And there could easily be a typo that makes you go through that process again.
 
@@ -70,7 +70,7 @@ Tapestry Loom is currently [available in TestFlight](https://testflight.apple.co
 The first thing you need to do is tell Loom where your "Connectors" folder is located. Use _File_ > _Select Connectors Folder…_ (or **Cmd-F**) to bring up a standard dialog and **Open** the folder you created above.
 
 
-## Looming Greatness
+### Looming Greatness
 
 After opening the folder, your connector appears in Tapestry Loom:
 
@@ -79,7 +79,7 @@ After opening the folder, your connector appears in Tapestry Loom:
 An important first step - the basic information is showing in the left-most _Connector_ panel of the app and you’re ready to start filling in the other three panels!
 
 
-## What Are You Connecting To?
+### What Are You Connecting To?
 
 A connector that doesn’t connect to anything isn’t very useful. Let’s fix that!
 
@@ -112,7 +112,7 @@ We’ll need to refresh again because of these changes, but try using the **Cmd-
 
 Our connector is now ready for the next step — collecting information for the Tapestry app.
 
-## Feed Me!
+### Feed Me!
 
 There isn’t anything else needed to make a feed with the Mystic 9-Ball connector, so just press **Save Feed** to create a test feed.
 
@@ -158,7 +158,9 @@ Once the item has been created and all its properties set, it is returned as an 
 
 Tapestry Loom uses the same processing pipeline that is used in the app, so that makes it easy for you to test and preview any changes that you make to your connector. Saving in your text editor, followed by a **Cmd-R** reload and **Load** button press is a sequence you’ll repeat frequently.
 
-## But Is It Useful?
+## Making Improvements
+
+### But Is It Useful?
 
 But let’s be honest: seeing "Hello World!" in your timeline every time you refresh wouldn’t be very useful. Let’s change that!
 
@@ -203,7 +205,6 @@ text = {
     "description": "No You Didn\u2019t",
     "image": "/samples/mystic9ball/images/ball/9ball_9.png"
 }
-
 ```
 
 Those are the results from the API and we can easily put these JSON results to use:
@@ -248,7 +249,7 @@ Luckily, we can easily do this using information in the JSON data:
 By adding both the `json.value` and `json.timestamp` as query parameters, a unique URL is formed. An added benefit is that this URL can now be shared by folks that are using your connector. If they get a [“Nailed It”](https://usetapestry.com/samples/mystic9ball/?value=3&timestamp=1722038267), all their friends can see it!
 
 
-## Just How You Like it
+### Just How You Like it
 
 There’s another problem with our connector: it loads every time you refresh the feeds in Tapestry. We don’t need that many prognostications!
 
@@ -322,7 +323,7 @@ Reload the connector and the _Feed_ panel will show the new _Minutes Between Sha
 Now, the **Load** button will only update the _Results_ list if a minute has passed. The button to show the `console.log()` output lets you verify that everything is working correctly.
 
 
-## The Fine Manual
+### The Fine Manual
 
 By now, you know what this connector does. But others do not, and a little bit of README goes a long way.
 
@@ -343,7 +344,7 @@ You can preview the content using the **Read Me** button in the _Connector_ pane
 
 Another way to help folks use your connector is by providing suggestions. There isn’t anything to suggest for the Mystic 9-Ball, but you can learn more about the `suggestions.json` file in [the documentation](https://github.com/TheIconfactory/Tapestry/blob/documentation-update/Documentation/API.md#suggestionsjson).
 
-## Finding Yourself
+### Finding Yourself
 
 Tapestry’s _Feed Finder_ is a powerful way for people to find your connector: all they need to know is a URL. With that information, the app can check for connectors that can be used on the site.
 
@@ -387,7 +388,7 @@ Yes, indeed!
 
 ## The Power of Items
 
-You’re done making the connector, but this tutorial has taken the simplest path through the API. In this section, we look at different ways to present the information your connector collects.
+You’re done making a connector, but this tutorial has taken the simplest path through the API. In this section, we’ll look at different ways to present the information your connector collects.
 
 ### Stylish Items
 
@@ -445,11 +446,11 @@ Properties of an `Item` are easy to verify. When you click on the document icon 
 ![A sheet showing all the properties of an Mystic 9-Ball item](images/7-ItemProperties.png)
 
 
-LAST EDIT
-
 ### Getting Attached
 
-In our initial example, we used HTML markup to provide the image in the item. By default, Tapestry looks for images and other media in the HTML is processes and generates media attachments automatically.
+In the examples above, the HTML markup provided the image for the item. By default, Tapestry looks for images and other media as it processes the `body` HTML and generates media attachments automatically (there is an internal `extractedAutomatically` property that indicates if this happened: it can be seen in the screenshot above).
+
+When you are working with an API that provides media explicitly, it's easier to create the attachments in your script. If you choose this path, you’ll need to set `provides_attachments` to true in the `plugin-config.json` file:
 
 ```json
 {
@@ -462,15 +463,19 @@ In our initial example, we used HTML markup to provide the image in the item. By
 }
 ```
 
-TODO: Media attachments - no limit, mention VoiceOver accessibility
+To create the `MediaAttachment`, you instantiate it with a source URL and set [the properties](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#mediaattachment):
 
 ```javascript
 		let mediaAttachment = MediaAttachment.createWithUrl(src);
 		mediaAttachment.aspectSize = {width : 500, height: 500};
 		mediaAttachment.text = `Mystic 9-Ball saying ${json.description}`;
+		
+		item.attachments = [mediaAttachment];
 ```
 
-TODO: Link attachments - no limit, but only first one is displayed
+There is no limit to the number of attachments, but only the first four are displayed as thumbnails in the user’s timeline. Also note that adding `text` will allow Tapestry to make the image accessible with VoiceOver.
+
+The `LinkAttachment` works similarly and allows Tapestry to display a preview card using its [properties](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#linkattachment).
 
 ```javascript
 		let linkAttachment = LinkAttachment.createWithUrl(uri);
@@ -480,14 +485,44 @@ TODO: Link attachments - no limit, but only first one is displayed
 		linkAttachment.image = "https://usetapestry.com/samples/mystic9ball/images/banner.png";
 		linkAttachment.aspectSize = {width : 1024, height: 768};
 
-```
-TODO: Add them to item
-```javascript
-		item.attachments = [mediaAttachment, linkAttachment];
+		item.attachments = [linkAttachment];
 ```
 
+Only the first link attachment will be used by Tapestry. Also, if you only set the URL, Tapestry will fill in the other properties automatically using any [Open Graph](https://ogp.me) information on the web page.
+
+Note that `MediaAttachment` is shown in both the timeline and detail views, while the `LinkAttachment` is only shown in the timeline.
+
+Generally, it’s not a good idea to show media and link attachments at the same time: it's just too much information for a user to parse quickly and carries a risk of duplicated information.
 
 
+## One More Thing
 
+Before we finish up with this tutorial, we’re going to quickly cover a few advanced topics.
+
+### Verification
+
+In the sample connector, you created a `load()` function that's called when generating items. Tapestry can also call another function named `verify()`. This function serves as a way to provide Tapestry with [information that's specific to the feed](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#verify).
+
+If a feed that’s using your connector needs a specific name (such as a blog name) or an icon (like an avatar), you’ll want to add `needs_verification` to `plugin-config.json` and implement the `verify()` function in `plugin.js`.
+
+You may also find that the `lookupIcon()` function is useful for [getting the icon](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#lookupiconurl--promise) associated with a URL.
+ 
+The [JSON Feed connector](https://github.com/TheIconfactory/Tapestry/blob/main/Plugins/org.jsonfeed/plugin.js) is a good example of how verification can be implemented.
+
+ 
+### Web Inspector
+
+While working on the sample connector, we used `console.log()` to generate debugging output. But when you’re dealing with something like an unexpected null value in a JSON payload, it’s a lot easier to be able to step through code line-by-line and check variables.
+
+Luckily, Tapestry Loom integrates with Safari’s Web Inspector with minimal setup.
+
+First, you'll want to go into Safari’s _Develop_ menu, find your Mac in the list, and put a checkmark next to **Automatically Show Web Inspector for JSContexts** and **Automatically Pause Connecting to JSContexts**. Safari will remember these settings, so this is typically a one-time setup.
+
+After Safari is configured, you can then start using the ladybug icons at the bottom of the _Feed_ and _Results_ panels. When these buttons are highlighted, the Web Inspector will be opened before `verify()` and `load()` are called. This lets you set breakpoints in your script, see variables, and step through code.
+
+
+## Conclusion
+
+Hopefully this has been an enjoyable excursion through the Tapestry API and inspires you to make connectors of your own.
 
 
