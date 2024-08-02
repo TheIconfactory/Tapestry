@@ -99,34 +99,36 @@ function postForItem(item, date = null) {
 			attachments.push(attachment);
 		}
 	}
-	const card = item["card"];
-	if (card != null && card.url != null) {
-		let attachment = LinkAttachment.createWithUrl(card.url);
-		if (card.type != null && card.type.length > 0) {
-			attachment.type = card.type;
+	else {
+		const card = item["card"];
+		if (card != null && card.url != null) {
+			let attachment = LinkAttachment.createWithUrl(card.url);
+			if (card.type != null && card.type.length > 0) {
+				attachment.type = card.type;
+			}
+			if (card.title != null && card.title.length > 0) {
+				attachment.title = card.title;
+			}
+			if (card.description != null && card.description.length > 0) {
+				attachment.subtitle = card.description;
+			}
+			if (card.author_name != null && card.author_name.length > 0) {
+				attachment.authorName = card.author_name;
+			}
+			if (card.author_url != null && card.author_url.length > 0) {
+				attachment.authorProfile = card.author_url;
+			}
+			if (card.image != null && card.image.length > 0) {
+				attachment.image = card.image;
+			}
+			if (card.blurhash != null && card.blurhash.length > 0) {
+				attachment.blurhash = card.blurhash;
+			}
+			if (card.width != null && card.height != null) {
+				attachment.aspectSize = {width : card.width, height: card.height};
+			}
+			attachments.push(attachment);
 		}
-		if (card.title != null && card.title.length > 0) {
-			attachment.title = card.title;
-		}
-		if (card.description != null && card.description.length > 0) {
-			attachment.subtitle = card.description;
-		}
-		if (card.author_name != null && card.author_name.length > 0) {
-			attachment.authorName = card.author_name;
-		}
-		if (card.author_url != null && card.author_url.length > 0) {
-			attachment.authorProfile = card.author_url;
-		}
-		if (card.image != null && card.image.length > 0) {
-			attachment.image = card.image;
-		}
-		if (card.blurhash != null && card.blurhash.length > 0) {
-			attachment.blurhash = card.blurhash;
-		}
-		if (card.width != null && card.height != null) {
-			attachment.aspectSize = {width : card.width, height: card.height};
-		}
-		attachments.push(attachment);
 	}
 	
 	if (attachments.length > 0) {
@@ -136,16 +138,27 @@ function postForItem(item, date = null) {
 	return post;
 }
 
-function load() {
-	if (includeHome == "on") {
-		sendRequest(site + "/api/v1/timelines/home?limit=40", "GET")
+var queryHomeTimeline = function (site) {
+
+  return new Promise(function (resolve, reject) {
+
+	function requestFromId(site, resolve, id = null, results = [], limit = 10) {
+		let url = null
+		if (id == null) {
+			url = site + "/api/v1/timelines/home?limit=40";
+		}
+		else {
+			url = site + `/api/v1/timelines/home?limit=40&since_id=1&max_id=${id}`;
+		}
+		
+		sendRequest(url, "GET")
 		.then((text) => {
 			//console.log(text);
+			let lastId = null
 			const jsonObject = JSON.parse(text);
-			let results = [];
 			for (const item of jsonObject) {
 				const date = new Date(item["created_at"]);
-				
+					
 				let annotation = null;
 				let postItem = item;
 				if (item["reblog"] != null) {
@@ -156,22 +169,138 @@ function load() {
 					annotation = Annotation.createWithText(`${accountName} Boosted`);
 					annotation.uri = account["url"];
 					annotation.icon = account["avatar"];
-					
+						
 					postItem = item["reblog"];
 				}
-				
+					
 				const post = postForItem(postItem, date);
 				if (annotation != null) {
 					post.annotations = [annotation];
 				}
-				
+					
 				results.push(post);
+				
+				lastId = item.id;
 			}
+			
+			if (lastId != null && limit > 0) {
+				requestFromId(site, resolve, lastId, results, limit - 1);
+			}
+			else {
+				resolve(results);
+			}
+		});
+	}
+
+	requestFromId(site, resolve);
+	//let results = requestFromId(site);
+	//resolve(results);
+  });
+};
+
+/*
+const queryHomeTimeline = new Promise((resolve, reject) => {
+
+	let requestFromId = (site, id = null, results = [], limit = 10) => {
+		let url = null
+		if (id == null) {
+			url = site + "/api/v1/timelines/home?limit=40";
+		}
+		else {
+			url = site + `/api/v1/timelines/home?limit=40&min_id=${id}`;
+		}
+		
+		sendRequest(url, "GET")
+		.then((text) => {
+			//console.log(text);
+			let lastId = null
+			const jsonObject = JSON.parse(text);
+			for (const item of jsonObject) {
+				const date = new Date(item["created_at"]);
+					
+				let annotation = null;
+				let postItem = item;
+				if (item["reblog"] != null) {
+					const account = item["account"];
+					const displayName = account["display_name"];
+					const userName = account["username"];
+					const accountName = (displayName ? displayName : userName);
+					annotation = Annotation.createWithText(`${accountName} Boosted`);
+					annotation.uri = account["url"];
+					annotation.icon = account["avatar"];
+						
+					postItem = item["reblog"];
+				}
+					
+				const post = postForItem(postItem, date);
+				if (annotation != null) {
+					post.annotations = [annotation];
+				}
+					
+				results.push(post);
+				
+				lastId = item.id;
+			}
+			
+			if (lastId != null && limit > 0) {
+				return requestFromId(lastId, results, limit - 1);
+			}
+			else {
+				return results;
+			}
+		});
+	}
+
+	let results = requestFromId(site);
+	resolve(results);
+});
+*/
+
+function load() {
+	if (includeHome == "on") {
+		// TODO: Try sending these requests recursively to get more results: https://stackoverflow.com/a/46409627/132867
+		queryHomeTimeline(site)
+  		.then((results) =>  {
 			processResults(results, true);
-		})
+ 		})
 		.catch((requestError) => {
 			processError(requestError);
 		});	
+		
+// 		sendRequest(site + "/api/v1/timelines/home?limit=40", "GET")
+// 		.then((text) => {
+// 			//console.log(text);
+// 			const jsonObject = JSON.parse(text);
+// 			let results = [];
+// 			for (const item of jsonObject) {
+// 				const date = new Date(item["created_at"]);
+// 				
+// 				let annotation = null;
+// 				let postItem = item;
+// 				if (item["reblog"] != null) {
+// 					const account = item["account"];
+// 					const displayName = account["display_name"];
+// 					const userName = account["username"];
+// 					const accountName = (displayName ? displayName : userName);
+// 					annotation = Annotation.createWithText(`${accountName} Boosted`);
+// 					annotation.uri = account["url"];
+// 					annotation.icon = account["avatar"];
+// 					
+// 					postItem = item["reblog"];
+// 				}
+// 				
+// 				const post = postForItem(postItem, date);
+// 				if (annotation != null) {
+// 					post.annotations = [annotation];
+// 				}
+// 				
+// 				results.push(post);
+// 			}
+// 			processResults(results, true);
+// 		})
+// 		.catch((requestError) => {
+// 			processError(requestError);
+// 		});	
 	}
 	
 	if (includeMentions == "on") {
