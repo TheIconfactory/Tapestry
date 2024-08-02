@@ -29,18 +29,18 @@ function load() {
 		let item = Item.createWithUriDate(uri, date);
 		item.body = `<p>The Mystic 9-Ball says: <b>${json.description}</b></p>`;
 
-		item.title = "Shake it Up!";
+//		item.title = "Shake it Up!";
 		
-		let annotation = Annotation.createWithText("The Iconfactory created");
-		annotation.icon = "https://iconfactory.com/favicon.ico";
-		annotation.uri = "https://iconfactory.com";
-		item.annotations = [annotation];
+// 		let annotation = Annotation.createWithText("The Iconfactory created");
+// 		annotation.icon = "https://iconfactory.com/favicon.ico";
+// 		annotation.uri = "https://iconfactory.com";
+// 		item.annotations = [annotation];
 		
-		let identity = Identity.createWithName("Mister Mystic");
-		identity.uri = "https://usetapestry.com/samples/mystic9ball";
-		identity.username = "@HighRoller";
-		identity.avatar = "https://usetapestry.com/samples/mystic9ball/images/9ball.png";
-		item.author = identity;
+// 		let identity = Identity.createWithName("Mister Mystic");
+// 		identity.uri = "https://usetapestry.com/samples/mystic9ball";
+// 		identity.username = "@HighRoller";
+// 		identity.avatar = "https://usetapestry.com/samples/mystic9ball/images/9ball.png";
+// 		item.author = identity;
 		
 		let mediaAttachment = MediaAttachment.createWithUrl(src);
 		mediaAttachment.aspectSize = {width : 500, height: 500};
