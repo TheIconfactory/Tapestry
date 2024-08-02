@@ -138,23 +138,34 @@ function postForItem(item, date = null) {
 	return post;
 }
 
-function queryHomeTimeline(site) {
+function queryHomeTimeline(site, currentId) {
 
   return new Promise((resolve, reject) => {
 
-	function requestFromId(site, resolve, reject, id = null, results = [], limit = 10) {
+	function requestFromId(site, resolve, reject, currentId = null, id = null, limit = 5, results = []) {
+		let recurse = true;
+		
 		let url = null
 		if (id == null) {
-			url = site + "/api/v1/timelines/home?limit=40";
+			if (currentId == null) {
+				url = `${site}/api/v1/timelines/home?limit=40`;
+			}
+			else {
+				url = `${site}/api/v1/timelines/home?limit=40&since_id=${currentId}`;
+				recurse = false;
+			}
 		}
 		else {
-			url = site + `/api/v1/timelines/home?limit=40&since_id=1&max_id=${id}`;
+			url = `${site}/api/v1/timelines/home?limit=40&since_id=1&max_id=${id}`;
 		}
+		
+		console.log(`currentId = ${currentId}, id = ${id}`);
 		
 		sendRequest(url, "GET")
 		.then((text) => {
 			//console.log(text);
-			let lastId = null
+			let firstId = null;
+			let lastId = null;
 			const jsonObject = JSON.parse(text);
 			for (const item of jsonObject) {
 				const date = new Date(item["created_at"]);
@@ -179,15 +190,28 @@ function queryHomeTimeline(site) {
 				}
 					
 				results.push(post);
-				
-				lastId = item.id;
+	
+				lastId = item["id"];
+				if (firstId == null) {
+					firstId = item["id"];
+				}
+				if (currentId == null) {
+					currentId = firstId;
+				}
 			}
 			
-			if (lastId != null && limit > 0) {
-				requestFromId(site, resolve, reject, lastId, results, limit - 1);
+			const newLimit = limit - 1;
+			
+			if (lastId != null && newLimit > 0 && recurse == true) {
+				requestFromId(site, resolve, reject, currentId, lastId, newLimit, results);
 			}
 			else {
-				resolve(results);
+				if (recurse) {
+					resolve([results, currentId]);
+				}
+				else {
+					resolve([results, firstId]);
+				}
 			}
 		})
 		.catch((error) => {
@@ -195,114 +219,26 @@ function queryHomeTimeline(site) {
 		});	
 	}
 
-	requestFromId(site, resolve, reject);
+	requestFromId(site, resolve, reject, currentId);
 
   });
 }
 
-/*
-const queryHomeTimeline = new Promise((resolve, reject) => {
-
-	let requestFromId = (site, id = null, results = [], limit = 10) => {
-		let url = null
-		if (id == null) {
-			url = site + "/api/v1/timelines/home?limit=40";
-		}
-		else {
-			url = site + `/api/v1/timelines/home?limit=40&min_id=${id}`;
-		}
-		
-		sendRequest(url, "GET")
-		.then((text) => {
-			//console.log(text);
-			let lastId = null
-			const jsonObject = JSON.parse(text);
-			for (const item of jsonObject) {
-				const date = new Date(item["created_at"]);
-					
-				let annotation = null;
-				let postItem = item;
-				if (item["reblog"] != null) {
-					const account = item["account"];
-					const displayName = account["display_name"];
-					const userName = account["username"];
-					const accountName = (displayName ? displayName : userName);
-					annotation = Annotation.createWithText(`${accountName} Boosted`);
-					annotation.uri = account["url"];
-					annotation.icon = account["avatar"];
-						
-					postItem = item["reblog"];
-				}
-					
-				const post = postForItem(postItem, date);
-				if (annotation != null) {
-					post.annotations = [annotation];
-				}
-					
-				results.push(post);
-				
-				lastId = item.id;
-			}
-			
-			if (lastId != null && limit > 0) {
-				return requestFromId(lastId, results, limit - 1);
-			}
-			else {
-				return results;
-			}
-		});
-	}
-
-	let results = requestFromId(site);
-	resolve(results);
-});
-*/
+var currentId = null;
 
 function load() {
 	if (includeHome == "on") {
 		// TODO: Try sending these requests recursively to get more results: https://stackoverflow.com/a/46409627/132867
-		queryHomeTimeline(site)
-  		.then((results) =>  {
-			processResults(results, true);
+		queryHomeTimeline(site, currentId)
+  		.then((array) =>  {
+  			if (array[1] != null) {
+	  			currentId = array[1];
+	  		}
+			processResults(array[0], true);
  		})
 		.catch((requestError) => {
 			processError(requestError);
 		});	
-		
-// 		sendRequest(site + "/api/v1/timelines/home?limit=40", "GET")
-// 		.then((text) => {
-// 			//console.log(text);
-// 			const jsonObject = JSON.parse(text);
-// 			let results = [];
-// 			for (const item of jsonObject) {
-// 				const date = new Date(item["created_at"]);
-// 				
-// 				let annotation = null;
-// 				let postItem = item;
-// 				if (item["reblog"] != null) {
-// 					const account = item["account"];
-// 					const displayName = account["display_name"];
-// 					const userName = account["username"];
-// 					const accountName = (displayName ? displayName : userName);
-// 					annotation = Annotation.createWithText(`${accountName} Boosted`);
-// 					annotation.uri = account["url"];
-// 					annotation.icon = account["avatar"];
-// 					
-// 					postItem = item["reblog"];
-// 				}
-// 				
-// 				const post = postForItem(postItem, date);
-// 				if (annotation != null) {
-// 					post.annotations = [annotation];
-// 				}
-// 				
-// 				results.push(post);
-// 			}
-// 			processResults(results, true);
-// 		})
-// 		.catch((requestError) => {
-// 			processError(requestError);
-// 		});	
 	}
 	
 	if (includeMentions == "on") {
