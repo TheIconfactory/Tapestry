@@ -138,11 +138,11 @@ function postForItem(item, date = null) {
 	return post;
 }
 
-var queryHomeTimeline = function (site) {
+function queryHomeTimeline(site) {
 
-  return new Promise(function (resolve, reject) {
+  return new Promise((resolve, reject) => {
 
-	function requestFromId(site, resolve, id = null, results = [], limit = 10) {
+	function requestFromId(site, resolve, reject, id = null, results = [], limit = 10) {
 		let url = null
 		if (id == null) {
 			url = site + "/api/v1/timelines/home?limit=40";
@@ -184,19 +184,21 @@ var queryHomeTimeline = function (site) {
 			}
 			
 			if (lastId != null && limit > 0) {
-				requestFromId(site, resolve, lastId, results, limit - 1);
+				requestFromId(site, resolve, reject, lastId, results, limit - 1);
 			}
 			else {
 				resolve(results);
 			}
-		});
+		})
+		.catch((error) => {
+			reject(error);
+		});	
 	}
 
-	requestFromId(site, resolve);
-	//let results = requestFromId(site);
-	//resolve(results);
+	requestFromId(site, resolve, reject);
+
   });
-};
+}
 
 /*
 const queryHomeTimeline = new Promise((resolve, reject) => {
