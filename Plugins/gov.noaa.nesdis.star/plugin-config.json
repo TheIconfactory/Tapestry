@@ -5,5 +5,6 @@
 	"site": "https://www.star.nesdis.noaa.gov",
 	"needs_verification": true,
 	"verify_variables": true,
+	"provides_attachments": true,
 	"check_interval": 300
 }
