@@ -194,7 +194,7 @@ function load() {
 					}
 				}
 				else {
-					if (entryAttributes.rel == "alternate") {
+					if (entryAttributes.rel == "alternate" || entryAttributes.rel == null) {
 						entryUrl = entryAttributes.href;
 					}
 				}
@@ -208,7 +208,7 @@ function load() {
 					date =  new Date(entry.updated);
 				}
 				const title = entry.title?.trim();
-				const content = entry.content;
+				const content = entry.content ?? entry.summary;
 				
 				var identity = null;
 				const authorName = entry.author.name;

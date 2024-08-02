@@ -7,11 +7,11 @@ The following document describes the JavaScript API that Tapestry uses to proces
 
 This is a work-in-progress and details are certain to change.
 
-Note that JavaScript in plug-ins must conform to the [ECMA-262 specification](http://www.ecma-international.org/publications/standards/Ecma-262.htm). This specification defines the language and its basic [functions](https://262.ecma-international.org/14.0/#sec-function-properties-of-the-global-object) and [objects](https://262.ecma-international.org/14.0/#sec-constructor-properties-of-the-global-object). Additions that support the Document Object Model (DOM) and other browser functions are not available.
+> **Note:** The JavaScript in connectors must conform to the [ECMA-262 specification](http://www.ecma-international.org/publications/standards/Ecma-262.htm). This specification defines the language and its basic [functions](https://262.ecma-international.org/14.0/#sec-function-properties-of-the-global-object) and [objects](https://262.ecma-international.org/14.0/#sec-constructor-properties-of-the-global-object). Additions that support the Document Object Model (DOM) and other browser functions are not available.
 
 ## Variables
 
-Any variables that have been specified in `ui-config.json` are set before the script is executed. For example, the Mastodon plug-in specifies the following inputs:
+Any variables that have been specified in `ui-config.json` are set before the script is executed. For example, the Mastodon connector specifies the following inputs:
 
 ```json
 {
@@ -111,9 +111,7 @@ The creator of the content. See `Identity` below.
 
 Media and link attachments for the content. See below.
 
-_NOTE:_ Media attachments will be automatically created when inline images are used in the HTML of the `body` property unless the `providesAttachments` configuration parameter is set to true.
-
-_NOTE:_ Link attachments will be automatically created from the first link in the first paragraph of the `body` HTML unless the `providesAttachments` configuration parameter is set to true.
+> **Note:** If the `provides_attachments` configuration parameter is not set or false, attachments will be generated automatically using the elements of the `body` HTML. Inline images and videos will result in media attachments, and the first link in the first paragraph will be checked as a link attachment.
 
 #### shortcodes: Dictionary
 
@@ -226,7 +224,7 @@ An HLS playlist (.m3u8) should be specified explicitly as "video" or "audio" sin
 
 #### url: String (required)
 
-A string containing the URL for the media on the Internet
+A string containing the URL for the media on the Internet.
 
 #### thumbnail: String
 
@@ -258,25 +256,43 @@ An object with `x` and `x` properties. The values are used to center media in th
 
 #### url: String (required)
 
-A string containing the URL for the link on the Internet
+A string containing the URL for the link on the Internet.
 
 #### type: String
 
+The type of link, typically an Open Graph [og:type](https://ogp.me/#types).
+
 #### title: String
+
+The title for the link, typically an Open Graph [og:title](https://ogp.me/#metadata).
 
 #### subtitle: String aka "description"
 
+The subtitle for the link, typically an Open Graph [og:description](https://ogp.me/#optional).
+
 #### siteName: String
+
+The site name for the link, typically an Open Graph [og:site\_name](https://ogp.me/#optional).
 
 #### authorName: String
 
+The author's name, typically as [HTML author metadata](https://www.w3.org/TR/2011/WD-html5-author-20110809/the-meta-element.html#meta-author).
+
 #### authorProfile: String
+
+A URL for the author, typically from [fediverse:creator](https://blog.joinmastodon.org/2024/07/highlighting-journalism-on-mastodon/).
 
 #### image: String
 
+An image for the link, typically the Open Graph [og:image](https://ogp.me/#metadata).
+
 #### blurhash: String
 
+A string that provides a placeholder image.
+
 #### aspectSize: Object
+
+An object with `width` and `height` properties, typically from Open Graph [og:image:width](https://ogp.me/#structured) and [og:image:height](https://ogp.me/#structured).
 
 
 ## Actions
@@ -291,7 +307,13 @@ Determines if a site is reachable and gathers properties for the feed. After `pr
 
 The properties returned can be user visible or used internally. An example of the former case is a display name will be used identify the feed. The latter case is a base URL that will be used to handle relative paths in the feed.
 
-This function will only be called if `needsVerification` is set to true in the plug-in’s configuration.
+When you call `processVerification` you can supply an object with these properties:
+
+  * displayName: `String` with a suggested name for a feed (e.g. an account name, blog name, etc.).
+  * icon: `String` with a URL to an image that can be used as a graphic attached to the feed (e.g. an avatar).
+  * baseUrl: `String` with a URL prefix for relative paths.
+
+This function will only be called if `needsVerification` is set to true in the connectors’s configuration.
 
 ### load()
 
@@ -312,9 +334,9 @@ Sends a request. If configured, a bearer token will be included with the request
 
 Returns a `Promise` with a resolve handler with a String parameter and a reject handler with an Error parameter. The resolve handler’s string is:
 
-_NOTE:_ The `url` is assumed to be properly encoded. Use JavaScript’s `encodeURI`, if needed.
+> **Note:** The `url` is assumed to be properly encoded. Use JavaScript’s `encodeURI`, if needed.
 
-  * For "HEAD" method, the string result contains a JSON dictionary:
+For the "HEAD" method, the string result contains a JSON dictionary:
   
 ```json
 {
@@ -327,12 +349,12 @@ _NOTE:_ The `url` is assumed to be properly encoded. Use JavaScript’s `encodeU
 }
 ```
 
-  * For all other successful requests, the string contains the response body. Typically this will be HTML text or a JSON payload. Regular expressions can be used on HTML and `JSON.parse` can be used to build queryable object. In both cases, the data extracted will be returned to the Tapestry app.
+For all other successful requests, the string contains the response body. Typically this will be HTML text or a JSON payload. Regular expressions can be used on HTML and `JSON.parse` can be used to build queryable object. In both cases, the data extracted will be returned to the Tapestry app.
 
-_NOTE:_ The `parameters` string can contain patterns that will be replaced with values managed by the Tapestry app:
+The `parameters` string can contain patterns that will be replaced with values managed by the Tapestry app:
 
   * `__ACCESS_TOKEN__` The access token returned when authenticating with OAuth or JWT.
-  * `__CLIENT_ID__` The client ID used to identify the plugin with the API.
+  * `__CLIENT_ID__` The client ID used to identify the connector with the API.
 
 For example, if you need to "POST" the client ID, you would use "client=\_\_CLIENT\_ID\_\_&foo=1&bar=something".
 
@@ -361,7 +383,7 @@ function verify() {
 }
 ```
 
-_NOTE:_ The JavaScript code doesn’t have access to the OAuth access token (for security, no authentication information is exposed to the plug-in). If an access token is needed in a list of `parameters`, use `__ACCESS_TOKEN__` — it will be substituted before the request is sent to the endpoint.
+> **Note:** The JavaScript code doesn’t have access to the OAuth access token (for security, no authentication information is exposed to the connector). If an access token is needed in a list of `parameters`, use `__ACCESS_TOKEN__` — it will be substituted before the request is sent to the endpoint.
 
 
 ### processResults(results, complete)
@@ -392,7 +414,7 @@ The dictionary can contain the following:
   
 When a string is returned, it will be used as a `displayName` with an empty `baseUrl` and default `icon`.
 
-_NOTE:_ A `baseUrl` is typically used for feeds where the site is "feed.example.com" but images and other resources are loaded from "example.com".
+> **Note:** A `baseUrl` is typically used for feeds where the site is "feed.example.com" but images and other resources are loaded from "example.com".
   
 ### xmlParse(text) → Object
 
@@ -400,7 +422,7 @@ _NOTE:_ A `baseUrl` is typically used for feeds where the site is "feed.example.
   
 Returns an `Object` representation of the XML data, much like `JSON.parse` does.
 
-_NOTE:_ Do not assume that the order of the keys in the object dictionaries will be the same as they occurred in the XML. No order is preserved during processing (as is the case with JSON parsing).
+> **Note:** Do not assume that the order of the keys in the object dictionaries will be the same as they occurred in the XML. No order is preserved during processing (as is the case with JSON parsing).
 
 To deal with the differences between XML and JavaScript objects (JSON), some processing is done on the XML.
 
@@ -536,7 +558,7 @@ Returns a `Promise` with a resolve handler that includes a `String` parameter wi
 
 ## Configuration
 
-Each connector plug-in is defined using the following files:
+Each connector is defined using the following files:
 
   * `plugin-config.json` (Required)
   * `plugin.js` (Required)
@@ -551,13 +573,13 @@ The contents of each of these files is discussed below.
 Required properties:
 
   * id: `String` with reverse domain name for uniqueness (e.g. org.joinmastodon or blog.micro)
-  * displayName: `String` with name that will be displayed in user interface
+  * display_name: `String` with name that will be displayed in user interface
 
 Recommended properties:
 
-  * site: `String` with the primary endpoint for the plugin's API. This parameter is used in several different contexts:
+  * site: `String` with the primary endpoint for the connector's API. This parameter is used in several different contexts:
   
-  	- If not provided, the user will be prompted for a URL during setup. If you are accessing an API with a single endpoint, please provide a value. In cases where each instance of the source will need its own site, for example a Mastodon instance or an RSS feed, do not provide a value and let the user can set it up.
+  	- If not provided, the user will be prompted for a URL during setup. If you are accessing an API with a single endpoint, please provide a value. In cases where each instance of the source will need its own site, for example a Mastodon instance or an RSS feed, do not provide a value and let the user set it up.
   	- The value will also be used as a base URL for relative authentication URLs (see the _NOTE_ below).
   	- The configured value or a value provided by the user will be provided as as JavaScript variable.
   	- The configured value or a value provided by the user will be used to control when Tapestry sends an "Authorization" HTTP header. If the request's scheme is "https" on the default port (443) and the same domain or subdomain of `site`, the header will be included. 
@@ -598,12 +620,12 @@ Optional JWT properties:
   * jwt\_authorize: `String` with endpoint to authorize account (e.g. "/xrpc/createSession").
   * jwt\_refresh: `String` with endpoint to refresh account (e.g. "/xrpc/refreshSession").
  
-_NOTE:_ The oauth\_authorize, oauth\_token, jwt\_authorize, and jwt\_refresh endpoints can be relative or absolute URLs. Relative paths use the `site` variable above as a base (allowing a single connector to support multiple federated servers, like with Mastodon). Absolute paths allow different domains to be used for the initial authorize and token generation (as with Tumblr).
+> **Note:** The oauth\_authorize, oauth\_token, jwt\_authorize, and jwt\_refresh endpoints can be relative or absolute URLs. Relative paths use the `site` variable above as a base (allowing a single connector to support multiple federated servers, like with Mastodon). Absolute paths allow different domains to be used for the initial authorize and token generation (as with Tumblr).
 
-_NOTE:_ The authorization\_header string provides a template for the API endpoints. The following items in the string will be replaced with values managed by the Tapestry app:
+The authorization\_header string provides a template for the API endpoints. The following items in the string will be replaced with values managed by the Tapestry app:
 
   * `__ACCESS_TOKEN__` The access token returned when authenticating with OAuth or JWT.
-  * `__CLIENT_ID__` The client ID used to identify the plugin with the API.
+  * `__CLIENT_ID__` The client ID used to identify the connector with the API.
   
 For example, you could set a string value of `OAuth oauth_consumer_key="__CLIENT_ID__", oauth_token="__ACCESS_TOKEN__"` and the following header would be generated:
 
@@ -624,7 +646,7 @@ The configuration for the Mastodon connector is:
 	"oauth_code_key": "code",
 	"oauth_scope": "read+write+push",
 	"oauth_grant_type": "authorization_code",
-	"providesAttachments": true,
+	"provides_attachments": true,
 	"canPost": true,
 	"check_interval": 300
 }
@@ -643,7 +665,7 @@ The configuration for the JSON Feed connector is:
  
 ### ui-config.json
 
-The user interface in the Tapestry app is configured with this file. A connector plug-in can have any number of inputs, specified as an `Array`. Each input has this required property:
+The user interface in the Tapestry app is configured with this file. A connector can have any number of inputs, specified as an `Array`. Each input has this required property:
 
   * name: `String` with the name of the input. This value is used to generate variables for `plugin.js`.
 
@@ -711,15 +733,14 @@ The following `plugin.js` script is used in a connector that retrieves all recen
 
 ```javascript
 function load() {
-	const endpoint = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson";
+
+	let summaryName = "4.5_day";
+	
+	const endpoint = `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/${summaryName}.geojson`;
+
 	sendRequest(endpoint)
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
-
-		const creatorUrl = "https://earthquake.usgs.gov/";
-		const creatorName = "USGS – Latest Earthquakes";
-		let creator = Creator.createWithUriName(creatorUrl, creatorName);
-		creator.avatar = "https://earthquake.usgs.gov/earthquakes/map/assets/pwa/icon-192x192.png";
 
 		const features = jsonObject["features"];
 		
@@ -734,14 +755,14 @@ function load() {
 			const coordinates = geometry["coordinates"];
 			const latitude = coordinates[1];
 			const longitude = coordinates[0];
-			const mapsUrl = "https://maps.apple.com/?ll=" + latitude + "," + longitude + "&spn=15.0";
+			const mapsUrl = "https://maps.apple.com/?ll=" + latitude + "," + longitude + "&z=8";
 			
-			const content = "<p>" + text + " <a href=\"" + mapsUrl + "\">Open Map</a><p>"
+			const content = "<p>" + text + " <a href=\"" + mapsUrl + "\">Open Map</a></p>"
 			
-			let post = Post.createWithUriDateContent(url, date, content);
-			post.creator = creator;
+			let resultItem = Item.createWithUriDate(url, date);
+			resultItem.body = content;
 			
-			results.push(post);
+			results.push(resultItem);
 		}
 		processResults(results);
 	})
@@ -755,7 +776,7 @@ This connector took about an hour to write with no prior knowledge of the API or
 
 ### README.md
 
-This file, formatted with Markdown, is displayed in Tapestry when the user views your plugin’s information. It is highly recommended since it provides valuable context for the end user.
+This file, formatted with Markdown, is displayed in Tapestry when the user views your connector’s information. It is highly recommended since it provides valuable context for the end user.
 
 Only inline styles are supported (e.g. no `#` header blocks or images). This is a limitation of displaying Markdown in user interface controls on Apple platforms. 
 
@@ -776,7 +797,7 @@ This first connector for Tapestry was written by Craig Hockenberry
 
 The contents of this file will help the user setup the connector. There are two types of suggestions: one for site URLs and another for settings.
 
-For example, the RSS plug-in suggests a few sites to help someone set up a feed the first time:
+For example, the RSS connector suggests a few sites to help someone set up a feed the first time:
 
 ```json
 {
@@ -824,9 +845,9 @@ Settings for variables can also be suggested. The `name` parameter should match 
 
 ### discovery.json
 
-This file helps the user find your plugin when they have a URL to a page of HTML. The rules in this file will be checked and if all constraints match, the plugin will be suggested to the user in an interface that simplifies set up.
+This file helps the user find your connector when they have a URL to a page of HTML. The rules in this file will be checked and if all constraints match, the connector will be suggested to the user in an interface that simplifies set up.
 
-The file consists of three categories: one specifies a list of sites where the plugin can be used, the other two specify a list of rules for the URL and HTML.
+The file consists of three categories: one specifies a list of sites where the connector can be used, the other two specify a list of rules for the URL and HTML.
 
 ```json
 {
@@ -842,9 +863,9 @@ The following sections describe each category.
 
 #### sites
 
-The sites category is a list of strings where the plugin can be used. These checks are performed on the URL that is supplied by the user.
+The sites category is a list of strings where the connector can be used. These checks are performed on the URL that is supplied by the user.
 
-For example. the `com.gocomics` plugin only works on one site so it uses:
+For example. the `com.gocomics` connector only works on one site so it uses:
 
 ```json
 	"site": [
@@ -852,7 +873,7 @@ For example. the `com.gocomics` plugin only works on one site so it uses:
 	],
 ```
 
-The YouTube plugin will work on many different domains. Note that "youtube." will match "youtube.de", "youtube.fr", as well as the more familiar "youtube.com". The match does not use regular expressions.
+The YouTube connector will work on many different domains. Note that "youtube." will match "youtube.de", "youtube.fr", as well as the more familiar "youtube.com". The match does not use regular expressions.
 
 ```json
  	"site": [
@@ -864,7 +885,7 @@ The YouTube plugin will work on many different domains. Note that "youtube." wil
 
 Matches are case insensitive. If a user types "YouTube.com/@MKBHD", it will match the "youtube." rule above.
 
-If the sites rules do not match, no further checks are performed and the plugin is not suggested to the user.
+If the sites rules do not match, no further checks are performed and the connector is not suggested to the user.
 
 #### url
 
@@ -884,7 +905,7 @@ If the `extract` pattern is empty it's considered a match and the full URL will 
 	]
 ```
 
-The `extract` regex pattern begins and ends with a single slash ("/") character. The first capture group in the pattern is used to set the variable’s value. If no match is found, the rule fails and the plugin is not offered as a suggestion.
+The `extract` regex pattern begins and ends with a single slash ("/") character. The first capture group in the pattern is used to set the variable’s value. If no match is found, the rule fails and the connector is not offered as a suggestion.
 
 All regular expressions are, like the web itself, case insensitive. The pattern "/foo/" will match "FOOBAR" in both the URL and HTML.
 
@@ -905,7 +926,7 @@ This example extracts the "aww" from `http://reddit.com/r/aww/whatever` and puts
 
 The content at the URL provided by the user can also be checked. The strategy is to collect all elements of a specific type, check an attribute of those elements, see if it matches, and then optionally save all or part of a match in a variable.
 
-This approach allows your plugin to check things like `<link>` or `<meta>` tags for things that it needs. For example, a page that has the following HTML markup can be used with a plugin that handles RSS feeds:
+This approach allows your connector to check things like `<link>` or `<meta>` tags for things that it needs. For example, a page that has the following HTML markup can be used with a connector that handles RSS feeds:
 
 ```html
 <link rel="alternate" type="application/atom+xml" href="/feeds/main" />
@@ -916,7 +937,7 @@ The `html` rules use the following properties:
   * element (required): the elements in the HTML to check: "link", "meta", or any other tag.
   * check (required): the attribute in the element to check
   * match (required): a string _or_ regex pattern that will be used to find matching attribute values
-  * use (optional): the attribute in the element that contains a value to use with the plugin
+  * use (optional): the attribute in the element that contains a value to use with the connector
   * extract (optional): a string _or_ regex pattern that will be used on the value specified by `use` and passed to the `variable`.
   * variable (optional): `site` or any variable defined in `ui-config.json` that will be set using `extract`.
 
@@ -931,7 +952,7 @@ The HTML rule will fail if any of the following are true:
   * If no `check` attribute exists, or if the `match` is not satisfied.
   * If `use` is specified and no `extract` match is found.
 
-Finally, the "href" attribute value in a `use` property will always return an absolute URL, even if there is a relative URL in the document. Variables, specifically `site`, will need a fully qualified domain name to access data since the plugin has no notion of a base URL.
+Finally, the "href" attribute value in a `use` property will always return an absolute URL, even if there is a relative URL in the document. Variables, specifically `site`, will need a fully qualified domain name to access data since the connector has no notion of a base URL.
 
 A picture is worth a thousand words, so the remainder of this section are examples.
 
@@ -987,7 +1008,7 @@ If there are multiple rules, they must all pass. For example, the first rule bel
 	]
 ```
 
-Any HTML element can be used. For example the plugin for podcasts uses these two rules:
+Any HTML element can be used. For example the connector for podcasts uses these two rules:
 
 ```json
 		{
@@ -1032,7 +1053,7 @@ The following tags are supported:
   * `<blockquote>` for quoted text.
   * `<br>` for a newline in the context of a paragraph. Ignored outside a paragraph.
 
-For example, if your plugin provides the following `body`:
+For example, if your connector provides the following `body`:
 
 ```html
 <p><b>Bold</b>, <i>italic</i>, <b><i>both</i></b>,<br/> and <a href="#">link</a>.</p>
@@ -1050,9 +1071,9 @@ As with all HTML, unclosed tags will provide unpredictable results. Close your t
 
 Some attachments are easier to deal with as inline content. For example, a blog feed may contain several `<img>` tags that you want to see as images in the timeline.
 
-As a part of the step to create the timeline preview, images can automatically be extracted from the HTML content and assigned as `Attachment` objects.
+As a part of the step to create the timeline preview, images can automatically be extracted from the HTML content and assigned as `MediaAttachment` objects.
 
-For example, if your plugin provides this content:
+For example, if your connector provides this content:
 ```
 <p>In this blog post, I will explain our watermark.</p>
 <p><img src="https://iconfactory.com/images-v8/if_watermark.png"/></p>
@@ -1064,5 +1085,7 @@ Tapestry will create an attachment for this image:
 
 If the `<img>` tag includes an `alt` attribute, that text will be included in the attachment and used to improve accessibility in the timeline.
 
-This behavior can be disabled with `"providesAttachments": true` in `plugin-config.json`. The Mastodon plug-in is an example of where this is used because the API provides media attachments directly.
+A `LinkAttachment` can also be created automatically. Tapestry will check the first link in the first paragraph and show the preview card in the timeline if the link contains Open Graph information.
+
+This behavior can be disabled with `"provides_attachments": true` in `plugin-config.json`. The Mastodon connector is an example of where this is used because its API provides attachments directly in the payload.
 

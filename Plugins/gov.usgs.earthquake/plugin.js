@@ -30,12 +30,6 @@ function load() {
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 
-// 		const identityUrl = "https://earthquake.usgs.gov/";
-// 		const identityName = "USGS – Latest Earthquakes";
-// 		let identity = Identity.createWithName(identityName);
-// 		identity.uri = identityUrl;
-// 		identity.avatar = "https://earthquake.usgs.gov/earthquakes/map/assets/pwa/icon-192x192.png";
-
 		const features = jsonObject["features"];
 		
 		let results = [];
@@ -55,7 +49,6 @@ function load() {
 			
 			let resultItem = Item.createWithUriDate(url, date);
 			resultItem.body = content;
-//			resultItem.author = identity;
 			
 			results.push(resultItem);
 		}
