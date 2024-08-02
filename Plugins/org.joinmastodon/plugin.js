@@ -140,6 +140,7 @@ function postForItem(item, date = null) {
 
 function load() {
 	if (includeHome == "on") {
+		// TODO: Try sending these requests recursively to get more results: https://stackoverflow.com/a/46409627/132867
 		sendRequest(site + "/api/v1/timelines/home?limit=40", "GET")
 		.then((text) => {
 			//console.log(text);
