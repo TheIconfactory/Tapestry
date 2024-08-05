@@ -313,7 +313,7 @@ When you call `processVerification` you can supply an object with these properti
   * icon: `String` with a URL to an image that can be used as a graphic attached to the feed (e.g. an avatar).
   * baseUrl: `String` with a URL prefix for relative paths.
 
-This function will only be called if `needsVerification` is set to true in the connectors’s configuration.
+This function will only be called if `needs_verification` is set to true in the connectors’s configuration.
 
 ### load()
 
@@ -658,7 +658,7 @@ The configuration for the JSON Feed connector is:
 {
 	"id": "org.jsonfeed",
 	"display_name": "JSON Feed",
-	"needsVerification": true,
+	"needs_verification": true,
 	"check_interval": 300
 }
 ```
