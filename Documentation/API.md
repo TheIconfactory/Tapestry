@@ -351,12 +351,18 @@ For the "HEAD" method, the string result contains a JSON dictionary:
 
 For all other successful requests, the string contains the response body. Typically this will be HTML text or a JSON payload. Regular expressions can be used on HTML and `JSON.parse` can be used to build queryable object. In both cases, the data extracted will be returned to the Tapestry app.
 
-The `parameters` string can contain patterns that will be replaced with values managed by the Tapestry app:
+The `parameters` string and values in `extraHeaders` can contain patterns that will be replaced with values managed by the Tapestry app:
 
   * `__ACCESS_TOKEN__` The access token returned when authenticating with OAuth or JWT.
   * `__CLIENT_ID__` The client ID used to identify the connector with the API.
 
-For example, if you need to "POST" the client ID, you would use "client=\_\_CLIENT\_ID\_\_&foo=1&bar=something".
+For example, if you need to "POST" the client ID, you would use "client=\_\_CLIENT\_ID\_\_&text=foo" for the `parameters`. If you need this information in a header, use:
+
+```javascript
+	let extraHeaders = { "X-Client-Id", "__CLIENT_ID__" };
+	sendRequest(url, "GET", null, extraHeaders)
+	...
+```
 
 #### EXAMPLE
 
@@ -386,13 +392,14 @@ function verify() {
 > **Note:** The JavaScript code doesn’t have access to the OAuth access token (for security, no authentication information is exposed to the connector). If an access token is needed in a list of `parameters`, use `__ACCESS_TOKEN__` — it will be substituted before the request is sent to the endpoint.
 
 
-### processResults(results, complete)
+### processResults(results, isComplete)
 
 Sends any data that’s retrieved to the Tapestry app for display.
 
-  * results: `Array` with `Post` or `Creator` objects.
-  * complete: `Boolean` with a flag that indicates that result collection is complete and can be displayed in the app timeline (default is true).
+  * results: `Array` with `Item` objects.
+  * isComplete: `Boolean` with a flag that indicates that result collection is complete and can be displayed in the app timeline (default is true).
 
+After returning a true value for `isComplete` any further results will be ignored. If you have multiple async `sendRequest` in your connector, you'll need to have some kind of reference counter to know when to set the flag to true. See the [Mastodon connector](https://github.com/TheIconfactory/Tapestry/blob/main/Plugins/org.joinmastodon/plugin.js) for an example of how to do this.
 
 ### processError(error)
 
@@ -647,7 +654,6 @@ The configuration for the Mastodon connector is:
 	"oauth_scope": "read+write+push",
 	"oauth_grant_type": "authorization_code",
 	"provides_attachments": true,
-	"canPost": true,
 	"check_interval": 300
 }
 ```
