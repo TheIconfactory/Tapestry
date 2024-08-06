@@ -27,16 +27,7 @@
 const avatarRegex = /<div class="gc-avatar gc-avatar--creator xs"><img[^]*?src="(.*)"/
 
 function verify() {
-	let date = new Date();
-	date.setDate(date.getDate() - 1); // https://stackoverflow.com/questions/5511323/calculate-the-date-yesterday-in-javascript
-	
-	const year = date.getFullYear();
-	const month = date.getMonth() + 1;
-	const day = date.getDate();
-
-	const timestamp = String(year) + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
-
-	const url = site + "/" + comicId + "/" + timestamp;
+	const url = `${site}/random/${comicId}`;
 	sendRequest(url)
 	.then((html) => {
 		const properties = extractProperties(html);
