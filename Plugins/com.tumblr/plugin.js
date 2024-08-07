@@ -121,10 +121,12 @@ function queryDashboard(doIncrementalLoad) {
 		function requestToId(id, doIncrementalLoad, resolve, reject, limit = 5, results = []) {
 			let url = null
 			if (id == null) {
+				console.log("offset = none");
 				url = `${site}/v2/user/dashboard?limit=20`;
 			}
 			else {
-				const offset = (5 - limit) * 20;
+				const offset = (requestLimit - limit) * 20;
+				console.log(`offset = ${offset}`);
 				url = `${site}/v2/user/dashboard?limit=20&offset=${offset}`;
 			}
 			
@@ -159,7 +161,8 @@ function queryDashboard(doIncrementalLoad) {
 			});	
 		}
 
-		requestToId(null, doIncrementalLoad, resolve, reject);
+		const requestLimit = 10;
+		requestToId(null, doIncrementalLoad, resolve, reject, requestLimit);
 
 	});
 	
