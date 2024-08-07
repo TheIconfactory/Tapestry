@@ -597,6 +597,7 @@ Recommended properties:
   * site\_help: `String` with a short description of what’s required for `site`.
  
   * icon: `String` with a URL to an image that will be used as a default for this connector.
+  * service\_name: `String` with the name of the service (e.g. "Tumblr", "YouTube", "Blog", "Podcast").
   * item\_style: `String` with either "post" or "article" to define the content layout.
  	
 Optional properties:
