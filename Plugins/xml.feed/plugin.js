@@ -350,7 +350,8 @@ function load() {
 				}
 				
 				// add link attachment for link that isn't on this site (e.g. a link blog)
-				{
+				// but only if there isn't media already attached
+				if (attachments.length == 0) {
 					let linkPrefix = url.split("/").splice(0,3).join("/");
 					let feedPrefix = feedUrl.split("/").splice(0,3).join("/");
 					if (linkPrefix != feedPrefix) {
