@@ -20,7 +20,7 @@ function verify() {
 	});
 }
 
-function postForItem(item, date = null) {
+function postForItem(item, date = null, shortcodes = {}) {
 	const account = item["account"];
 	const displayName = account["display_name"];
 	const userName = account["username"];
@@ -44,7 +44,6 @@ function postForItem(item, date = null) {
 	post.body = content;
 	post.author = identity;
 
-	let shortcodes = {};
 	const itemEmojis = item["emojis"];
 	if (itemEmojis != null && itemEmojis.length > 0) {
 		for (const emoji of itemEmojis) {
@@ -181,6 +180,7 @@ function queryHomeTimeline(doIncrementalLoad) {
 					const date = new Date(item["created_at"]);
 						
 					let annotation = null;
+					let shortcodes = {};
 					let postItem = item;
 					if (item["reblog"] != null) {
 						const account = item["account"];
@@ -190,11 +190,18 @@ function queryHomeTimeline(doIncrementalLoad) {
 						annotation = Annotation.createWithText(`${accountName} Boosted`);
 						annotation.uri = account["url"];
 						annotation.icon = account["avatar"];
+
+						const accountEmojis = account["emojis"];
+						if (accountEmojis != null && accountEmojis.length > 0) {
+							for (const emoji of accountEmojis) {
+								shortcodes[emoji.shortcode] = emoji.static_url;
+							}
+						}
 							
 						postItem = item["reblog"];
 					}
 						
-					const post = postForItem(postItem, date);
+					const post = postForItem(postItem, date, shortcodes);
 					if (annotation != null) {
 						post.annotations = [annotation];
 					}
@@ -235,6 +242,7 @@ function queryMentions() {
 				let postItem = item["status"];
 
 				let annotation = null;
+				let shortcodes = {};
 				if (postItem.mentions != null && postItem.mentions.length > 0) {
 					const mentions = postItem.mentions;
 					const account = mentions[0];
@@ -245,9 +253,16 @@ function queryMentions() {
 					}
 					annotation = Annotation.createWithText(text);
 					annotation.uri = account["url"];
+
+					const accountEmojis = account["emojis"];
+					if (accountEmojis != null && accountEmojis.length > 0) {
+						for (const emoji of accountEmojis) {
+							shortcodes[emoji.shortcode] = emoji.static_url;
+						}
+					}
 				}
 	
-				const post = postForItem(postItem);
+				const post = postForItem(postItem, null, shortcodes);
 				if (annotation != null) {
 					post.annotations = [annotation];
 				}
