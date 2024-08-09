@@ -1,6 +1,8 @@
 
 # Tapestry Loom - User Guide
 
+**NOTE: This documentation is out-of-date and needs to be updated for the latest version of Tapestry Loom**
+
 ## Introduction
 
 The Tapestry Loom is a tool that allows you to build and test plugins using the [Tapestry API](API.md)

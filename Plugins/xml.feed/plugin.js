@@ -295,8 +295,11 @@ function load() {
 				let content = item["content:encoded"] ?? item.description;
 
 				let identity = null;
-				const authorName = item["dc:creator"];
+				let authorName = item["dc:creator"];
 				if (authorName != null) {
+					if (authorName instanceof Array) {
+						authorName = authorName.join(", ");
+					}
 					identity = Identity.createWithName(authorName);
 					identity.uri = feedUrl;
 				}
@@ -347,7 +350,8 @@ function load() {
 				}
 				
 				// add link attachment for link that isn't on this site (e.g. a link blog)
-				{
+				// but only if there isn't media already attached
+				if (attachments.length == 0) {
 					let linkPrefix = url.split("/").splice(0,3).join("/");
 					let feedPrefix = feedUrl.split("/").splice(0,3).join("/");
 					if (linkPrefix != feedPrefix) {
@@ -382,8 +386,11 @@ function load() {
 				let content = item.description;
 
 				let identity = null;
-				const authorName = item["dc:creator"];
+				let authorName = item["dc:creator"];
 				if (authorName != null) {
+					if (authorName instanceof Array) {
+						authorName = authorName.join(", ");
+					}
 					identity = Identity.createWithName(authorName);
 					identity.uri = feedUrl;
 				}
