@@ -67,7 +67,7 @@ function load() {
 			let attachment = MediaAttachment.createWithUrl(url);
 			attachment.aspectSize = {width: imageWidth, height: imageHeight};
 			
-			const content = `<p>${image} image of Continental US (${satellite})</p>`;
+			const content = `<p>${image} image of ${view} (${satellite})</p>`;
 			var resultItem = Item.createWithUriDate(url, date);
 			resultItem.body = content;
 			resultItem.attachments = [attachment];
@@ -80,5 +80,9 @@ function load() {
 		});	
 
 		lastDate = date;
+	}
+	else {
+		// no results	
+		processResults([]);
 	}
 }
