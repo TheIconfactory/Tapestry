@@ -850,6 +850,60 @@ Settings for variables can also be suggested. The `name` parameter should match 
 }
 ```
 
+### apps.json
+
+The contents of this file will help the user select a native app to be used by feeds created with this connector.
+
+```json
+{
+	"apps": [
+		{
+			"name": "Feditext",
+			"value": "feditext://__HOST_PATH__"
+		},
+		{
+			"name": "Ice Cubes",
+			"value": "IceCubesApp://__HOST_PATH__"
+		},
+		{
+			"name": "Ivory",
+			"value": "ivory:///openURL?url=__PATH_ENCODED__"
+		},
+		{
+			"name": "Mammoth",
+			"value": "mammoth://__HOST_PATH__"
+		},
+		{
+			"name": "Mona",
+			"value": "mona://__HOST_PATH__"
+		},
+		{
+			"name": "Bluesky",
+			"value": "bluesky:__PATH__"
+		}		
+	]
+}
+```
+
+The following components can be used as replacements in `value`:
+
+  * \_\_HOST\_PATH\_\_ = `mastodon.social/@chockenberry/112973783761167377`
+  * \_\_PATH\_ENCODED\_\_ = `https:%3A%2F%2Fmastodon.social%2F%40chockenberry%2F112973783761167377`
+  * \_\_PATH\_\_ = `/@chockenberry/112973783761167377`
+
+
+With this URL:
+
+> https://mastodon.social/@chockenberry/112973783761167377
+
+If the user has chosen Ivory as a native app, the URL will be transformed using \_\_PATH\_ENCODED\_\_ to:
+
+> `ivory:///openURL?url=https:%3A%2F%2Fmastodon.social%2F%40chockenberry%2F112973783761167377`
+
+When the a user chooses Mona, Mammoth, Ice Cubes, or Feditext, the URL will be transformed with \_\_HOST\_PATH\_\_ to:
+
+> `mona://mastodon.social/@chockenberry/112973783761167377`
+
 ### discovery.json
 
 This file helps the user find your connector when they have a URL to a page of HTML. The rules in this file will be checked and if all constraints match, the connector will be suggested to the user in an interface that simplifies set up.
