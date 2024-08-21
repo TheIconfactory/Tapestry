@@ -60,7 +60,7 @@ function itemForData(item) {
 	const date = new Date(item["created_utc"] * 1000);
 	const uri = "https://www.reddit.com" + encodeURI(item["permalink"]);
 	let title = item["title"];
-	let content = `<p><a href="${item["url"]}">Link</a></p>`;
+	let content = "";
 
 	if (item["selftext_html"] != null) {
 		let rawContent = item["selftext_html"];
