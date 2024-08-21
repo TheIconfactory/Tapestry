@@ -858,51 +858,67 @@ The contents of this file will help the user select a native app to be used by f
 {
 	"apps": [
 		{
+			"id": "com.github.feditext",
 			"name": "Feditext",
-			"value": "feditext://__HOST_PATH__"
+			"template": "feditext://__HOST_PATH__"
 		},
 		{
+			"id": "com.github.Dimillian",
 			"name": "Ice Cubes",
-			"value": "IceCubesApp://__HOST_PATH__"
+			"template": "IceCubesApp://__HOST_PATH__"
 		},
 		{
+			"id": "com.tapbots",
 			"name": "Ivory",
-			"value": "ivory:///openURL?url=__PATH_ENCODED__"
+			"template": "ivory:///openURL?url=__PATH_ENCODED__"
 		},
 		{
+			"id": "app.getmammoth",
 			"name": "Mammoth",
-			"value": "mammoth://__HOST_PATH__"
+			"template": "mammoth://__HOST_PATH__"
 		},
 		{
+			"id": "com.github.JunyuKuang",
 			"name": "Mona",
-			"value": "mona://__HOST_PATH__"
-		},
-		{
-			"name": "Bluesky",
-			"value": "bluesky:__PATH__"
-		}		
+			"template": "mona://__HOST_PATH__"
+		}
 	]
 }
 ```
 
-The following components can be used as replacements in `value`:
+The following components can be used as replacements in `template`:
 
   * \_\_HOST\_PATH\_\_ = `mastodon.social/@chockenberry/112973783761167377`
-  * \_\_PATH\_ENCODED\_\_ = `https:%3A%2F%2Fmastodon.social%2F%40chockenberry%2F112973783761167377`
   * \_\_PATH\_\_ = `/@chockenberry/112973783761167377`
+  * \_\_URL\_ENCODED\_\_ = `https:%3A%2F%2Fmastodon.social%2F%40chockenberry%2F112973783761167377`
+  * \_\_URL\_\_ = `https://mastodon.social/@chockenberry/112973783761167377`
 
 
 With this URL:
 
 > https://mastodon.social/@chockenberry/112973783761167377
 
-If the user has chosen Ivory as a native app, the URL will be transformed using \_\_PATH\_ENCODED\_\_ to:
+If the user has chosen Ivory as a native app, the URL will be transformed using \_\_URL\_ENCODED\_\_ to:
 
 > `ivory:///openURL?url=https:%3A%2F%2Fmastodon.social%2F%40chockenberry%2F112973783761167377`
 
 When the a user chooses Mona, Mammoth, Ice Cubes, or Feditext, the URL will be transformed with \_\_HOST\_PATH\_\_ to:
 
 > `mona://mastodon.social/@chockenberry/112973783761167377`
+
+The \_\_URL\_\_ template value can be useful for apps that support [Universal Links](https://developer.apple.com/ios/universal-links/). The URL will be handled externally by the operating system and the user is presented with a choice to use an app:
+
+```json
+{
+	"apps": [
+		{
+			"id": "com.tumblr",
+			"name": "Tumblr",
+			"template": "__URL__"
+		}
+	]
+}
+```
 
 ### discovery.json
 

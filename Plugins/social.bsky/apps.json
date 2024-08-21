@@ -1,0 +1,10 @@
+{
+	"apps": [
+		{
+			"id": "social.bsky",
+			"name": "Bluesky",
+			"template": "bluesky:__PATH__",
+			"pattern": "https://bsky.app"
+		}
+	]
+}
