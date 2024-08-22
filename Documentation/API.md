@@ -109,9 +109,9 @@ The creator of the content. See `Identity` below.
 
 #### attachments: Array of MediaAttachment and LinkAttachment
 
-Media and link attachments for the content. See below.
+Media and link attachments for the content. See `MediaAttachment` and `LinkAttachment` below.
 
-> **Note:** If the `provides_attachments` configuration parameter is not set or false, attachments will be generated automatically using the elements of the `body` HTML. Inline images and videos will result in media attachments, and the first link in the first paragraph will be checked as a link attachment.
+> **Note:** If the `provides_attachments` configuration parameter is not set or false, attachments will be generated automatically using the elements of the `body` HTML. If no other media attachments in the item have been set, inline images and videos will be used to create media attachments automatically. Additionally, the first link in the first paragraph will be checked for a link attachment. See the section on HTML Content for more information.
 
 #### shortcodes: Dictionary
 
@@ -860,27 +860,32 @@ The contents of this file will help the user select a native app to be used by f
 		{
 			"id": "com.github.feditext",
 			"name": "Feditext",
-			"template": "feditext://__HOST_PATH__"
+			"template": "feditext://__HOST_PATH__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
 		},
 		{
 			"id": "com.github.Dimillian",
 			"name": "Ice Cubes",
-			"template": "IceCubesApp://__HOST_PATH__"
+			"template": "IceCubesApp://__HOST_PATH__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
 		},
 		{
 			"id": "com.tapbots",
 			"name": "Ivory",
-			"template": "ivory:///openURL?url=__PATH_ENCODED__"
+			"template": "ivory:///openURL?url=__URL_ENCODED__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
 		},
 		{
 			"id": "app.getmammoth",
 			"name": "Mammoth",
-			"template": "mammoth://__HOST_PATH__"
+			"template": "mammoth://__HOST_PATH__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
 		},
 		{
 			"id": "com.github.JunyuKuang",
 			"name": "Mona",
-			"template": "mona://__HOST_PATH__"
+			"template": "mona://__HOST_PATH__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
 		}
 	]
 }
@@ -914,11 +919,14 @@ The \_\_URL\_\_ template value can be useful for apps that support [Universal Li
 		{
 			"id": "com.tumblr",
 			"name": "Tumblr",
-			"template": "__URL__"
+			"template": "__URL__",
+			"pattern": "https://([a-z0-9_]+\\.|)tumblr\\.com"
 		}
 	]
 }
 ```
+
+The `pattern` is a regular expression. When a link’s URL matches the pattern, the URL created by the template will be opened.
 
 ### discovery.json
 
@@ -1156,7 +1164,7 @@ For example, if your connector provides this content:
 <p><img src="https://iconfactory.com/images-v8/if_watermark.png"/></p>
 ```
 
-Tapestry will create an attachment for this image:
+If no media attachments have been added to an item, Tapestry will create them automatically from inline images and show this in the media viewer:
 
 <img width="46" height="46" src="https://iconfactory.com/images-v8/if_watermark.png"/>
 
@@ -1164,5 +1172,16 @@ If the `<img>` tag includes an `alt` attribute, that text will be included in th
 
 A `LinkAttachment` can also be created automatically. Tapestry will check the first link in the first paragraph and show the preview card in the timeline if the link contains Open Graph information.
 
+<table>
+	<tr>
+		<th>State</th>
+		<th>Behavior</th>
+	</tr>
+	<tr>
+		<td>True</td>
+		<td>Good</td>
+	</tr>
+</table>
+	
 This behavior can be disabled with `"provides_attachments": true` in `plugin-config.json`. The Mastodon connector is an example of where this is used because its API provides attachments directly in the payload.
 
