@@ -336,7 +336,7 @@ function contentForRecord(record) {
 		return "<p>Deleted post</p>";
 	}
 	// TODO: This logic is fragile...
-	if (record.text == null && record?.value.text == null) {
+	if (record.text == null && record?.value == null) { //record?.value.text == null) {
 		return "";
 	}
 	

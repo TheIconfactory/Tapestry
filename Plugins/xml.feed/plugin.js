@@ -85,6 +85,9 @@ function verify() {
 		}
 		else if (jsonObject.rss != null) {
 			// RSS 2.0
+// TODO: Check that XML is good:
+// if (jsonObject.rss instanceof Object	&& jsonObject.rss.channel instanceof Object) { ... }
+
 			const baseUrl = jsonObject.rss.channel.link;
 			const displayName = jsonObject.rss.channel.title;
 
@@ -211,8 +214,11 @@ function load() {
 				const content = entry.content ?? entry.summary;
 				
 				var identity = null;
-				const authorName = entry.author.name;
+				let authorName = entry.author.name;
 				if (authorName != null) {
+					if (authorName instanceof Array) {
+						authorName = authorName.join(", ");
+					}
 					identity = Identity.createWithName(authorName);
 					if (entry.author.uri != null) {
 						identity.uri = entry.author.uri;
