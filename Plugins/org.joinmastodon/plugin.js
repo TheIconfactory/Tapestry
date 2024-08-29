@@ -38,7 +38,7 @@ function postForItem(item, date = null, shortcodes = {}) {
 		postDate = date;
 	}
 	
-	const uri = item["uri"];
+	const uri = item["url"];
 	const content = item["content"];
 	const post = Item.createWithUriDate(uri, postDate);
 	post.body = content;
