@@ -2,7 +2,7 @@
 var missing = {value: true};
 
 function load() {
-//	DO SIN TAX ERR DUH
+	//SIN TAX ERR DUH
 	
 	if (missing.value == undefined) {
 		processError("WTF?");
@@ -14,8 +14,8 @@ function load() {
 	let item = Item.createWithUriDate(uri, date);
 	item.body = `<b>Hello, world.`;
 	
-	processResults([item]);
+	//processResults([item]);
 
-	processError("Done!");
+	//processError("Done!");
 	//throw new Error("Whoops!")
 }
