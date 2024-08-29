@@ -57,6 +57,7 @@ function load() {
 		}
 		else {
 			console.log(JSON.stringify(jsonObject, null, "    "));
+			processResults(null);
 		}
 	})
 	.catch((requestError) => {

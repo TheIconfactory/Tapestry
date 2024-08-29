@@ -70,6 +70,7 @@ function load() {
 	console.log(`timestamp = ${timestamp}`);
 	
 	if (timestamp == lastTimestamp) {
+		processResults(null);
 		return;
 	}
 	
@@ -114,8 +115,7 @@ function load() {
 		}
 	})
 	.catch((requestError) => {
-		// NOTE: It's possible that the comic for the day has not been posted yet (timezones, yay). So fail silently.
-		//processError(requestError);
+		processError(requestError);
 	});
 	
 }

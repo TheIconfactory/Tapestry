@@ -83,6 +83,6 @@ function load() {
 	}
 	else {
 		// no results	
-		processResults([]);
+		processResults(null);
 	}
 }
