@@ -9,7 +9,7 @@
 		{
 			"id": "com.github.Dimillian",
 			"name": "Ice Cubes",
-			"template": "IceCubesApp://__HOST_PATH__",
+			"template": "icecubesapp://__HOST_PATH__",
 			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
 		},
 		{
