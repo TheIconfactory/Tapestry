@@ -65,8 +65,13 @@ function load() {
 				const url = item.link;
 				const date = new Date(item.pubDate);
 				
-				const enclosureUrl = item["enclosure$attrs"].url;
-				const attachment = MediaAttachment.createWithUrl(enclosureUrl);
+				let attachment = null;
+				if (item["enclosure$attrs"] != null) {
+					const enclosureUrl = item["enclosure$attrs"].url;
+					if (enclosureUrl != null) {
+						attachment = MediaAttachment.createWithUrl(enclosureUrl);
+					}
+				}
 
 				let title = null;
 				let subtitle = null;
@@ -97,8 +102,10 @@ function load() {
 				const resultItem = Item.createWithUriDate(url, date);
 				resultItem.title = title;
 				resultItem.body = content;
-				resultItem.attachments = [attachment];
-			
+				if (attachment != null) {
+					resultItem.attachments = [attachment];
+				}
+				
 				results.push(resultItem);
 			}
 
