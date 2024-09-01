@@ -214,17 +214,19 @@ function load() {
 				const content = entry.content ?? entry.summary;
 				
 				var identity = null;
-				let authorName = entry.author.name;
-				if (authorName != null) {
-					if (authorName instanceof Array) {
-						authorName = authorName.join(", ");
-					}
-					identity = Identity.createWithName(authorName);
-					if (entry.author.uri != null) {
-						identity.uri = entry.author.uri;
+				if (entry.author != null) {
+					let authorName = entry.author.name;
+					if (authorName != null) {
+						if (authorName instanceof Array) {
+							authorName = authorName.join(", ");
+						}
+						identity = Identity.createWithName(authorName);
+						if (entry.author.uri != null) {
+							identity.uri = entry.author.uri;
+						}
 					}
 				}
-
+				
 				const resultItem = Item.createWithUriDate(url, date);
 				if (title != null) {
 					resultItem.title = title;
