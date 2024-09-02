@@ -297,6 +297,9 @@ function load() {
 			const items = jsonObject.rss.channel.item;
 			var results = [];
 			for (const item of items) {
+				if (item.link == null || item.pubDate == null) {
+					continue;
+				}
 				const url = item.link;
 				const date = new Date(item.pubDate);
 				let title = item.title?.trim();
