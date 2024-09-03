@@ -120,16 +120,18 @@ function load() {
 			
 				const title = mediaGroup["media:title"];
 				let description = null;
-				if (mediaGroup["media:description"] != null) {
-					// NOTE: YouTube shorts do not have a description.
-					let rawDescription = mediaGroup["media:description"];
-					let linkedDescription = rawDescription.replace(urlRegex, "<a href=\"$1\">$1</a>");
-					let paragraphs = linkedDescription.split("\n\n");
-					description = paragraphs.map((paragraph) => {
-						let lines = paragraph.split("\n");
-						let breakLines = lines.join("<br/>");
-						return `<p>${breakLines}</p>`
-					}).join("\n")
+				if (includeDescription == "on") {
+					if (mediaGroup["media:description"] != null) {
+						// NOTE: YouTube shorts do not have a description.
+						let rawDescription = mediaGroup["media:description"];
+						let linkedDescription = rawDescription.replace(urlRegex, "<a href=\"$1\">$1</a>");
+						let paragraphs = linkedDescription.split("\n\n");
+						description = paragraphs.map((paragraph) => {
+							let lines = paragraph.split("\n");
+							let breakLines = lines.join("<br/>");
+							return `<p>${breakLines}</p>`
+						}).join("\n")
+					}
 				}
 				const resultItem = Item.createWithUriDate(url, date);
 				resultItem.title = title;
