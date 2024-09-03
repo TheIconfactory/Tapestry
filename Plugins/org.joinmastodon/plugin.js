@@ -25,8 +25,9 @@ function postForItem(item, date = null, shortcodes = {}) {
 	const displayName = account["display_name"];
 	const userName = account["username"];
 	const accountName = (displayName ? displayName : userName);
+	const fullAccountName = account["acct"];
 	const identity = Identity.createWithName(accountName);
-	identity.username = "@" + userName;
+	identity.username = "@" + fullAccountName;
 	identity.uri = account["url"];
 	identity.avatar = account["avatar"];
 
