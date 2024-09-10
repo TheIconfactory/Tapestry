@@ -5,6 +5,7 @@
 	"icon": "https://bsky.app/static/apple-touch-icon.png",
 	"item_style": "post",
 	"site": "https://bsky.social",
+	"jwt_prompt": "Email Address",
 	"jwt_authorize": "/xrpc/com.atproto.server.createSession",
 	"jwt_refresh": "/xrpc/com.atproto.server.refreshSession",
 	"provides_attachments": true,

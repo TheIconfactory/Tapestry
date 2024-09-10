@@ -625,6 +625,7 @@ Optional OAuth properties:
 
 Optional JWT properties:
 
+  * jwt\_prompt: `String` with account information needed to login (e.g. "Email Address").
   * jwt\_authorize: `String` with endpoint to authorize account (e.g. "/xrpc/createSession").
   * jwt\_refresh: `String` with endpoint to refresh account (e.g. "/xrpc/refreshSession").
  
