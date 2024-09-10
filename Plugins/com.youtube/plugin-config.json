@@ -2,6 +2,7 @@
 	"id": "com.youtube",
 	"display_name": "YouTube Channel",
 	"service_name": "YouTube",
+	"default_color": "orange",
 	"icon": "https://www.youtube.com/s/desktop/905763c7/img/favicon_144x144.png",
 	"site_prompt": "Feed URL",
 	"site_placeholder": "https://youtube.com/feeds/video.xml",

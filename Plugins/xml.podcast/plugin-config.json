@@ -2,6 +2,7 @@
 	"id": "xml.podcast",
 	"display_name": "Podcast Feed",
 	"service_name": "Podcast",
+	"default_color": "teal",
 	"icon": "https://usetapestry.com/icons/podcast.png",
 	"site_prompt": "Podcast URL",
 	"site_placeholder": "https://foo.com/feed",

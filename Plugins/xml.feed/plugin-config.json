@@ -2,6 +2,7 @@
 	"id": "xml.feed",
 	"display_name": "Blog Feed (RSS/Atom)",
 	"service_name": "Blog",
+	"default_color": "purple",
 	"icon": "https://usetapestry.com/icons/rss.png",
 	"site_prompt": "Feed URL",
 	"site_placeholder": "https://foo.com/feed.xml",
