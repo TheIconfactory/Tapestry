@@ -309,7 +309,11 @@ function queryStatusesForUser(id) {
 	
 }
 
-var doIncrementalLoad = false;
+// NOTE: The connector does incremental loads (only most recent items in home timeline) until 6 hours have
+// elapsed since the last full load (200 items in home timeline). The idea here is that this covers cases where
+// this script is still in memory, but hasn't been accessed while the device/user is sleeping.
+var lastFullUpdate = null;
+const fullUpdateInterval = 6 * 60 * 60;
 
 // NOTE: There needs to be something like the Web Storage API where data (like the account id) can be persisted
 // across launches of the app. Having to verify the credentials each time to get information that doesn't change
@@ -320,6 +324,24 @@ var userId = null;
 var loadCounter = 0;
 
 function load() {
+	let doIncrementalLoad = false;
+	if (lastFullUpdate != null) {
+		// check the interval provided by the user
+		console.log(`fullUpdateInterval = ${fullUpdateInterval}`);
+		let delta = fullUpdateInterval * 1000; // seconds → milliseconds
+		let future = (lastFullUpdate.getTime() + delta);
+		console.log(`future = ${new Date(future)}`);
+		let now = (new Date()).getTime();
+		if (now < future) {
+			// time has not elapsed, do an incremental load
+			console.log(`time until next update = ${(future - now) / 1000} sec.`);
+			doIncrementalLoad = true;
+		}
+	}
+	if (!doIncrementalLoad) {
+		lastFullUpdate = new Date();
+	}
+	
 	loadCounter = 0;
 	if (includeHome == "on") {
 		loadCounter += 1;
