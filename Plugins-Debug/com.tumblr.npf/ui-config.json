@@ -1,0 +1,10 @@
+{
+	"inputs": [
+		{
+			"name": "includeReblogs",
+			"type": "switch",
+			"prompt": "Include Reblogs",
+			"value": "on",
+		}
+	]
+}
