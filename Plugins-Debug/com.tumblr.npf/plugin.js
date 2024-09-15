@@ -23,23 +23,29 @@ function verify() {
 	});
 }
 
-function postForItem(item) {	
+function postForItem(item) {
+	if (item.type != "blocks") {
+		return null;
+	}
+	
 	let isReblog = false;
 	if (item.parent_post_url != null) {
 		isReblog = true;
 	}
+	if (isReblog && includeReblogs != "on") {
+		return null;
+	}
+	
+	const date = new Date(item.timestamp * 1000); // timestamp is seconds since the epoch, convert to milliseconds
 
-	let identity = null;
+	let contentItem = item;
+	let contentBlocks = item.content;
+	let contentUrl = item.post_url;
+	
 	let annotation = null;
 	if (isReblog) {
 		if (item.trail != null && item.trail.length > 0) {
-			let lastTrail = item.trail[0];
-			
-			const blog = lastTrail.blog;
-			identity = Identity.createWithName(blog.name);
-			identity.uri = blog.url;
-			identity.username = blog.title;
-			identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
+			let trailOrigin = item.trail[0];
 			
 			const itemBlog = item.blog;
 			const userName = itemBlog.name;
@@ -47,136 +53,140 @@ function postForItem(item) {
 			annotation = Annotation.createWithText(text);
 			annotation.icon = "https://api.tumblr.com/v2/blog/" + itemBlog.name + "/avatar/96";
 			annotation.uri = item.post_url;
+			
+			contentItem = trailOrigin;
+			contentBlocks = contentItem.content;
+			
+// 			if (contentItem.blog.url != null && contentItem.post.id != null) {
+// 				contentUrl = contentItem.blog.url + "/" + contentItem.post.id;
+// 			}
 		}
 	}
-	else {
-		const blog = item.blog;
-		identity = Identity.createWithName(blog.name);
-		identity.uri = blog.url;
-		identity.username = blog.title;
-		identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
-	}
 	
-	const uri = item.post_url;
-	const date = new Date(item.timestamp * 1000); // timestamp is seconds since the epoch, convert to milliseconds
+	const blog = contentItem.blog;
+	identity = Identity.createWithName(blog.name);
+	identity.uri = blog.url;
+	identity.username = blog.title;
+	identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
 	
-	// item.tags = ["tweets", "white people twitter", "funny tweets"]
-	// linked as: https://www.tumblr.com/tagged/white%20people%20twitter
 	
-	// parent_post_url != null if a reblog
-
-// 	let lastTrail = null;
-// 	if (item.parent_post_url != null) {
-// 		// this is a reblog
-// 		if (item.trail != null && item.trail.length > 0) {
-// 			lastTrail = item.trail[0];
-// 		}
-// 	}
-	
-// 	let annotation = null;
-// 	if (lastTrail != null) {
-// 		const userName = lastTrail.blog.name;
-// 		const text = "Reblogged " + userName;
-// 		annotation = Annotation.createWithText(text);
-// 		annotation.uri = item.parent_post_url;
-// 	}
-	
-	let text = "";
+	let body = "";
 	let attachments = [];
-	if (item.type == "blocks") {
-		//text = item.summary;
-		console.log(`item.summary = ${item.summary}`);
-		console.log(`item.content.length = ${item.content.length}`);
-		for (const itemContent of item.content) {
-			switch (itemContent.type) {
-			case "text":
-				console.log(`itemContent.text = ${itemContent.text}`);
-				text += itemContent.text;
-				break;
-			case "image":
-				if (itemContent.media != null && itemContent.media.length > 0) {
-					const mediaProperties = itemContent.media[0];
+	console.log(`contentBlocks.length = ${contentBlocks.length}`);
+	for (const contentBlock of contentBlocks) {
+		console.log(`  contentBlock.type = ${contentBlock.type}`);
+		switch (contentBlock.type) {
+		case "text":
+			body += `<p>${contentBlock.text}</p>`;
+			break;
+		case "image":
+			if (contentBlock.media != null && contentBlock.media.length > 0) {
+				const mediaProperties = contentBlock.media[0];
+				const posterProperties = mediaProperties.poster;
 
-					const attachment = MediaAttachment.createWithUrl(mediaProperties.url);
-					attachment.text = itemContent.alt_text;
-					attachment.mimeType = mediaProperties.type;
-					attachment.aspectSize = {width: mediaProperties.width, height: mediaProperties.height};
-					if (mediaProperties.poster != null) {
-						attachment.thumbnail = mediaProperties.poster.url;
-					}
-					attachments.push(attachment);
+				const attachment = MediaAttachment.createWithUrl(mediaProperties.url);
+				attachment.text = contentBlock.alt_text;
+				attachment.mimeType = mediaProperties.type;
+				attachment.aspectSize = {width: mediaProperties.width, height: mediaProperties.height};
+				if (posterProperties != null) {
+					attachment.thumbnail = posterProperties.url;
 				}
-				break;
-// 			case "link":
-// 				break;
-// 			case "audio":
-// 				break;
-// 			case "video":
-// 				break;
-// 			case "paywall":
-// 				break;
-			default:
-				text += `*** ${itemContent.type} not handled ***`;
+				attachments.push(attachment);
 			}
+			break;
+		case "link":
+			if (contentBlock.url != null) {
+				let attachment = LinkAttachment.createWithUrl(contentBlock.url);
+				if (contentBlock.title != null && contentBlock.title.length > 0) {
+					attachment.title = contentBlock.title;
+				}
+				if (contentBlock.description != null && contentBlock.description.length > 0) {
+					attachment.subtitle = contentBlock.description;
+				}
+				if (contentBlock.author != null && contentBlock.author.length > 0) {
+					attachment.authorName = contentBlock.author;
+				}
+				if (contentBlock.poster != null && contentBlock.poster.length > 0) {
+					let poster = contentBlock.poster[0];
+					if (poster.url != null) {
+						attachment.image = poster.url;
+					}
+					if (poster.width != null && poster.height != null) {
+						attachment.aspectSize = {width : poster.width, height: poster.height};
+					}
+				}
+				attachments.push(attachment);
+			}
+			break;
+		case "audio":
+			if (contentBlock.media != null) {
+				const mediaProperties = contentBlock.media;
+				const posterProperties = contentBlock.poster;
+
+				// TODO: Check contentBlock.provider and use embed_html if not "tumblr"
+				
+				const attachment = MediaAttachment.createWithUrl(mediaProperties.url);
+				attachment.mimeType = mediaProperties.type;
+				attachment.aspectSize = {width: mediaProperties.width, height: mediaProperties.height};
+				if (posterProperties != null && posterProperties.length > 0) {
+					attachment.thumbnail = posterProperties[0].url;
+				}
+				attachments.push(attachment);
+			}
+			else if (contentBlock.url != null) {
+				const attachment = MediaAttachment.createWithUrl(contentBlock.url);
+				attachments.push(attachment);
+			}
+			break;
+		case "video":
+			if (contentBlock.media != null) {
+				const mediaProperties = contentBlock.media;
+				const posterProperties = contentBlock.poster;
+
+				// TODO: Check contentBlock.provider and use embed_html if not "tumblr"
+				
+				const attachment = MediaAttachment.createWithUrl(mediaProperties.url);
+				attachment.mimeType = mediaProperties.type;
+				attachment.aspectSize = {width: mediaProperties.width, height: mediaProperties.height};
+				if (posterProperties != null && posterProperties.length > 0) {
+					attachment.thumbnail = posterProperties[0].url;
+				}
+				attachments.push(attachment);
+			}
+			else if (contentBlock.url != null) {
+				const attachment = MediaAttachment.createWithUrl(contentBlock.url);
+				attachments.push(attachment);
+			}
+			break;
+// 		case "paywall":
+// 			break;
+		default:
+			body += `Cannot display ${contentBlock.type} content.`;
 		}
 	}
-// 	else if (item.type == "photo") {
-// 		if (lastTrail != null) {
-// 			text = lastTrail.content;
-// 		}
-// 		else {
-// 			text = item.caption;
-// 		}
-// 					
-// 		attachments = [];
-// 		let photos = item.photos;
-// 		let count = photos.length;
-// 		for (let index = 0; index < count; index++) {
-// 			let photo = photos[index];
-// 			const media = photo.original_size.url;
-// 			const attachment = MediaAttachment.createWithUrl(media);
-// 			attachment.text = item.summary;
-// 			attachment.mimeType = "image";
-// 			attachments.push(attachment);
-// 		}
-// 	}
-// 	else if (item.type == "video") {
-// 		if (lastTrail != null) {
-// 			text = lastTrail.content;
-// 		}
-// 		else {
-// 			text = item.body;
-// 		}
-// 	}
-// 	else if (item.type == "text") {
-// 		if (lastTrail != null) {
-// 			text = lastTrail.content;
-// 		}
-// 		else {
-// 			text = item.body;
-// 		}
-// 	}
-// 	else {
-// 		console.log(`ignored item.type = ${item.type}`);
-// 	}
 	
-	//if (text.length != 0) {
-		const post = Item.createWithUriDate(uri, date);
-		post.body = text;
-		if (identity != null) {
-			post.author = identity;
+	if (includeTags == "on") {
+		if (contentItem.tags != null && contentItem.tags.length > 0) {
+			body += "<div>";
+			for (const tag of contentItem.tags) {
+				body += `<a href="https://www.tumblr.com/tagged/${encodeURIComponent(tag)}">#${tag}</a> `;
+			}
+			body += "</div>";
 		}
-		if (attachments.length != 0) {
-			post.attachments = attachments
-		}
-		if (annotation != null) {
-			post.annotations = [annotation];
-		}
-		return post;
-	//}
-	//else {
-	//	return null;
-	//}
+	}
+
+	const post = Item.createWithUriDate(contentUrl, date);
+	post.body = body;
+	if (identity != null) {
+		post.author = identity;
+	}
+	if (attachments.length != 0) {
+		post.attachments = attachments
+	}
+	if (annotation != null) {
+		post.annotations = [annotation];
+	}
+	return post;
 }
 
 function queryDashboard(doIncrementalLoad) {
