@@ -65,11 +65,21 @@ function postForItem(item) {
 		}
 	}
 	
-	const blog = contentItem.blog;
-	identity = Identity.createWithName(blog.name);
-	identity.uri = blog.url;
-	identity.username = blog.title;
-	identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
+	if (contentItem.blog != null) {
+		const blog = contentItem.blog;
+		identity = Identity.createWithName(blog.name);
+		identity.uri = blog.url;
+		identity.username = blog.title;
+		identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
+	}
+	else {
+		if (contentItem.broken_blog_name != null) {
+			identity = Identity.createWithName(contentItem.broken_blog_name);
+		}
+		else {
+			console.log(`**** no blog for '${item.summary}' ${item.post_url}`);
+		}
+	}
 	
 	let body = "";
 	let attachments = [];
@@ -79,6 +89,39 @@ function postForItem(item) {
 		console.log(`  [${blockIndex}] contentBlock.type = ${contentBlock.type}`);
 		switch (contentBlock.type) {
 		case "text":
+			let text = contentBlock.text;
+			let textFormats = contentBlock.formatting;
+			if (textFormats != null && textFormats.length > 0) {
+			
+				console.log(`    text = ${text}`);
+				let codeUnits = Array.from(text);
+				console.log(`    codeUnits = ${codeUnits}`);
+				let codePoints = codeUnits.map((codeUnit) => codeUnit.codePointAt());
+				
+				let codePointOffset = 0;
+				for (const textFormat of textFormats) {
+					const start = textFormat.start;
+					const end = textFormat.end;
+					
+					switch (textFormat.type) {
+					case "bold":
+						codePoints.splice(end + codePointOffset, 0, 60, 47, 98, 62); // insert </b> at end of range
+						codePoints.splice(start + codePointOffset, 0, 60, 98, 62); // insert <b> at beginning of range 
+						codePointOffset += 7; // number of code points added above
+						break;
+					case "italic":
+						codePoints.splice(end + codePointOffset, 0, 60, 47, 105, 62); // insert </i> at end of range
+						codePoints.splice(start + codePointOffset, 0, 60, 105, 62); // insert <i> at beginning of range 
+						codePointOffset += 7; // number of code points added above
+						break;
+					}
+				}
+					
+				console.log(`    codePoints = ${codePoints}`);
+				let convertedText = String.fromCodePoint(...codePoints);
+				console.log(`    convertedText = ${convertedText}`);
+				text = convertedText;
+			}
 			
 			let askLayout = contentLayouts.find(({ type }) => type === "ask");
 			if (askLayout != null && askLayout.blocks.indexOf(blockIndex) != -1) {
@@ -87,10 +130,10 @@ function postForItem(item) {
 				if (askLayout.blog != null) {
 					asker = askLayout.blog.name;
 				}
-				body += `<blockquote><p><strong>${asker}</strong> asked:</p><p>${contentBlock.text}</p></blockquote>`;
+				body += `<blockquote><p><strong>${asker}</strong> asked:</p><p>${text}</p></blockquote>`;
 			}
 			else {
-				body += `<p>${contentBlock.text}</p>`;
+				body += `<p>${text}</p>`;
 			}
 			break;
 		case "image":
