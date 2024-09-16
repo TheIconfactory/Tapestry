@@ -38,9 +38,10 @@ function postForItem(item) {
 	
 	const date = new Date(item.timestamp * 1000); // timestamp is seconds since the epoch, convert to milliseconds
 
-	let contentItem = item;
-	let contentBlocks = item.content;
 	let contentUrl = item.post_url;
+	let contentItem = item;
+	let contentBlocks = contentItem.content;
+	let contentLayouts = contentItem.layout;
 	
 	let annotation = null;
 	if (isReblog) {
@@ -56,6 +57,7 @@ function postForItem(item) {
 			
 			contentItem = trailOrigin;
 			contentBlocks = contentItem.content;
+			contentLayouts = contentItem.layout;
 			
 // 			if (contentItem.blog.url != null && contentItem.post.id != null) {
 // 				contentUrl = contentItem.blog.url + "/" + contentItem.post.id;
@@ -69,15 +71,27 @@ function postForItem(item) {
 	identity.username = blog.title;
 	identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
 	
-	
 	let body = "";
 	let attachments = [];
 	console.log(`contentBlocks.length = ${contentBlocks.length}`);
+	let blockIndex = 0;
 	for (const contentBlock of contentBlocks) {
-		console.log(`  contentBlock.type = ${contentBlock.type}`);
+		console.log(`  [${blockIndex}] contentBlock.type = ${contentBlock.type}`);
 		switch (contentBlock.type) {
 		case "text":
-			body += `<p>${contentBlock.text}</p>`;
+			
+			let askLayout = contentLayouts.find(({ type }) => type === "ask");
+			if (askLayout != null && askLayout.blocks.indexOf(blockIndex) != -1) {
+				// text is an ask, style it with a blockquote
+				let asker = "Anonymous";
+				if (askLayout.blog != null) {
+					asker = askLayout.blog.name;
+				}
+				body += `<blockquote><p><strong>${asker}</strong> asked:</p><p>${contentBlock.text}</p></blockquote>`;
+			}
+			else {
+				body += `<p>${contentBlock.text}</p>`;
+			}
 			break;
 		case "image":
 			if (contentBlock.media != null && contentBlock.media.length > 0) {
@@ -163,15 +177,17 @@ function postForItem(item) {
 		default:
 			body += `Cannot display ${contentBlock.type} content.`;
 		}
+		
+		blockIndex += 1;
 	}
 	
 	if (includeTags == "on") {
 		if (contentItem.tags != null && contentItem.tags.length > 0) {
-			body += "<div>";
+			body += "<p>";
 			for (const tag of contentItem.tags) {
 				body += `<a href="https://www.tumblr.com/tagged/${encodeURIComponent(tag)}">#${tag}</a> `;
 			}
-			body += "</div>";
+			body += "</p>";
 		}
 	}
 
@@ -244,6 +260,7 @@ function queryDashboard(doIncrementalLoad) {
 	
 }
 
+// TODO: FOR TESTING ONLY
 //var doIncrementalLoad = false;
 var doIncrementalLoad = true;
 
