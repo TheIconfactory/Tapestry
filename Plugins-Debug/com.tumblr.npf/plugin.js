@@ -91,36 +91,71 @@ function postForItem(item) {
 		case "text":
 			let text = contentBlock.text;
 			let textFormats = contentBlock.formatting;
+// 			text = "supercalifragilisticexpialidocious";
+// 			textFormats = [
+// 			{
+// 				"start": 0,
+// 				"end": 20,
+// 				"type": "bold"
+// 			},
+// 			{
+// 				"start": 9,
+// 				"end": 34,
+// 				"type": "italic"
+// 			}]
 			if (textFormats != null && textFormats.length > 0) {
-			
+/*
 				console.log(`    text = ${text}`);
 				let codeUnits = Array.from(text);
 				console.log(`    codeUnits = ${codeUnits}`);
 				let codePoints = codeUnits.map((codeUnit) => codeUnit.codePointAt());
 				
+				const startCodePointLength = 3;
+				const endCodePointLength = 4;
+				
+				let lastEnd = -1;
+				let isOverlapping = false;
 				let codePointOffset = 0;
 				for (const textFormat of textFormats) {
 					const start = textFormat.start;
 					const end = textFormat.end;
 					
+					if (lastEnd != -1) {
+						if (start < lastEnd) {
+							// overlapping range
+							codePointOffset += (startCodePointLength);
+							isOverlapping = true;
+						}
+						else {
+							codePointOffset += (startCodePointLength + endCodePointLength);
+							if (isOverlapping) {
+								codePointOffset += (endCodePointLength);
+								isOverlapping = false;
+							}
+						}
+					}
+					
 					switch (textFormat.type) {
 					case "bold":
 						codePoints.splice(end + codePointOffset, 0, 60, 47, 98, 62); // insert </b> at end of range
 						codePoints.splice(start + codePointOffset, 0, 60, 98, 62); // insert <b> at beginning of range 
-						codePointOffset += 7; // number of code points added above
+						//codePointOffset += 7; // number of code points added above
 						break;
 					case "italic":
 						codePoints.splice(end + codePointOffset, 0, 60, 47, 105, 62); // insert </i> at end of range
 						codePoints.splice(start + codePointOffset, 0, 60, 105, 62); // insert <i> at beginning of range 
-						codePointOffset += 7; // number of code points added above
+						//codePointOffset += 7; // number of code points added above
 						break;
 					}
+					
+					lastEnd = end;
 				}
 					
 				console.log(`    codePoints = ${codePoints}`);
 				let convertedText = String.fromCodePoint(...codePoints);
 				console.log(`    convertedText = ${convertedText}`);
 				text = convertedText;
+*/
 			}
 			
 			let askLayout = contentLayouts.find(({ type }) => type === "ask");
