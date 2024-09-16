@@ -24,93 +24,263 @@ function verify() {
 }
 
 function postForItem(item) {
-	const blog = item.blog;
-	const identity = Identity.createWithName(blog.name);
-	identity.uri = blog.url;
-	identity.username = blog.title;
-	identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
-
-	const uri = item.post_url;
-	const date = new Date(item.timestamp * 1000); // timestamp is seconds since the epoch, convert to milliseconds
-	
-	// item.tags = ["tweets", "white people twitter", "funny tweets"]
-	// linked as: https://www.tumblr.com/tagged/white%20people%20twitter
-	
-	// parent_post_url != null if a reblog
-
-	let lastTrail = null;
-	if (item.parent_post_url != null) {
-		// this is a reblog
-		if (item.trail != null && item.trail.length > 0) {
-			lastTrail = item.trail[0];
-		}
-	}
-	
-	let annotation = null;
-	if (lastTrail != null) {
-		const userName = lastTrail.blog.name;
-		const text = "Reblogged " + userName;
-		annotation = Annotation.createWithText(text);
-		annotation.uri = item.parent_post_url;
-	}
-	
-	let content = null;
-	let attachments = null;
-	if (item.type == "photo") {
-		if (lastTrail != null) {
-			content = lastTrail.content;
-		}
-		else {
-			content = item.caption;
-		}
-					
-		attachments = [];
-		let photos = item.photos;
-		let count = photos.length;
-		for (let index = 0; index < count; index++) {
-			let photo = photos[index];
-			const media = photo.original_size.url;
-			const attachment = MediaAttachment.createWithUrl(media);
-			attachment.text = item.summary;
-			attachment.mimeType = "image";
-			attachments.push(attachment);
-		}
-	}
-	else if (item.type == "video") {
-		if (lastTrail != null) {
-			content = lastTrail.content;
-		}
-		else {
-			content = item.body;
-		}
-	}
-	else if (item.type == "text") {
-		if (lastTrail != null) {
-			content = lastTrail.content;
-		}
-		else {
-			content = item.body;
-		}
-	}
-	else {
-		console.log(`ignored item.type = ${item.type}`);
-	}
-	
-	if (content != null) {
-		const post = Item.createWithUriDate(uri, date);
-		post.body = content;
-		post.author = identity;
-		if (attachments != null) {
-			post.attachments = attachments
-		}
-		if (annotation != null) {
-			post.annotations = [annotation];
-		}
-		return post;
-	}
-	else {
+	if (item.type != "blocks") {
 		return null;
 	}
+	
+	let isReblog = false;
+	if (item.parent_post_url != null) {
+		isReblog = true;
+	}
+	if (isReblog && includeReblogs != "on") {
+		return null;
+	}
+	
+	const date = new Date(item.timestamp * 1000); // timestamp is seconds since the epoch, convert to milliseconds
+
+	let contentUrl = item.post_url;
+	let contentItem = item;
+	let contentBlocks = contentItem.content;
+	let contentLayouts = contentItem.layout;
+	
+	let annotation = null;
+	if (isReblog) {
+		if (item.trail != null && item.trail.length > 0) {
+			let trailOrigin = item.trail[0];
+			
+			const itemBlog = item.blog;
+			const userName = itemBlog.name;
+			const text = "Reblogged by " + userName;
+			annotation = Annotation.createWithText(text);
+			annotation.icon = "https://api.tumblr.com/v2/blog/" + itemBlog.name + "/avatar/96";
+			annotation.uri = item.post_url;
+			
+			contentItem = trailOrigin;
+			contentBlocks = contentItem.content;
+			contentLayouts = contentItem.layout;
+			
+// 			if (contentItem.blog.url != null && contentItem.post.id != null) {
+// 				contentUrl = contentItem.blog.url + "/" + contentItem.post.id;
+// 			}
+		}
+	}
+	
+	if (contentItem.blog != null) {
+		const blog = contentItem.blog;
+		identity = Identity.createWithName(blog.name);
+		identity.uri = blog.url;
+		identity.username = blog.title;
+		identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
+	}
+	else {
+		if (contentItem.broken_blog_name != null) {
+			identity = Identity.createWithName(contentItem.broken_blog_name);
+		}
+		else {
+			console.log(`**** no blog for '${item.summary}' ${item.post_url}`);
+		}
+	}
+	
+	let body = "";
+	let attachments = [];
+	console.log(`contentBlocks.length = ${contentBlocks.length}`);
+	let blockIndex = 0;
+	for (const contentBlock of contentBlocks) {
+		console.log(`  [${blockIndex}] contentBlock.type = ${contentBlock.type}`);
+		switch (contentBlock.type) {
+		case "text":
+			let text = contentBlock.text;
+			let textFormats = contentBlock.formatting;
+// 			text = "supercalifragilisticexpialidocious";
+// 			textFormats = [
+// 			{
+// 				"start": 0,
+// 				"end": 20,
+// 				"type": "bold"
+// 			},
+// 			{
+// 				"start": 9,
+// 				"end": 34,
+// 				"type": "italic"
+// 			}]
+			if (textFormats != null && textFormats.length > 0) {
+/*
+				console.log(`    text = ${text}`);
+				let codeUnits = Array.from(text);
+				console.log(`    codeUnits = ${codeUnits}`);
+				let codePoints = codeUnits.map((codeUnit) => codeUnit.codePointAt());
+				
+				const startCodePointLength = 3;
+				const endCodePointLength = 4;
+				
+				let lastEnd = -1;
+				let isOverlapping = false;
+				let codePointOffset = 0;
+				for (const textFormat of textFormats) {
+					const start = textFormat.start;
+					const end = textFormat.end;
+					
+					if (lastEnd != -1) {
+						if (start < lastEnd) {
+							// overlapping range
+							codePointOffset += (startCodePointLength);
+							isOverlapping = true;
+						}
+						else {
+							codePointOffset += (startCodePointLength + endCodePointLength);
+							if (isOverlapping) {
+								codePointOffset += (endCodePointLength);
+								isOverlapping = false;
+							}
+						}
+					}
+					
+					switch (textFormat.type) {
+					case "bold":
+						codePoints.splice(end + codePointOffset, 0, 60, 47, 98, 62); // insert </b> at end of range
+						codePoints.splice(start + codePointOffset, 0, 60, 98, 62); // insert <b> at beginning of range 
+						//codePointOffset += 7; // number of code points added above
+						break;
+					case "italic":
+						codePoints.splice(end + codePointOffset, 0, 60, 47, 105, 62); // insert </i> at end of range
+						codePoints.splice(start + codePointOffset, 0, 60, 105, 62); // insert <i> at beginning of range 
+						//codePointOffset += 7; // number of code points added above
+						break;
+					}
+					
+					lastEnd = end;
+				}
+					
+				console.log(`    codePoints = ${codePoints}`);
+				let convertedText = String.fromCodePoint(...codePoints);
+				console.log(`    convertedText = ${convertedText}`);
+				text = convertedText;
+*/
+			}
+			
+			let askLayout = contentLayouts.find(({ type }) => type === "ask");
+			if (askLayout != null && askLayout.blocks.indexOf(blockIndex) != -1) {
+				// text is an ask, style it with a blockquote
+				let asker = "Anonymous";
+				if (askLayout.blog != null) {
+					asker = askLayout.blog.name;
+				}
+				body += `<blockquote><p><strong>${asker}</strong> asked:</p><p>${text}</p></blockquote>`;
+			}
+			else {
+				body += `<p>${text}</p>`;
+			}
+			break;
+		case "image":
+			if (contentBlock.media != null && contentBlock.media.length > 0) {
+				const mediaProperties = contentBlock.media[0];
+				const posterProperties = mediaProperties.poster;
+
+				const attachment = MediaAttachment.createWithUrl(mediaProperties.url);
+				attachment.text = contentBlock.alt_text;
+				attachment.mimeType = mediaProperties.type;
+				attachment.aspectSize = {width: mediaProperties.width, height: mediaProperties.height};
+				if (posterProperties != null) {
+					attachment.thumbnail = posterProperties.url;
+				}
+				attachments.push(attachment);
+			}
+			break;
+		case "link":
+			if (contentBlock.url != null) {
+				let attachment = LinkAttachment.createWithUrl(contentBlock.url);
+				if (contentBlock.title != null && contentBlock.title.length > 0) {
+					attachment.title = contentBlock.title;
+				}
+				if (contentBlock.description != null && contentBlock.description.length > 0) {
+					attachment.subtitle = contentBlock.description;
+				}
+				if (contentBlock.author != null && contentBlock.author.length > 0) {
+					attachment.authorName = contentBlock.author;
+				}
+				if (contentBlock.poster != null && contentBlock.poster.length > 0) {
+					let poster = contentBlock.poster[0];
+					if (poster.url != null) {
+						attachment.image = poster.url;
+					}
+					if (poster.width != null && poster.height != null) {
+						attachment.aspectSize = {width : poster.width, height: poster.height};
+					}
+				}
+				attachments.push(attachment);
+			}
+			break;
+		case "audio":
+			if (contentBlock.media != null) {
+				const mediaProperties = contentBlock.media;
+				const posterProperties = contentBlock.poster;
+
+				// TODO: Check contentBlock.provider and use embed_html if not "tumblr"
+				
+				const attachment = MediaAttachment.createWithUrl(mediaProperties.url);
+				attachment.mimeType = mediaProperties.type;
+				attachment.aspectSize = {width: mediaProperties.width, height: mediaProperties.height};
+				if (posterProperties != null && posterProperties.length > 0) {
+					attachment.thumbnail = posterProperties[0].url;
+				}
+				attachments.push(attachment);
+			}
+			else if (contentBlock.url != null) {
+				const attachment = MediaAttachment.createWithUrl(contentBlock.url);
+				attachments.push(attachment);
+			}
+			break;
+		case "video":
+			if (contentBlock.media != null) {
+				const mediaProperties = contentBlock.media;
+				const posterProperties = contentBlock.poster;
+
+				// TODO: Check contentBlock.provider and use embed_html if not "tumblr"
+				
+				const attachment = MediaAttachment.createWithUrl(mediaProperties.url);
+				attachment.mimeType = mediaProperties.type;
+				attachment.aspectSize = {width: mediaProperties.width, height: mediaProperties.height};
+				if (posterProperties != null && posterProperties.length > 0) {
+					attachment.thumbnail = posterProperties[0].url;
+				}
+				attachments.push(attachment);
+			}
+			else if (contentBlock.url != null) {
+				const attachment = MediaAttachment.createWithUrl(contentBlock.url);
+				attachments.push(attachment);
+			}
+			break;
+// 		case "paywall":
+// 			break;
+		default:
+			body += `Cannot display ${contentBlock.type} content.`;
+		}
+		
+		blockIndex += 1;
+	}
+	
+	if (includeTags == "on") {
+		if (contentItem.tags != null && contentItem.tags.length > 0) {
+			body += "<p>";
+			for (const tag of contentItem.tags) {
+				body += `<a href="https://www.tumblr.com/tagged/${encodeURIComponent(tag)}">#${tag}</a> `;
+			}
+			body += "</p>";
+		}
+	}
+
+	const post = Item.createWithUriDate(contentUrl, date);
+	post.body = body;
+	if (identity != null) {
+		post.author = identity;
+	}
+	if (attachments.length != 0) {
+		post.attachments = attachments
+	}
+	if (annotation != null) {
+		post.annotations = [annotation];
+	}
+	return post;
 }
 
 function queryDashboard(doIncrementalLoad) {
@@ -122,12 +292,12 @@ function queryDashboard(doIncrementalLoad) {
 			let url = null
 			if (id == null) {
 				console.log("offset = none");
-				url = `${site}/v2/user/dashboard?limit=20`;
+				url = `${site}/v2/user/dashboard?npf=true&reblog_info=true&notes_info=true&limit=20`;
 			}
 			else {
 				const offset = (requestLimit - limit) * 20;
 				console.log(`offset = ${offset}`);
-				url = `${site}/v2/user/dashboard?limit=20&offset=${offset}`;
+				url = `${site}/v2/user/dashboard?npf=true&reblog_info=true&notes_info=true&limit=20&offset=${offset}`;
 			}
 			
 			console.log(`doIncrementalLoad = ${doIncrementalLoad}, id = ${id}`);

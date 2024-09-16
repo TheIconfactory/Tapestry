@@ -13,5 +13,6 @@
 	"oauth_scope": "basic+offline_access",
 	"oauth_grant_type": "authorization_code",
 	"oauth_http_redirect": true,
+	"provides_attachments": true,
 	"check_interval": 300
 }

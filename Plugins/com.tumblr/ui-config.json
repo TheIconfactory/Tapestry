@@ -1,4 +1,16 @@
 {
 	"inputs": [
+		{
+			"name": "includeReblogs",
+			"type": "switch",
+			"prompt": "Include Reblogs",
+			"value": "on",
+		},
+		{
+			"name": "includeTags",
+			"type": "switch",
+			"prompt": "Include Tags",
+			"value": "on",
+		}
 	]
 }
