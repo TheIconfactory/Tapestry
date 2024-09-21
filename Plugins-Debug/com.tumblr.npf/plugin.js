@@ -104,6 +104,17 @@ function postForItem(item) {
 // 				"type": "italic"
 // 			}]
 			if (textFormats != null && textFormats.length > 0) {
+			
+				let index = 0;
+				let rangeStart = 0;
+				let rangeEnd = text.length;
+				
+				function spliceText(text, index, rangeStart, rangeEnd) {
+					if (index < textFormats.length) {
+						textFormat = textFormats[index];
+					}
+				}
+				
 /*
 				console.log(`    text = ${text}`);
 				let codeUnits = Array.from(text);
@@ -372,4 +383,184 @@ function countCodePoints(str) {
 		len += 1;
 	}
 	return len;
+}
+
+function test() {
+	let index = -1;
+	let codeUnits = Array.from(text);
+	let codePoints = codeUnits.map((codeUnit) => codeUnit.codePointAt());
+	
+	let range = [0, text.length];
+	let result = breakText(range);
+	applyItems(result.items, 0, codePoints);
+	console.log(`test: codePoints = ${String.fromCodePoint(...codePoints)}`);
+
+	function breakText(range) {
+		index += 1;
+
+		let remainderRange = null;
+		let remainderIndex = null;
+
+		let items = [];
+
+		let done = false;
+		while (! done) {
+			let intersectionRange = intersect(range, formatRange(index));
+
+			if (intersectionRange == null) {
+				// no more intersections at this level, send items and remainder up a level
+				done = true;
+			}
+			else {
+				// if there is a partial intersection, the remainder is handled in the previous level
+				remainderRange = difference(formatRange(index), range);
+				if (remainderRange != null) {
+					remainderIndex = index;
+				}
+
+				let captureIndex = index; // the index is global and will advance when calling breakText()
+				let result = breakText(intersectionRange);
+
+				let intersectionStart = intersectionRange[0];
+				let intersectionEnd = intersectionRange[1];
+
+				// get the original code points and apply item results from breakText()
+				let original = codePoints.slice(intersectionStart, intersectionEnd);
+				applyItems(result.items, intersectionStart, original);
+
+				let captureRange = formatRange(captureIndex);
+				let capturePrefix = formatPrefix(captureIndex);
+				let captureSuffix = formatSuffix(captureIndex);
+
+				let replacement = [...capturePrefix, ...original, ...captureSuffix];
+
+				console.log(`capture ${captureIndex} = ${String.fromCodePoint(...replacement)}`);
+				item = { start: captureRange[0], length: captureRange[1] - captureRange[0], replacement: replacement};
+				items.push(item);
+
+				if (result.remainderRange != null) {
+					let remainderRange = result.remainderRange;
+					let remainderIndex = result.remainderIndex;
+					let type = formatType(remainderIndex);
+					let prefix = formatPrefix(remainderIndex);
+					let suffix = formatSuffix(remainderIndex);
+					let slice = codePoints.slice(remainderRange[0], remainderRange[1]);
+					let replacement = [...prefix, ...slice, ...suffix];
+					console.log(`capture remainder ${index} = ${String.fromCodePoint(...replacement)} (${type}) range = ${remainderRange}`);
+					item = { start: remainderRange[0], length: remainderRange[1] - remainderRange[0], replacement: replacement};
+					items.push(item);
+				}
+			}
+		}
+
+		return {items: items, remainderRange: remainderRange, remainderIndex: remainderIndex}
+	}
+
+	function applyItems(items, offset, string) {
+		if (items.length > 0) {
+			let substitutions = items.reverse();
+			for (const substitution of substitutions) {
+				let start = substitution.start;
+				let length = substitution.length;
+				string.splice(start - offset, length, ...substitution.replacement)
+			}
+		}
+		return string;
+	}
+	
+} // test()
+
+function formatRange(index) {
+	if (index < textFormats.length) {
+		//console.log(`formatRange index = ${index}`);
+		return [textFormats[index].start, textFormats[index].end];
+	}
+	return null;
+}
+
+function formatType(index) {
+	if (index < textFormats.length) {
+		return textFormats[index].type;
+	}
+	return null;
+}
+
+function formatPrefix(index) {
+	if (index < textFormats.length) {
+		switch (textFormats[index].type) {
+			case "bold":
+				return [60, 98, 62]; // <b>";
+				break;
+			case "italic":
+				return [60, 105, 62]; // <i>";
+				break;
+			default:
+				return [];
+				break;
+		}
+	}
+	return null;
+}
+
+function formatSuffix(index) {
+	if (index < textFormats.length) {
+		switch (textFormats[index].type) {
+			case "bold":
+				return [60, 47, 98, 62]; // </b>";
+				break;
+			case "italic":
+				return [60, 47, 105, 62]; // </i>";
+				break;
+			default:
+				return [];
+				break;
+		}
+	}
+	return null;
+}
+
+// derived from: https://scicomp.stackexchange.com/a/26260
+function intersect(a, b) {
+	if (a == null || b == null) {
+		return null;
+	}
+
+	aStart = a[0];
+	aEnd = a[1];
+	bStart = b[0];
+	bEnd = b[1];
+
+	if (bStart > aEnd || aStart > bEnd) {
+		return null;
+	}
+	let oStart = Math.max(aStart, bStart);
+	let oEnd = Math.min(aEnd, bEnd);
+	if (oStart == oEnd) {
+		return null;
+	}
+	return [oStart, oEnd]
+}
+
+// derived from: https://stackoverflow.com/a/26342664/132867
+function difference(a, b) {
+	if (a == null || b == null) {
+		return null;
+	}
+
+	aStart = a[0];
+	aEnd = a[1];
+	bStart = b[0];
+	bEnd = b[1];
+
+	if (aStart < bStart) {
+		let oStart = aStart;
+		let oEnd = Math.min(aEnd, bStart);
+		return [oStart, oEnd];
+	}
+	if (aEnd > bEnd || aStart > bEnd) {
+		let oStart = Math.max(aStart, bEnd);
+		let oEnd = aEnd;
+		return [oStart, oEnd];
+	}
+	return null;
 }
