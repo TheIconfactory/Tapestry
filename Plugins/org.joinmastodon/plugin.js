@@ -6,7 +6,8 @@ function verify() {
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		
-		const displayName = "@" + jsonObject["username"];
+		const instance = site.split("/")[2] ?? "";
+		const displayName = "@" + jsonObject["username"] + "@" + instance;
 		const icon = jsonObject["avatar"];
 		
 		const verification = {
