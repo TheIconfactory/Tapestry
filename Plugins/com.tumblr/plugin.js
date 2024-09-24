@@ -70,7 +70,12 @@ function postForItem(item) {
 		identity = Identity.createWithName(blog.name);
 		identity.uri = blog.url;
 		identity.username = blog.title;
-		identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
+		if (blog.avatar != null && blog.avatar.length > 0) {
+			identity.avatar = blog.avatar[0].url;
+		}
+		else {
+			identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
+		}
 	}
 	else {
 		if (contentItem.broken_blog_name != null) {
@@ -101,8 +106,8 @@ function postForItem(item) {
 			if (askLayout != null && askLayout.blocks.indexOf(blockIndex) != -1) {
 				// text is an ask, style it with a blockquote
 				let asker = "Anonymous";
-				if (askLayout.blog != null) {
-					asker = askLayout.blog.name;
+				if (askLayout?.attribution?.blog?.name != null) {
+					asker = askLayout.attribution.blog.name;
 				}
 				body += `<blockquote><p><strong>${asker}</strong> asked:</p><p>${text}</p></blockquote>`;
 			}
@@ -296,7 +301,6 @@ const fullUpdateInterval = 6 * 60 * 60;
 function load() {
 	let doIncrementalLoad = false;
 	if (lastFullUpdate != null) {
-		// check the interval provided by the user
 		console.log(`fullUpdateInterval = ${fullUpdateInterval}`);
 		let delta = fullUpdateInterval * 1000; // seconds → milliseconds
 		let future = (lastFullUpdate.getTime() + delta);
@@ -311,7 +315,7 @@ function load() {
 	if (!doIncrementalLoad) {
 		lastFullUpdate = new Date();
 	}
-
+doIncrementalLoad = false
 	queryDashboard(doIncrementalLoad)
 	.then((results) =>  {
 		console.log(`finished dashboard`);
