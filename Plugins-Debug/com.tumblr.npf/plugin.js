@@ -91,82 +91,10 @@ function postForItem(item) {
 		case "text":
 			let text = contentBlock.text;
 			let textFormats = contentBlock.formatting;
-// 			text = "supercalifragilisticexpialidocious";
-// 			textFormats = [
-// 			{
-// 				"start": 0,
-// 				"end": 20,
-// 				"type": "bold"
-// 			},
-// 			{
-// 				"start": 9,
-// 				"end": 34,
-// 				"type": "italic"
-// 			}]
 			if (textFormats != null && textFormats.length > 0) {
-			
-				let index = 0;
-				let rangeStart = 0;
-				let rangeEnd = text.length;
-				
-				function spliceText(text, index, rangeStart, rangeEnd) {
-					if (index < textFormats.length) {
-						textFormat = textFormats[index];
-					}
-				}
-				
-/*
-				console.log(`    text = ${text}`);
-				let codeUnits = Array.from(text);
-				console.log(`    codeUnits = ${codeUnits}`);
-				let codePoints = codeUnits.map((codeUnit) => codeUnit.codePointAt());
-				
-				const startCodePointLength = 3;
-				const endCodePointLength = 4;
-				
-				let lastEnd = -1;
-				let isOverlapping = false;
-				let codePointOffset = 0;
-				for (const textFormat of textFormats) {
-					const start = textFormat.start;
-					const end = textFormat.end;
-					
-					if (lastEnd != -1) {
-						if (start < lastEnd) {
-							// overlapping range
-							codePointOffset += (startCodePointLength);
-							isOverlapping = true;
-						}
-						else {
-							codePointOffset += (startCodePointLength + endCodePointLength);
-							if (isOverlapping) {
-								codePointOffset += (endCodePointLength);
-								isOverlapping = false;
-							}
-						}
-					}
-					
-					switch (textFormat.type) {
-					case "bold":
-						codePoints.splice(end + codePointOffset, 0, 60, 47, 98, 62); // insert </b> at end of range
-						codePoints.splice(start + codePointOffset, 0, 60, 98, 62); // insert <b> at beginning of range 
-						//codePointOffset += 7; // number of code points added above
-						break;
-					case "italic":
-						codePoints.splice(end + codePointOffset, 0, 60, 47, 105, 62); // insert </i> at end of range
-						codePoints.splice(start + codePointOffset, 0, 60, 105, 62); // insert <i> at beginning of range 
-						//codePointOffset += 7; // number of code points added above
-						break;
-					}
-					
-					lastEnd = end;
-				}
-					
-				console.log(`    codePoints = ${codePoints}`);
-				let convertedText = String.fromCodePoint(...codePoints);
-				console.log(`    convertedText = ${convertedText}`);
-				text = convertedText;
-*/
+				let formattedText = formatText(text, textFormats);
+				console.log(`    formattedText = ${formattedText}`);
+				text = formattedText;
 			}
 			
 			let askLayout = contentLayouts.find(({ type }) => type === "ask");
@@ -367,34 +295,21 @@ function load() {
 	});	
 }
 
-// returns the number of Unicode code points in a JavaScript string
-// derived from: https://coolaj86.com/articles/how-to-count-unicode-characters-in-javascript/
-function countCodePoints(str) {
-	let len = 0;
-	let index = 0;
-	while (index < str.length) {
-		let point = str.codePointAt(index);
-      	let width = 0;
-		while (point) {
-			width += 1;
-			point = point >> 8;
-		}
-		index += Math.round(width/2);
-		len += 1;
-	}
-	return len;
-}
 
-function test() {
+function formatText(text, textFormats) {
 	let index = -1;
 	let codeUnits = Array.from(text);
 	let codePoints = codeUnits.map((codeUnit) => codeUnit.codePointAt());
-	
+
+	textFormats.sort((a, b) => a.start - b.start); // items are captured in start order, but are not guaranteed to be from API
+
 	let range = [0, text.length];
 	let result = breakText(range);
 	applyItems(result.items, 0, codePoints);
-	console.log(`test: codePoints = ${String.fromCodePoint(...codePoints)}`);
-
+	let formattedText = String.fromCodePoint(...codePoints)
+	console.log(`test: formattedText = ${formattedText}`);
+	return formattedText;
+	
 	function breakText(range) {
 		index += 1;
 
@@ -468,56 +383,109 @@ function test() {
 		return string;
 	}
 	
+	function formatRange(index) {
+		if (index < textFormats.length) {
+			//console.log(`formatRange index = ${index}`);
+			return [textFormats[index].start, textFormats[index].end];
+		}
+		return null;
+	}
+	
+	function formatType(index) {
+		if (index < textFormats.length) {
+			return textFormats[index].type;
+		}
+		return null;
+	}
+	
+	/*
+		The following format types and parameters are supported:
+		
+		{type: "bold", start: 22, end: 26}, 
+		{type: "italic", start: 28, end: 34},
+		{type: "link", start: 79, end: 83, url: "https://example.com/"}
+		{type: "small", start: 95, end: 100},
+		{type: "strikethrough", start: 112, end: 119}
+		{type: "mention", start: 22, end: 36, blog: {name: "flork-of-cows", url: "https://flork-of-cows.tumblr.com/", uuid: "t:jfn3ONc8OeKjq8QfLYcR3A"}}
+		
+		Code points are precomputed with: Array.from("</b>").map((codeUnit) => codeUnit.codePointAt())
+	*/
+	
+	function formatPrefix(index) {
+		if (index < textFormats.length) {
+			switch (textFormats[index].type) {
+				case "bold":
+					return [60,98,62]; // <b>;
+					break;
+				case "italic":
+					return [60,105,62]; // <i>;
+					break;
+				case "link":
+					if (textFormats[index].url != null) {
+						let start = [60,97,32,104,114,101,102,61,34]; // <a href="
+						let urlCodePoints = Array.from(textFormats[index].url).map((codeUnit) => codeUnit.codePointAt());
+						let end = [34,62]; // ">
+						return [...start, ...urlCodePoints, ...end];
+					}
+					return [];
+					break;
+				case "small":
+					return [60,115,109,97,108,108,62]; // <small>;
+					break;
+				case "strikethrough":
+					return [60,115,62]; // <s>;
+					break;
+				case "mention":
+					if (textFormats[index].blog != null && textFormats[index].blog.url != null) {
+						let start = [60,97,32,104,114,101,102,61,34]; // <a href="
+						let urlCodePoints = Array.from(textFormats[index].blog.url).map((codeUnit) => codeUnit.codePointAt());
+						let end = [34,62]; // ">
+						return [...start, ...urlCodePoints, ...end];
+					}
+					return [];
+					break;
+				default:
+					return [];
+					break;
+			}
+		}
+		return null;
+	}
+	
+	function formatSuffix(index) {
+		if (index < textFormats.length) {
+			switch (textFormats[index].type) {
+				case "bold":
+					return [60,47,98,62]; // </b>
+					break;
+				case "italic":
+					return [60,47,105,62]; // </i>
+					break;
+				case "link":
+					if (textFormats[index].url != null) {
+						return [60,47,97,62]; // </a>
+					}
+					return [];
+					break;
+					break;
+				case "small":
+					return [60,47,115,109,97,108,108,62]; // </small>;
+				case "strikethrough":
+					return [60,47,115,62]; // </s>;
+				case "mention":
+					if (textFormats[index].blog != null && textFormats[index].blog.url != null) {
+						return [60,47,97,62]; // </a>
+					}
+					return [];
+					break;
+				default:
+					return [];
+					break;
+			}
+		}
+		return null;
+	}
 } // test()
-
-function formatRange(index) {
-	if (index < textFormats.length) {
-		//console.log(`formatRange index = ${index}`);
-		return [textFormats[index].start, textFormats[index].end];
-	}
-	return null;
-}
-
-function formatType(index) {
-	if (index < textFormats.length) {
-		return textFormats[index].type;
-	}
-	return null;
-}
-
-function formatPrefix(index) {
-	if (index < textFormats.length) {
-		switch (textFormats[index].type) {
-			case "bold":
-				return [60, 98, 62]; // <b>";
-				break;
-			case "italic":
-				return [60, 105, 62]; // <i>";
-				break;
-			default:
-				return [];
-				break;
-		}
-	}
-	return null;
-}
-
-function formatSuffix(index) {
-	if (index < textFormats.length) {
-		switch (textFormats[index].type) {
-			case "bold":
-				return [60, 47, 98, 62]; // </b>";
-				break;
-			case "italic":
-				return [60, 47, 105, 62]; // </i>";
-				break;
-			default:
-				return [];
-				break;
-		}
-	}
-	return null;
-}
 
 // derived from: https://scicomp.stackexchange.com/a/26260
 function intersect(a, b) {
