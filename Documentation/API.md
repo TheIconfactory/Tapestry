@@ -928,7 +928,7 @@ The \_\_URL\_\_ template value can be useful for apps that support [Universal Li
 }
 ```
 
-The `pattern` is a regular expression. When a link’s URL matches the pattern, the URL created by the template will be opened.
+The `pattern` is a case-insensitive regular expression. When a link’s URL matches the pattern, the URL created by the template will be opened.
 
 ### discovery.json
 
@@ -1135,6 +1135,7 @@ The following tags are supported:
   * `<p>` to start a paragraph.
   * `<strong>, <b>` for **strongly emphasized** text.
   * `<em>, <i>` for _emphasized_ text.
+  * `<strike>, <s>` for ~~strikethrough~~ text.
   * `<a>` for [linked](https://example.com) text.
   * `<img>` for inline attachments (see below).
   * `<blockquote>` for quoted text.
