@@ -12,5 +12,11 @@
 			"check": "href",
 			"match": "///(?:podcasts.apple.com|apple.co)//"
 		}
+	],
+	"xml": [
+		{
+			"root": "channel",
+			"with": "itunes:image"
+		}
 	]
 }
