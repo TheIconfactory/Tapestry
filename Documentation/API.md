@@ -940,7 +940,8 @@ The file consists of three categories: one specifies a list of sites where the c
 {
 	"sites": [],
 	"url": [],
-	"html": []
+	"html": [],
+	"xml": []
 }
 ```
 
@@ -1114,6 +1115,22 @@ Any HTML element can be used. For example the connector for podcasts uses these 
 
 The first rule checks that there is an RSS feed while the second rule checks if there is a link on the page to Apple's podcast directory. 
 
+#### xml
+
+If none of the rules above apply, the content will be checked for XML. There are two parameters, both of which are optional. This example will identify podcast feeds:
+
+```json
+	"xml": [
+		{
+			"root": "rss",
+			"with": "itunes:image"
+		}
+	]
+```
+
+The `root` element must be the first element in the content. In the example above, it guarantees that the XML data is in the RSS format.
+
+The `with` element must occur at least once in the content. The example above checks that the RSS feed contains an iTunes image, which is required for a podcast.
 
 ## HTML Content
 

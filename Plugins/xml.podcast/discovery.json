@@ -15,7 +15,7 @@
 	],
 	"xml": [
 		{
-			"root": "channel",
+			"root": "rss",
 			"with": "itunes:image"
 		}
 	]
