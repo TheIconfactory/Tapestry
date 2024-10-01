@@ -88,17 +88,17 @@ function postForItem(item) {
 	
 	let body = "";
 	let attachments = [];
-	console.log(`contentBlocks.length = ${contentBlocks.length}`);
+	//console.log(`contentBlocks.length = ${contentBlocks.length}`);
 	let blockIndex = 0;
 	for (const contentBlock of contentBlocks) {
-		console.log(`  [${blockIndex}] contentBlock.type = ${contentBlock.type}`);
+		//console.log(`  [${blockIndex}] contentBlock.type = ${contentBlock.type}`);
 		switch (contentBlock.type) {
 		case "text":
 			let text = contentBlock.text;
 			let textFormats = contentBlock.formatting;
 			if (textFormats != null && textFormats.length > 0) {
 				let formattedText = formatText(text, textFormats);
-				console.log(`    formattedText = ${formattedText}`);
+				//console.log(`    formattedText = ${formattedText}`);
 				text = formattedText;
 			}
 			
@@ -315,7 +315,7 @@ function load() {
 	if (!doIncrementalLoad) {
 		lastFullUpdate = new Date();
 	}
-doIncrementalLoad = false
+
 	queryDashboard(doIncrementalLoad)
 	.then((results) =>  {
 		console.log(`finished dashboard`);
@@ -341,7 +341,7 @@ function formatText(text, textFormats) {
 	let result = breakText(range);
 	applyItems(result.items, 0, codePoints);
 	let formattedText = String.fromCodePoint(...codePoints)
-	console.log(`test: formattedText = ${formattedText}`);
+	//console.log(`test: formattedText = ${formattedText}`);
 	return formattedText;
 	
 	function breakText(range) {
@@ -383,7 +383,7 @@ function formatText(text, textFormats) {
 
 				let replacement = [...capturePrefix, ...original, ...captureSuffix];
 
-				console.log(`capture ${captureIndex} = ${String.fromCodePoint(...replacement)}`);
+				//console.log(`capture ${captureIndex} = ${String.fromCodePoint(...replacement)}`);
 				item = { start: captureRange[0], length: captureRange[1] - captureRange[0], replacement: replacement};
 				items.push(item);
 
@@ -395,7 +395,7 @@ function formatText(text, textFormats) {
 					let suffix = formatSuffix(remainderIndex);
 					let slice = codePoints.slice(remainderRange[0], remainderRange[1]);
 					let replacement = [...prefix, ...slice, ...suffix];
-					console.log(`capture remainder ${index} = ${String.fromCodePoint(...replacement)} (${type}) range = ${remainderRange}`);
+					//console.log(`capture remainder ${index} = ${String.fromCodePoint(...replacement)} (${type}) range = ${remainderRange}`);
 					item = { start: remainderRange[0], length: remainderRange[1] - remainderRange[0], replacement: replacement};
 					items.push(item);
 				}

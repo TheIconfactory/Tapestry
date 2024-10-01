@@ -9,6 +9,7 @@
 	"jwt_prompt": "Email Address",
 	"jwt_authorize": "/xrpc/com.atproto.server.createSession",
 	"jwt_refresh": "/xrpc/com.atproto.server.refreshSession",
+	"refresh_status_code": 400,
 	"provides_attachments": true,
 	"check_interval": 300
 }
