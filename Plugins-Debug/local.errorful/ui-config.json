@@ -1,0 +1,10 @@
+{
+	"inputs": [
+		{
+			"name": "turbo",
+			"type": "switch",
+			"prompt": "TURBO",
+			"placeholder": "No default value, will be 'off'."
+		},
+	]
+}
