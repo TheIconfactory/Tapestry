@@ -32,6 +32,18 @@ function postForItem(item, date = null, shortcodes = {}) {
 	identity.uri = account["url"];
 	identity.avatar = account["avatar"];
 
+	let content = item["content"];
+	if (item["poll"] != null) {
+		if (item["poll"].options != null) {
+			let multiple = (item["poll"]?.multiple ?? false) ? "(Multiple Choice)" : "";
+			content += "<p><ul>";
+			for (const option of item["poll"].options) {
+				content += `<li>${option.title}</li>`;
+			}
+			content += `</ul>${multiple}</p>`;
+		}			
+	}
+
 	let postDate;
 	if (date == null) {
 		postDate = new Date(item["created_at"]);
@@ -41,10 +53,10 @@ function postForItem(item, date = null, shortcodes = {}) {
 	}
 	
 	const uri = item["url"];
-	const content = item["content"];
 	const post = Item.createWithUriDate(uri, postDate);
-	post.body = content;
+
 	post.author = identity;
+	post.body = content;
 
 	const itemEmojis = item["emojis"];
 	if (itemEmojis != null && itemEmojis.length > 0) {
