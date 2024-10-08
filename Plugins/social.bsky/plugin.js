@@ -308,23 +308,44 @@ function contentForEmbed(embed) {
 function attachmentsForEmbed(embed) {
 	let attachments = null;
 	
-	if (embed != null && embed.$type == "app.bsky.embed.images#view") {
-		const images = embed.images;
-		if (images != null) {
-			attachments = []
-			let count = images.length;
-			for (let index = 0; index < count; index++) {
-				let image = images[index];
-				const media = image.fullsize;
-				const attachment = MediaAttachment.createWithUrl(media);
-				if (image.aspectRatio != null) {
-					attachment.aspectSize = image.aspectRatio;
+	if (embed != null) {
+		if (embed.$type == "app.bsky.embed.images#view") {
+			const images = embed.images;
+			if (images != null) {
+				attachments = []
+				let count = images.length;
+				for (let index = 0; index < count; index++) {
+					let image = images[index];
+					const media = image.fullsize;
+					const attachment = MediaAttachment.createWithUrl(media);
+					if (image.aspectRatio != null) {
+						attachment.aspectSize = image.aspectRatio;
+					}
+					if (image.alt != null) {
+						attachment.text = image.alt;
+					}
+					if (image.thumb) {
+						attachment.thumbnail = image.thumb;
+					}
+					attachment.mimeType = "image";
+					attachments.push(attachment);
 				}
-				attachment.text = image.alt;
-				attachment.thumbnail = image.thumb;
-				attachment.mimeType = "image";
-				attachments.push(attachment);
 			}
+		}
+		else if (embed.$type == "app.bsky.embed.video#view") {
+			const media = embed.playlist;
+			const attachment = MediaAttachment.createWithUrl(media);
+			if (embed.aspectRatio != null) {
+				attachment.aspectSize = embed.aspectRatio;
+			}
+			if (embed.alt != null) {
+				attachment.text = embed.alt;
+			}
+			if (embed.thumbnail != null) {
+				attachment.thumbnail = embed.thumbnail;
+			}
+			attachment.mimeType = "video/mp4";
+			attachments = [attachment];
 		}
 	}
 	

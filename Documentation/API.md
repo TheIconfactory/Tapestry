@@ -236,6 +236,8 @@ A string that lets Tapestry know what kind of media is being attached. Currently
 
 If this value isn't provided, the file name extension for `url` will be used. If there is no file extension, "image" will be assumed.
 
+Note that playlists, such as .m3u8, will be assumed to be audio (based upon the file extension). If the playlist contains video, set the `mimeType` explicitly to "video/mp4".
+
 #### blurhash: String
 
 A string that provides a placeholder image.
