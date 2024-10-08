@@ -16,171 +16,158 @@ function verify() {
 	});
 }
 
-// https://bsky.social/xrpc/app.bsky.feed.getTimeline?algorithm=reverse-chronological&limit=22
-
-// site: "https://bsky.social"
-
 const uriPrefix = "https://bsky.app";
 
-function load() {
-	sendRequest(site + "/xrpc/app.bsky.feed.getTimeline?algorithm=reverse-chronological&limit=100")
-	.then((text) => {
-		//console.log(text);
-		const jsonObject = JSON.parse(text);
+function queryTimeline(doIncrementalLoad) {
 
-		const items = jsonObject.feed
-		let results = [];
-		for (const item of items) {
-			const date = new Date(item.post.indexedAt);
+	return new Promise((resolve, reject) => {
 
-			const author = item.post.author;
-			
-			const identity = identityForAccount(author);
-			
-			const inReplyToRecord = item.reply && item.reply.record
-			const reason = item.reason
-			const record = item.post.record;
-			
-			// reply is: item.post
-			// reply content/author is: item.post.record / item.post.author
-			// reply parent content/author is: item.reply.parent.record / item.reply.parent.author
-			
-			// repost is: item.reason.$type == "app.bsky.feed.defs#reasonRepost"
-			// repost account is: item.reason.by
-			// repost date is: item.reason.indexedAt
-			
-			// embed is: item.post.embed.$type == "app.bsky.embed.record#view"
-			// embed content/author: item.post.embed.record
-			
-			// account info ("by" or "author"):
-				// did: for profile link
-				// displayName: account name
-				// handle: @name (without the @)
-				
-			// content info ("record"):
-				// indexedAt: date created
-				// author: account info
-				// value:
-					// $type == "app.bsky.feed.post"
-					// text: post text
-
-/*
-	POST
-	
-	item
-		post
-			author : account
-			record : content
-
-		
-	REPOST
-
-	item
-		post
-			author : account
-			record : content
-		reason
-			$type == "app.bsky.feed.defs#reasonRepost"
-			by : account
-		reply (the post being replied to)
-			parent
-				author: account
-				record: content
-			root
-				author: account
-				record: content
-					
-	REPLY
-
-	item
-		post (the reply)
-			author : account
-			record : content
-		reply (the post being replied to)
-			parent
-				author: account
-				record: content
-			root
-				author: account
-				record: content
-
-	EMBED
-	
-	item
-		post
-			author: account
-			record: content
-			embed
-				$type == "app.bsky.embed.record#view"
-				record : content
-			
-				$type == "app.bsky.embed.images#view"
-				images
-					fullsize
-					alt
-					thumb
-*/				
-						
-			let content = contentForRecord(item.post.record);
-			
-			let annotation = null;
-			
-			const replyContent = contentForReply(item.reply);
-			if (replyContent != null) {
-				annotation = annotationForReply(item.reply);
-				content = replyContent + content;
+		// this function is called recursively to load & process batches of posts into a single list of results
+		function requestToCursor(cursor, doIncrementalLoad, resolve, reject, limit = 5, results = []) {
+			let url = null
+			if (cursor == null) {
+				console.log("cursor = none");
+				url = `${site}/xrpc/app.bsky.feed.getTimeline?algorithm=reverse-chronological&limit=50`;
 			}
-
-			const repostContent = contentForRepost(item.reason);
-			if (repostContent != null) {
-				annotation = annotationForRepost(item.reason);
-				content = repostContent + content;
-			}
-
-			let showItem = true;
-			if (includeReposts != "on") {
-				if (repostContent != null) {
-					showItem = false;
-				}
-			}
-			if (includeReplies != "on") {
-				if (repostContent == null && replyContent != null) { // filter out replies only if they are not reposted
-					showItem = false;
-				}
+			else {
+				const offset = (requestLimit - limit) * 20;
+				console.log(`cursor = ${cursor}`);
+				url = `${site}/xrpc/app.bsky.feed.getTimeline?algorithm=reverse-chronological&limit=50&cursor=${cursor}`;
 			}
 			
-			if (showItem) {
-				const embedContent = contentForEmbed(item.post.embed);
-				if (embedContent != null) {
-					content = content + embedContent;
+			console.log(`doIncrementalLoad = ${doIncrementalLoad}, cursor = ${cursor}`);
+			
+			sendRequest(url, "GET")
+			.then((text) => {
+				//console.log(text);
+				const jsonObject = JSON.parse(text);
+				const items = jsonObject.feed
+				for (const item of items) {
+					const post = postForItem(item);
+					if (post != null) {
+						results.push(post);
+					}
 				}
-				let attachments = attachmentsForEmbed(item.post.embed);
-				
-				// item.post.uri:	at://did:plc:aidmyvxy7lln7l5fzkv4gvxa/app.bsky.feed.post/3jvi6bseuzu2x
-				// web url:			https://staging.bsky.app/profile/nanoraptor.danamania.com/post/3jvi6bseuzu2x 
-				
-				const itemIdentifier = item.post.uri.split("/").pop();
-				const postUri = uriPrefix + "/profile/" + author.handle + "/post/" + itemIdentifier;
-				
-				const post = Item.createWithUriDate(postUri, date);
-				post.body = content;
-				post.author = identity;
-				if (attachments != null) {
-					post.attachments = attachments
+
+				const cursor = jsonObject.cursor;				
+				const newLimit = limit - 1;
+
+				if (cursor != null && newLimit > 0 && doIncrementalLoad == false) {
+					requestToCursor(cursor, doIncrementalLoad, resolve, reject, newLimit, results);
 				}
-				if (annotation != null) {
-					post.annotations = [annotation];
+				else {
+					resolve(results);
 				}
-				
-				results.push(post);
-			}
+			})
+			.catch((error) => {
+				reject(error);
+			});	
 		}
 
-		processResults(results);
+		const requestLimit = 4;
+		requestToCursor(null, doIncrementalLoad, resolve, reject, requestLimit);
+
+	});
+	
+}
+
+// NOTE: The connector does incremental loads (only most recent items in dashboard) until 6 hours have
+// elapsed since the last full load (200 items in dashboard). The idea here is that this covers cases where
+// this script is still in memory, but hasn't been accessed while the device/user is sleeping.
+var lastFullUpdate = null;
+const fullUpdateInterval = 6 * 60 * 60;
+
+function load() {
+	let doIncrementalLoad = false;
+	if (lastFullUpdate != null) {
+		console.log(`fullUpdateInterval = ${fullUpdateInterval}`);
+		let delta = fullUpdateInterval * 1000; // seconds → milliseconds
+		let future = (lastFullUpdate.getTime() + delta);
+		console.log(`future = ${new Date(future)}`);
+		let now = (new Date()).getTime();
+		if (now < future) {
+			// time has not elapsed, do an incremental load
+			console.log(`time until next update = ${(future - now) / 1000} sec.`);
+			doIncrementalLoad = true;
+		}
+	}
+	if (!doIncrementalLoad) {
+		lastFullUpdate = new Date();
+	}
+
+	queryTimeline(doIncrementalLoad)
+	.then((results) =>  {
+		console.log(`finished timeline`);
+		processResults(results, true);
+		doIncrementalLoad = true;
 	})
 	.catch((requestError) => {
+		console.log(`error timeline`);
 		processError(requestError);
-	});	
+		doIncrementalLoad = false;
+	});
+}
+
+function postForItem(item) {
+	const date = new Date(item.post.indexedAt);
+
+	const author = item.post.author;
+	
+	const identity = identityForAccount(author);
+	
+	const inReplyToRecord = item.reply && item.reply.record
+	const reason = item.reason
+	const record = item.post.record;
+	
+				
+	let content = contentForRecord(item.post.record);
+	
+	let annotation = null;
+	
+	const replyContent = contentForReply(item.reply);
+	if (replyContent != null) {
+		annotation = annotationForReply(item.reply);
+		content = replyContent + content;
+	}
+
+	const repostContent = contentForRepost(item.reason);
+	if (repostContent != null) {
+		annotation = annotationForRepost(item.reason);
+		content = repostContent + content;
+	}
+
+	let showItem = true;
+	if (includeReposts != "on") {
+		if (repostContent != null) {
+			showItem = false;
+		}
+	}
+	if (includeReplies != "on") {
+		if (repostContent == null && replyContent != null) { // filter out replies only if they are not reposted
+			showItem = false;
+		}
+	}
+	
+	if (showItem) {
+		let attachments = attachmentsForEmbed(item.post.embed);
+				
+		const itemIdentifier = item.post.uri.split("/").pop();
+		const postUri = uriPrefix + "/profile/" + author.handle + "/post/" + itemIdentifier;
+		
+		const post = Item.createWithUriDate(postUri, date);
+		post.body = content;
+		post.author = identity;
+		if (attachments != null) {
+			post.attachments = attachments
+		}
+		if (annotation != null) {
+			post.annotations = [annotation];
+		}
+		
+		return post;
+	}
+	
+	return null;
 }
 
 function identityForAccount(account) {
@@ -285,20 +272,12 @@ function contentForReply(reply) {
 
 	if (reply != null && reply.parent != null) {
 		const replyContent = contentForRecord(reply.parent.record);
-		content = `<blockquote>${replyContent}</blockquote>`;
-	}
-	
-	return content;
-}
-
-function contentForEmbed(embed) {
-	let content = null;
-
-	if (embed != null && embed.$type == "app.bsky.embed.record#view") {
-		if (embed.record != null) {
-			const embedAccount = contentForAccount(embed.record.author);
-			const embedContent = contentForRecord(embed.record);
-			content = `<blockquote>${embedAccount}${embedContent}</blockquote>`;
+		const replyAuthor = reply.parent.author?.displayName
+		if (replyAuthor != null) {
+			content = `<blockquote><p>${replyAuthor} said:</p><p>${replyContent}</p></blockquote>`;
+		}
+		else {
+			content = `<blockquote><p>${replyContent}</p></blockquote>`;
 		}
 	}
 	
@@ -333,20 +312,153 @@ function attachmentsForEmbed(embed) {
 			}
 		}
 		else if (embed.$type == "app.bsky.embed.video#view") {
-			const media = embed.playlist;
-			const attachment = MediaAttachment.createWithUrl(media);
-			if (embed.aspectRatio != null) {
-				attachment.aspectSize = embed.aspectRatio;
+			if (embed.playlist != null) {
+				const media = embed.playlist;
+				const attachment = MediaAttachment.createWithUrl(media);
+				if (embed.aspectRatio != null) {
+					attachment.aspectSize = embed.aspectRatio;
+				}
+				if (embed.alt != null) {
+					attachment.text = embed.alt;
+				}
+				if (embed.thumbnail != null) {
+					attachment.thumbnail = embed.thumbnail;
+				}
+				attachment.mimeType = "video/mp4";
+				attachments = [attachment];
 			}
-			if (embed.alt != null) {
-				attachment.text = embed.alt;
-			}
-			if (embed.thumbnail != null) {
-				attachment.thumbnail = embed.thumbnail;
-			}
-			attachment.mimeType = "video/mp4";
-			attachments = [attachment];
 		}
+		else if (embed.$type == "app.bsky.embed.external#view") {
+			if (embed.external != null && embed.external.uri != null) {
+				const external = embed.external;
+				let attachment = LinkAttachment.createWithUrl(external.uri);
+				if (external.title != null && external.title.length > 0) {
+					attachment.title = external.title;
+				}
+				if (external.description != null && external.description.length > 0) {
+					attachment.subtitle = external.description;
+				}
+				if (external.thumb != null && external.thumb.length > 0) {
+					attachment.image = external.thumb;
+				}
+				attachments = [attachment];
+			}
+		}
+		else if (embed.$type == "app.bsky.embed.record#view") {
+			if (embed.record != null) {
+				const record = embed.record;
+				
+				const authorHandle = record.author?.handle;
+				const authorDisplayName = record.author?.displayName;
+				const recordText = record.value?.text;
+				
+				const embedUrl = record.uri.split("/").pop();
+				if (authorHandle != null) {
+					const postUri = uriPrefix + "/profile/" + authorHandle + "/post/" + embedUrl;
+	
+					let attachment = LinkAttachment.createWithUrl(postUri);
+					if (authorDisplayName != null && authorDisplayName.length > 0) {
+						attachment.title = authorDisplayName;
+					}
+					if (recordText != null && recordText.length > 0) {
+						attachment.subtitle = recordText;
+					}
+// 					if (authorDisplayName != null && authorDisplayName.length > 0) {
+// 						attachment.authorName = authorDisplayName;
+// 					}
+// 					attachment.authorProfile = uriPrefix + "/profile/" + authorHandle;
+					
+					if (record.embeds != null && record.embeds.length > 0) {
+						if (record.embeds[0].images != null && record.embeds[0].images.length > 0) {
+							const image = record.embeds[0].images[0];
+							attachment.image = image.thumb;
+							if (image.aspectRatio != null) {
+								attachment.aspectSize = image.aspectRatio;
+							}
+						}
+					}
+					
+					attachments = [attachment];
+				}
+			}
+		}
+		else if (embed.$type == "app.bsky.embed.recordWithMedia#view") {
+			if (embed.record != null && embed.media != null) {
+				const media = embed.media;
+				
+				attachments = attachmentsForEmbed(media);
+				
+				const record = embed.record.record;
+				if (record != null) {
+					const handle = record.author?.handle;
+					const title = record.author?.displayName;
+					const description = record.value?.text;
+					
+					const embedUrl = record.uri.split("/").pop();
+					if (handle != null) {
+						const postUri = uriPrefix + "/profile/" + handle + "/post/" + embedUrl;
+		
+						let attachment = LinkAttachment.createWithUrl(postUri);
+						if (title != null && title.length > 0) {
+							attachment.title = title;
+						}
+						if (description != null && description.length > 0) {
+							attachment.subtitle = description;
+						}
+						
+						if (record.embeds != null && record.embeds.length > 0) {
+							const firstRecordEmbed = record.embeds[0];
+							if (firstRecordEmbed.$type == "app.bsky.embed.images#view") {
+								if (firstRecordEmbed.images != null && firstRecordEmbed.images.length > 0) {
+									const image = firstRecordEmbed.images[0];
+									attachment.image = image.thumb;
+									if (image.aspectRatio != null) {
+										attachment.aspectSize = image.aspectRatio;
+									}
+								}
+							}
+							else if (firstRecordEmbed.$type == "app.bsky.embed.video#view") {
+								if (firstRecordEmbed.thumbnail != null) {
+									attachment.image = firstRecordEmbed.thumbnail;
+									if (firstRecordEmbed.aspectRatio != null) {
+										attachment.aspectSize = firstRecordEmbed.aspectRatio;
+									}
+								}
+							}
+							else if (firstRecordEmbed.$type == "app.bsky.embed.recordWithMedia#view") {
+								if (firstRecordEmbed.media != null) {
+									const firsRecordEmbedMedia = firstRecordEmbed.media;
+									if (firsRecordEmbedMedia.$type == "app.bsky.embed.images#view") {
+										if (firsRecordEmbedMedia.images != null && firsRecordEmbedMedia.images.length > 0) {
+											const image = firsRecordEmbedMedia.images[0];
+											attachment.image = image.thumb;
+											if (image.aspectRatio != null) {
+												attachment.aspectSize = image.aspectRatio;
+											}
+										}
+									}
+									else if (firsRecordEmbedMedia.$type == "app.bsky.embed.video#view") {
+										if (firsRecordEmbedMedia.thumbnail != null) {
+											attachment.image = firsRecordEmbedMedia.thumbnail;
+											if (firsRecordEmbedMedia.aspectRatio != null) {
+												attachment.aspectSize = firsRecordEmbedMedia.aspectRatio;
+											}
+										}
+									}
+								}
+							}
+						}
+						if (attachments == null) {
+							attachments = [attachment];
+						}
+						else {
+							attachments.push(attachment);
+						}
+					}
+				}
+			}
+		}
+
 	}
 	
 	return attachments;
