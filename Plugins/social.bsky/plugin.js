@@ -495,12 +495,20 @@ function contentForRecord(record) {
 				const feature = facet.features[0];
 
 				if (feature.$type == "app.bsky.richtext.facet#link") {
-					const link = "<a href=\"" + feature.uri + "\">" + text + "</a>";
+					const link = `<a href="${feature.uri}">${text}</a>`;
 					content = prefix + link + suffix;
 				}
 				else if (feature.$type == "app.bsky.richtext.facet#mention") {
-					const link = "<a href=\"" + uriPrefix + "/profile/" + feature.did + "\">" + text + "</a>";
+					const link = `<a href="${uriPrefix}/profile/${feature.did}">${text}</a>`;
 					content = prefix + link + suffix;
+				}
+				else if (feature.$type == "app.bsky.richtext.facet#tag") {
+					//console.log(`tag feature = ${JSON.stringify(feature)}`);
+					const link = `<a href="${uriPrefix}/hashtag/${feature.tag}">${text}</a>`;
+					content = prefix + link + suffix;
+				}
+				else {
+					console.log(`skipped feature.$type = ${feature.$type}`);
 				}
 			}
 		}
