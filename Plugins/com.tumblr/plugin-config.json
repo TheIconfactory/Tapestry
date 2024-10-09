@@ -3,7 +3,7 @@
 	"display_name": "Tumblr",
 	"service_name": "Tumblr",
 	"default_color": "green",
-	"icon": "https://assets.tumblr.com/pop/manifest/favicon-0e3d244a.ico",
+	"icon": "https://usetapestry.com/icons/tumblr.png",
 	"item_style": "post",
 	"site": "https://api.tumblr.com",
 	"oauth_authorize": "https://www.tumblr.com/oauth2/authorize",

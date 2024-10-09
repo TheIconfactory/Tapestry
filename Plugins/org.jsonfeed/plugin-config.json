@@ -3,7 +3,7 @@
 	"display_name": "Blog Feed (JSON)",
 	"service_name": "Blog",
 	"default_color": "purple",
-	"icon": "https://micro.blog/jsonfeed/favicon.png",
+	"icon": "https://usetapestry.com/icons/jsonfeed.png",
 	"site_prompt": "Feed URL",
 	"site_placeholder": "https://foo.com/feed.json",
 	"site_help": "Enter the path to the website’s JSON file.\n\nIf you don’t know this URL, use the [Feed Finder](tapestry://feedfinder) and enter a value like `daringfireball.net`",
