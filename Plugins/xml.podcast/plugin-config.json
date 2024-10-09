@@ -6,6 +6,7 @@
 	"icon": "https://usetapestry.com/icons/podcast.png",
 	"site_prompt": "Podcast URL",
 	"site_placeholder": "https://foo.com/feed",
+	"site_help": "Enter the path to the podcast’s XML file.\n\nIf you don’t know this URL, use the [Feed Finder](tapestry://feedfinder) and enter a value like `atp.fm` or `thisamericanlife.org`",
 	"needs_verification": true,
 	"provides_attachments": true,
 	"check_interval": 300

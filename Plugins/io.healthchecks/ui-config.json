@@ -3,14 +3,14 @@
     {
       "name": "project_api_key",
       "type": "text",
-      "prompt": "Project API key",
-      "placeholder": "uuid"
+      "prompt": "Project API Key",
+      "placeholder": "UUID"
     },
     {
       "name": "uuid",
       "type": "text",
-      "prompt": "Check UUID",
-      "placeholder": "uuid"
+      "prompt": "Check Identifier",
+      "placeholder": "UUID"
     }
   ]
 }

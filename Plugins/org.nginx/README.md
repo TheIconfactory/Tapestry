@@ -1,0 +1,1 @@
+If you run an nginx web server with the [stub_status](https://nginx.org/en/docs/http/ngx_http_stub_status_module.html) module, this connector will display the statistics in your timeline with every refresh.
