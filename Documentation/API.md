@@ -974,7 +974,7 @@ The YouTube connector will work on many different domains. Note that "youtube." 
  	],
 ```
 
-Matches are case insensitive. If a user types "YouTube.com/@MKBHD", it will match the "youtube." rule above.
+Matches are case insensitive. If a user types "YouTube.com/@iJustine", it will match the "youtube." rule above.
 
 If the sites rules do not match, no further checks are performed and the connector is not suggested to the user.
 
