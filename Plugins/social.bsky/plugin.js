@@ -479,8 +479,10 @@ function contentForRecord(record) {
 	// so we have to convert it back to bytes, find what we need, and then make a new UTF-16 string.
 	
 	if (record.facets != null) {
-		// NOTE: Done in reverse order because we're modifying string in place.
-		for (const facet of record.facets.reverse()) {
+		// NOTE: Facets are processed in reverse order determined by the starting index. This is because the output string
+		// is being modified in place.
+		const sortedFacets = record.facets.toSorted((a,b) => {return b?.index?.byteStart - a?.index?.byteStart})
+		for (const facet of sortedFacets) {
 			if (facet.features.length > 0) {
 				const bytes = stringToBytes(content);
 				
