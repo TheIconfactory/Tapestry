@@ -81,9 +81,15 @@ function postForItem(item, date = null, shortcodes = {}) {
 		for (const mediaAttachment of mediaAttachments) {
 			const media = mediaAttachment["url"]
 			const attachment = MediaAttachment.createWithUrl(media);
-			attachment.thumbnail = mediaAttachment["preview_url"];
-			attachment.text = mediaAttachment["description"];
-			attachment.blurhash = mediaAttachment["blurhash"];
+			if (mediaAttachment["preview_url"] != null) {
+				attachment.thumbnail = mediaAttachment["preview_url"];
+			}
+			if (mediaAttachment["description"] != null) {
+				attachment.text = mediaAttachment["description"];
+			}
+			if (mediaAttachment["blurhash"] != null) {
+				attachment.blurhash = mediaAttachment["blurhash"];
+			}
 			if (mediaAttachment["meta"] != null) {
 				const metadata = mediaAttachment["meta"];
 				if (metadata["focus"] != null) {
