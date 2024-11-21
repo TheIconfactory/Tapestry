@@ -565,6 +565,24 @@ Returns an `Object` representation containing the HTML’s properties. These val
   
 Returns a `Promise` with a resolve handler that includes a `String` parameter with a path to an icon for the page. If no icon can be found, a `null` value is returned.
 
+### setItem(key, value)
+
+  * key: `String` a key for value being stored.
+  * value: `String` to be saved in local storage.
+  
+Items can be removed from local storage by passing a `null` value. The amount of local storage is limited to 100,000 total characters and any items set beyond that threshold will be ignored.
+  
+### getItem(key) → String
+
+  * key: `String` a key for value that was stored.
+  
+Returns a `String` that was saved in local storage. If no value was stored, `null` is returned.
+
+### clearItems()
+
+All items in local storage are removed.
+
+
 ## Configuration
 
 Each connector is defined using the following files:

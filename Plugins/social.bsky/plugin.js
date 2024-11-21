@@ -71,40 +71,41 @@ function queryTimeline(doIncrementalLoad) {
 	
 }
 
-// NOTE: The connector does incremental loads (only most recent items in dashboard) until 6 hours have
-// elapsed since the last full load (200 items in dashboard). The idea here is that this covers cases where
-// this script is still in memory, but hasn't been accessed while the device/user is sleeping.
-var lastFullUpdate = null;
-const fullUpdateInterval = 6 * 60 * 60;
+// NOTE: The connector does incremental loads (only most recent items in home timeline) until 6 hours have
+// elapsed since the last full load (200 items in main timeline). The idea here is that this covers cases where
+// this script run from a manual or background refresh periodically.
+
+const fullUpdateInterval = 6 * 60 * 60 * 1000; // in milliseconds
 
 function load() {
+	let nowTimestamp = (new Date()).getTime();
+	
 	let doIncrementalLoad = false;
+	let lastFullUpdate = getItem("lastFullUpdate");
 	if (lastFullUpdate != null) {
+		let lastFullUpdateTimestamp = parseInt(lastFullUpdate);
+		console.log(`lastFullUpdateTimestamp = ${new Date(lastFullUpdateTimestamp)}`);
 		console.log(`fullUpdateInterval = ${fullUpdateInterval}`);
-		let delta = fullUpdateInterval * 1000; // seconds → milliseconds
-		let future = (lastFullUpdate.getTime() + delta);
-		console.log(`future = ${new Date(future)}`);
-		let now = (new Date()).getTime();
-		if (now < future) {
+		let futureTimestamp = (lastFullUpdateTimestamp + fullUpdateInterval);
+		console.log(`futureTimestamp = ${new Date(futureTimestamp)}`);
+		if (nowTimestamp < futureTimestamp) {
 			// time has not elapsed, do an incremental load
-			console.log(`time until next update = ${(future - now) / 1000} sec.`);
+			console.log(`time until next update = ${(futureTimestamp - nowTimestamp) / 1000} sec.`);
 			doIncrementalLoad = true;
 		}
-	}
-	if (!doIncrementalLoad) {
-		lastFullUpdate = new Date();
 	}
 
 	queryTimeline(doIncrementalLoad)
 	.then((results) =>  {
 		console.log(`finished timeline`);
 		processResults(results, true);
-		doIncrementalLoad = true;
+		if (!doIncrementalLoad) {
+			setItem("lastFullUpdate", String(nowTimestamp));
+		}
 	})
 	.catch((requestError) => {
 		console.log(`error timeline`);
 		processError(requestError);
-		doIncrementalLoad = false;
 	});
 }
 

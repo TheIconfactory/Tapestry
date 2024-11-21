@@ -9,6 +9,9 @@ function verify() {
 		const instance = site.split("/")[2] ?? "";
 		const displayName = "@" + jsonObject["username"] + "@" + instance;
 		const icon = jsonObject["avatar"];
+
+		const userId = jsonObject["id"];
+		setItem("userId", userId);
 		
 		const verification = {
 			displayName: displayName,
@@ -330,35 +333,31 @@ function queryStatusesForUser(id) {
 
 // NOTE: The connector does incremental loads (only most recent items in home timeline) until 6 hours have
 // elapsed since the last full load (200 items in home timeline). The idea here is that this covers cases where
-// this script is still in memory, but hasn't been accessed while the device/user is sleeping.
-var lastFullUpdate = null;
-const fullUpdateInterval = 6 * 60 * 60;
+// this script run from a manual or background refresh periodically.
 
-// NOTE: There needs to be something like the Web Storage API where data (like the account id) can be persisted
-// across launches of the app. Having to verify the credentials each time to get information that doesn't change
-// doesn't make sense.
-var userId = null;
+const fullUpdateInterval = 6 * 60 * 60 * 1000; // in milliseconds
+
+var userId = getItem("userId");
 
 // NOTE: This reference counter tracks loading so we can let the app know when all async loading work is complete.
 var loadCounter = 0;
 
 function load() {
+	let nowTimestamp = (new Date()).getTime();
+	
 	let doIncrementalLoad = false;
+	let lastFullUpdate = getItem("lastFullUpdate");
 	if (lastFullUpdate != null) {
-		// check the interval provided by the user
+		let lastFullUpdateTimestamp = parseInt(lastFullUpdate);
+		console.log(`lastFullUpdateTimestamp = ${new Date(lastFullUpdateTimestamp)}`);
 		console.log(`fullUpdateInterval = ${fullUpdateInterval}`);
-		let delta = fullUpdateInterval * 1000; // seconds → milliseconds
-		let future = (lastFullUpdate.getTime() + delta);
-		console.log(`future = ${new Date(future)}`);
-		let now = (new Date()).getTime();
-		if (now < future) {
+		let futureTimestamp = (lastFullUpdateTimestamp + fullUpdateInterval);
+		console.log(`futureTimestamp = ${new Date(futureTimestamp)}`);
+		if (nowTimestamp < futureTimestamp) {
 			// time has not elapsed, do an incremental load
-			console.log(`time until next update = ${(future - now) / 1000} sec.`);
+			console.log(`time until next update = ${(futureTimestamp - nowTimestamp) / 1000} sec.`);
 			doIncrementalLoad = true;
 		}
-	}
-	if (!doIncrementalLoad) {
-		lastFullUpdate = new Date();
 	}
 	
 	loadCounter = 0;
@@ -378,13 +377,14 @@ function load() {
   			loadCounter -= 1;
   			console.log(`finished home timeline, loadCounter = ${loadCounter}`);
 			processResults(results, loadCounter == 0);
-			doIncrementalLoad = true;
+			if (!doIncrementalLoad) {
+				setItem("lastFullUpdate", String(nowTimestamp));
+			}
  		})
 		.catch((requestError) => {
   			loadCounter -= 1;
   			console.log(`error home timeline, loadCounter = ${loadCounter}`);
 			processError(requestError);
-			doIncrementalLoad = false;
 		});	
 	}
 	
@@ -422,6 +422,8 @@ function load() {
 				const jsonObject = JSON.parse(text);
 				
 				userId = jsonObject["id"];
+				setItem("userId", userId);
+
 				queryStatusesForUser(userId)
 				.then((results) =>  {
 					loadCounter -= 1;
