@@ -2,8 +2,9 @@
 	"id": "variables.test",
 	"display_name": "Test Variables",
 	"icon": "https://iconfactory.com/favicon.ico",
-	"site": "https://variables.test",
+	"site": "https://example.com",
 	"needs_verification": true,
+	"needs_api_keys": true,
 	"verify_variables": true,
 	"check_interval": 300
 }

@@ -107,6 +107,50 @@ function itemForData(item) {
 			if (mediaMetadata != null) {
 				const metadata = mediaMetadata[mediaId];
 				if (metadata.status == "valid") {
+					if (metadata.s != null) {
+						let width = null;
+						if (metadata.s.x != null) {
+							width = metadata.s.x;
+						}
+						let height = null;
+						if (metadata.s.y != null) {
+							height = metadata.s.y;
+						}
+						let mimeType = null;
+						if (metadata.m != null) {
+							mimeType = metadata.m;
+						}
+						const image = metadata.s.u;
+						// TODO: Use the metadata.p.u URL as a thumbnail.
+						// TODO: Use s.x and s.y to create aspect ratio
+						if (image != null) {
+							const attachment = MediaAttachment.createWithUrl(image);
+							if (width != null && height != null) {
+								attachment.aspectSize = { width: width, height: height };
+							}
+							if (mimeType != null) {
+								attachment.mimeType = mimeType;
+							}
+							else {
+								attachment.mimeType = "image";
+							}
+							attachments.push(attachment);
+						}
+					}
+				}
+			}
+			else {
+				// NOTE: This might be an appropriate fallback: "https://i.redd.it/" + galleryItem["media_id"] + ".jpg";
+			}
+		}
+	}
+	else if (item["media_metadata"] != null) {
+		attachments = [];
+		const mediaMetadata = item["media_metadata"];
+		for (let key in mediaMetadata) {
+			const metadata = mediaMetadata[key];
+			if (metadata.status == "valid") {
+				if (metadata.s != null) {
 					let width = null;
 					if (metadata.s.x != null) {
 						width = metadata.s.x;
@@ -134,49 +178,28 @@ function itemForData(item) {
 							attachment.mimeType = "image";
 						}
 						attachments.push(attachment);
-					}
-					
+					}	
 				}
-			}
-			else {
-				// NOTE: This might be an appropriate fallback: "https://i.redd.it/" + galleryItem["media_id"] + ".jpg";
-			}
-		}
-	}
-	else if (item["media_metadata"] != null) {
-		attachments = [];
-		const mediaMetadata = item["media_metadata"];
-		for (let key in mediaMetadata) {
-			const metadata = mediaMetadata[key];
-			if (metadata.status == "valid") {
-				let width = null;
-				if (metadata.s.x != null) {
-					width = metadata.s.x;
-				}
-				let height = null;
-				if (metadata.s.y != null) {
-					height = metadata.s.y;
-				}
-				let mimeType = null;
-				if (metadata.m != null) {
-					mimeType = metadata.m;
-				}
-				const image = metadata.s.u;
-				// TODO: Use the metadata.p.u URL as a thumbnail.
-				// TODO: Use s.x and s.y to create aspect ratio
-				if (image != null) {
-					const attachment = MediaAttachment.createWithUrl(image);
-					if (width != null && height != null) {
-						attachment.aspectSize = { width: width, height: height };
+				else if (metadata.hlsUrl != null) {
+					const video = metadata.hlsUrl;
+					if (video != null) {
+						let width = null;
+						if (metadata.x != null) {
+							width = metadata.x;
+						}
+						let height = null;
+						if (metadata.y != null) {
+							height = metadata.y;
+						}
+						const mimeType = "video";
+						const attachment = MediaAttachment.createWithUrl(video);
+						if (width != null && height != null) {
+							attachment.aspectSize = { width: width, height: height };
+						}
+						attachment.mimeType = "video";
+						attachments.push(attachment);
 					}
-					if (mimeType != null) {
-						attachment.mimeType = mimeType;
-					}
-					else {
-						attachment.mimeType = "image";
-					}
-					attachments.push(attachment);
-				}			
+				}
 			}
 		}
 	}

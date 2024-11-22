@@ -38,7 +38,7 @@ function verify() {
 function load() {
 	const filterMentions = includeMentions != "on";
 	
-	sendRequest(site + "/posts/timeline", "GET")
+	sendRequest(site + "/posts/timeline?count=200", "GET")
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		const items = jsonObject["items"];

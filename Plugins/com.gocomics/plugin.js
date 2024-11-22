@@ -56,8 +56,6 @@ function verify() {
 	});
 }
 
-var lastTimestamp = null
-
 function load() {
 	const date = new Date();
 	
@@ -68,10 +66,6 @@ function load() {
 	const timestamp = String(year) + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
 	
 	console.log(`timestamp = ${timestamp}`);
-	
-	if (timestamp == lastTimestamp) {
-		return;
-	}
 	
 	const url = site + "/" + comicId + "/" + timestamp;
 	sendRequest(url)
@@ -109,13 +103,10 @@ function load() {
 			}
 			
 			processResults([item]);
-			
-			lastTimestamp = timestamp;
 		}
 	})
 	.catch((requestError) => {
-		// NOTE: It's possible that the comic for the day has not been posted yet (timezones, yay). So fail silently.
-		//processError(requestError);
+		processError(requestError);
 	});
 	
 }

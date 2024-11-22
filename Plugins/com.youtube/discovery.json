@@ -13,11 +13,10 @@
 			"variable": "site"
 		}
 	],
-	"raw": [
+	"xml": [
 		{
-			"match": "//channel/([^/]+)/videos/",
-			"replacement": "https://www.youtube.com/feeds/videos.xml?channel_id=$$",
-			"variable": "site"
+			"root": "feed",
+			"with": "yt:channelId"
 		}
 	]
 }

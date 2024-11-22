@@ -236,6 +236,8 @@ A string that lets Tapestry know what kind of media is being attached. Currently
 
 If this value isn't provided, the file name extension for `url` will be used. If there is no file extension, "image" will be assumed.
 
+Note that playlists, such as .m3u8, will be assumed to be audio (based upon the file extension). If the playlist contains video, set the `mimeType` explicitly to "video/mp4".
+
 #### blurhash: String
 
 A string that provides a placeholder image.
@@ -563,6 +565,24 @@ Returns an `Object` representation containing the HTML’s properties. These val
   
 Returns a `Promise` with a resolve handler that includes a `String` parameter with a path to an icon for the page. If no icon can be found, a `null` value is returned.
 
+### setItem(key, value)
+
+  * key: `String` a key for value being stored.
+  * value: `String` to be saved in local storage.
+  
+Items can be removed from local storage by passing a `null` value. The amount of local storage is limited to 100,000 total characters and any items set beyond that threshold will be ignored.
+  
+### getItem(key) → String
+
+  * key: `String` a key for value that was stored.
+  
+Returns a `String` that was saved in local storage. If no value was stored, `null` is returned.
+
+### clearItems()
+
+All items in local storage are removed.
+
+
 ## Configuration
 
 Each connector is defined using the following files:
@@ -598,6 +618,7 @@ Recommended properties:
  
   * icon: `String` with a URL to an image that will be used as a default for this connector.
   * service\_name: `String` with the name of the service (e.g. "Tumblr", "YouTube", "Blog", "Podcast").
+  * default\_color: `String` with a default color name for feeds created by the connector. Valid values are "purple", "gold", "blue", "coral", "slate", "orange", "green", "teal". If no value is specified, "gray" will be used.
   * item\_style: `String` with either "post" or "article" to define the content layout.
  	
 Optional properties:
@@ -606,6 +627,7 @@ Optional properties:
   * verify\_variables: 'Boolean' with true if variable changes cause verification. Use this option if changing a variable will affect  loading content (because its a part of a URL, for example).
   * provides\_attachments: `Boolean` with true if connector generates attachments directly, otherwise post-processing of HTML content will be used to capture images, videos, and link previews.
   * authorization\_header: `String` with a template for the authorization header. If no value is specified, "Bearer \_\_ACCESS\_TOKEN\_\_" will be used. See below for options.
+  * refresh\_status\_code: `Number` with the HTTP status code that indicates authorization needs to be refreshed. Default value is 401. A value of 0 will not attempt to refresh tokens.
   * check\_interval: `Number` with number of seconds between load requests (currently unimplemented).
 
 Optional OAuth properties:
@@ -625,6 +647,7 @@ Optional OAuth properties:
 
 Optional JWT properties:
 
+  * jwt\_prompt: `String` with account information needed to login (e.g. "Email Address").
   * jwt\_authorize: `String` with endpoint to authorize account (e.g. "/xrpc/createSession").
   * jwt\_refresh: `String` with endpoint to refresh account (e.g. "/xrpc/refreshSession").
  
@@ -926,7 +949,7 @@ The \_\_URL\_\_ template value can be useful for apps that support [Universal Li
 }
 ```
 
-The `pattern` is a regular expression. When a link’s URL matches the pattern, the URL created by the template will be opened.
+The `pattern` is a case-insensitive regular expression. When a link’s URL matches the pattern, the URL created by the template will be opened.
 
 ### discovery.json
 
@@ -938,7 +961,8 @@ The file consists of three categories: one specifies a list of sites where the c
 {
 	"sites": [],
 	"url": [],
-	"html": []
+	"html": [],
+	"xml": []
 }
 ```
 
@@ -968,7 +992,7 @@ The YouTube connector will work on many different domains. Note that "youtube." 
  	],
 ```
 
-Matches are case insensitive. If a user types "YouTube.com/@MKBHD", it will match the "youtube." rule above.
+Matches are case insensitive. If a user types "YouTube.com/@iJustine", it will match the "youtube." rule above.
 
 If the sites rules do not match, no further checks are performed and the connector is not suggested to the user.
 
@@ -1112,6 +1136,22 @@ Any HTML element can be used. For example the connector for podcasts uses these 
 
 The first rule checks that there is an RSS feed while the second rule checks if there is a link on the page to Apple's podcast directory. 
 
+#### xml
+
+If none of the rules above apply, the content will be checked for XML. There are two parameters, both of which are optional. This example will identify podcast feeds:
+
+```json
+	"xml": [
+		{
+			"root": "rss",
+			"with": "itunes:image"
+		}
+	]
+```
+
+The `root` element must be the first element in the content. In the example above, it guarantees that the XML data is in the RSS format.
+
+The `with` element must occur at least once in the content. The example above checks that the RSS feed contains an iTunes image, which is required for a podcast.
 
 ## HTML Content
 
@@ -1133,6 +1173,7 @@ The following tags are supported:
   * `<p>` to start a paragraph.
   * `<strong>, <b>` for **strongly emphasized** text.
   * `<em>, <i>` for _emphasized_ text.
+  * `<strike>, <s>` for ~~strikethrough~~ text.
   * `<a>` for [linked](https://example.com) text.
   * `<img>` for inline attachments (see below).
   * `<blockquote>` for quoted text.

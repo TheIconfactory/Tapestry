@@ -178,7 +178,14 @@ function load() {
 			}
 			const feedName = jsonObject.feed.title;
 		
-			const entries = jsonObject.feed.entry;
+			const entry = jsonObject.feed.entry;
+			let entries = null;
+			if (entry instanceof Array) {
+				entries = entry;
+			}
+			else {
+				entries = [entry];
+			}
 			var results = [];
 			for (const entry of entries) {
 				const entryAttributes = entry.link$attrs;
@@ -214,17 +221,19 @@ function load() {
 				const content = entry.content ?? entry.summary;
 				
 				var identity = null;
-				let authorName = entry.author.name;
-				if (authorName != null) {
-					if (authorName instanceof Array) {
-						authorName = authorName.join(", ");
-					}
-					identity = Identity.createWithName(authorName);
-					if (entry.author.uri != null) {
-						identity.uri = entry.author.uri;
+				if (entry.author != null) {
+					let authorName = entry.author.name;
+					if (authorName != null) {
+						if (authorName instanceof Array) {
+							authorName = authorName.join(", ");
+						}
+						identity = Identity.createWithName(authorName);
+						if (entry.author.uri != null) {
+							identity.uri = entry.author.uri;
+						}
 					}
 				}
-
+				
 				const resultItem = Item.createWithUriDate(url, date);
 				if (title != null) {
 					resultItem.title = title;
@@ -292,9 +301,19 @@ function load() {
 			const feedUrl = jsonObject.rss.channel.link;
 			const feedName = jsonObject.rss.channel.title;
 
-			const items = jsonObject.rss.channel.item;
-			var results = [];
+			const item = jsonObject.rss.channel.item;
+			let items = null;
+			if (item instanceof Array) {
+				items = item;
+			}
+			else {
+				items = [item];
+			}
+			let results = [];
 			for (const item of items) {
+				if (item.link == null || item.pubDate == null) {
+					continue;
+				}
 				const url = item.link;
 				const date = new Date(item.pubDate);
 				let title = item.title?.trim();
@@ -380,7 +399,14 @@ function load() {
 			const feedUrl = jsonObject["rdf:RDF"].channel.link;
 			const feedName = jsonObject["rdf:RDF"].channel.title;
 
-			const items = jsonObject["rdf:RDF"].item;
+			const item = jsonObject["rdf:RDF"].item;
+			let items = null;
+			if (item instanceof Array) {
+				items = item;
+			}
+			else {
+				items = [item];
+			}
 			var results = [];
 			for (const item of items) {
 				if (item["dc:date"] == null) {

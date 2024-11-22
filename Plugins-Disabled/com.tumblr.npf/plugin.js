@@ -70,12 +70,7 @@ function postForItem(item) {
 		identity = Identity.createWithName(blog.name);
 		identity.uri = blog.url;
 		identity.username = blog.title;
-		if (blog.avatar != null && blog.avatar.length > 0) {
-			identity.avatar = blog.avatar[0].url;
-		}
-		else {
-			identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
-		}
+		identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
 	}
 	else {
 		if (contentItem.broken_blog_name != null) {
@@ -88,17 +83,17 @@ function postForItem(item) {
 	
 	let body = "";
 	let attachments = [];
-	//console.log(`contentBlocks.length = ${contentBlocks.length}`);
+	console.log(`contentBlocks.length = ${contentBlocks.length}`);
 	let blockIndex = 0;
 	for (const contentBlock of contentBlocks) {
-		//console.log(`  [${blockIndex}] contentBlock.type = ${contentBlock.type}`);
+		console.log(`  [${blockIndex}] contentBlock.type = ${contentBlock.type}`);
 		switch (contentBlock.type) {
 		case "text":
 			let text = contentBlock.text;
 			let textFormats = contentBlock.formatting;
 			if (textFormats != null && textFormats.length > 0) {
 				let formattedText = formatText(text, textFormats);
-				//console.log(`    formattedText = ${formattedText}`);
+				console.log(`    formattedText = ${formattedText}`);
 				text = formattedText;
 			}
 			
@@ -106,8 +101,8 @@ function postForItem(item) {
 			if (askLayout != null && askLayout.blocks.indexOf(blockIndex) != -1) {
 				// text is an ask, style it with a blockquote
 				let asker = "Anonymous";
-				if (askLayout?.attribution?.blog?.name != null) {
-					asker = askLayout.attribution.blog.name;
+				if (askLayout.blog != null) {
+					asker = askLayout.blog.name;
 				}
 				body += `<blockquote><p><strong>${asker}</strong> asked:</p><p>${text}</p></blockquote>`;
 			}
@@ -158,6 +153,8 @@ function postForItem(item) {
 			if (contentBlock.media != null) {
 				const mediaProperties = contentBlock.media;
 				const posterProperties = contentBlock.poster;
+
+				// TODO: Check contentBlock.provider and use embed_html if not "tumblr"
 				
 				const attachment = MediaAttachment.createWithUrl(mediaProperties.url);
 				attachment.mimeType = mediaProperties.type;
@@ -167,17 +164,17 @@ function postForItem(item) {
 				}
 				attachments.push(attachment);
 			}
-			else if (contentBlock.embed_html != null) {
-				body += `<p>${contentBlock.embed_html}</p>`;
-			}
 			else if (contentBlock.url != null) {
-				body += `<p><a href="${contentBlock.url}">${contentBlock.url}</a>`;
+				const attachment = MediaAttachment.createWithUrl(contentBlock.url);
+				attachments.push(attachment);
 			}
 			break;
 		case "video":
 			if (contentBlock.media != null) {
 				const mediaProperties = contentBlock.media;
 				const posterProperties = contentBlock.poster;
+
+				// TODO: Check contentBlock.provider and use embed_html if not "tumblr"
 				
 				const attachment = MediaAttachment.createWithUrl(mediaProperties.url);
 				attachment.mimeType = mediaProperties.type;
@@ -187,27 +184,15 @@ function postForItem(item) {
 				}
 				attachments.push(attachment);
 			}
-			else if (contentBlock.embed_html != null) {
-				body += `<p>${contentBlock.embed_html}</p>`;
-			}
 			else if (contentBlock.url != null) {
-				body += `<p><a href="${contentBlock.url}">${contentBlock.url}</a>`;
+				const attachment = MediaAttachment.createWithUrl(contentBlock.url);
+				attachments.push(attachment);
 			}
-			break;
-		case "poll":
-			body += `<p>${contentBlock.question}</p>`;
-			body += "<p>";
-			body += "<ul>";
-			for (const answer of contentBlock.answers) {
-				body += `<li>${answer.answer_text}</li>`;
-			}
-			body += "</ul>";
-			body += "</p>";
 			break;
 // 		case "paywall":
 // 			break;
 		default:
-			body += `<p>Cannot display ${contentBlock.type} content.</p>`;
+			body += `Cannot display ${contentBlock.type} content.`;
 		}
 		
 		blockIndex += 1;
@@ -292,43 +277,22 @@ function queryDashboard(doIncrementalLoad) {
 	
 }
 
-// NOTE: The connector does incremental loads (only most recent items in home timeline) until 6 hours have
-// elapsed since the last full load (200 items in dashboard). The idea here is that this covers cases where
-// this script run from a manual or background refresh periodically.
-
-const fullUpdateInterval = 6 * 60 * 60 * 1000; // in milliseconds
+// TODO: FOR TESTING ONLY
+//var doIncrementalLoad = false;
+var doIncrementalLoad = true;
 
 function load() {
-	let nowTimestamp = (new Date()).getTime();
-
-	let doIncrementalLoad = false;
-	let lastFullUpdate = getItem("lastFullUpdate");
-	if (lastFullUpdate != null) {
-		let lastFullUpdateTimestamp = parseInt(lastFullUpdate);
-		console.log(`lastFullUpdateTimestamp = ${new Date(lastFullUpdateTimestamp)}`);
-		console.log(`fullUpdateInterval = ${fullUpdateInterval}`);
-		let futureTimestamp = (lastFullUpdateTimestamp + fullUpdateInterval);
-		console.log(`futureTimestamp = ${new Date(futureTimestamp)}`);
-		if (nowTimestamp < futureTimestamp) {
-			// time has not elapsed, do an incremental load
-			console.log(`time until next update = ${(futureTimestamp - nowTimestamp) / 1000} sec.`);
-			doIncrementalLoad = true;
-		}
-	}
-
 	queryDashboard(doIncrementalLoad)
 	.then((results) =>  {
 		console.log(`finished dashboard`);
 		processResults(results, true);
-		if (!doIncrementalLoad) {
-			setItem("lastFullUpdate", String(nowTimestamp));
-		}
+		doIncrementalLoad = true;
 	})
 	.catch((requestError) => {
 		console.log(`error dashboard`);
 		processError(requestError);
 		doIncrementalLoad = false;
-	});
+	});	
 }
 
 
@@ -343,7 +307,7 @@ function formatText(text, textFormats) {
 	let result = breakText(range);
 	applyItems(result.items, 0, codePoints);
 	let formattedText = String.fromCodePoint(...codePoints)
-	//console.log(`test: formattedText = ${formattedText}`);
+	console.log(`test: formattedText = ${formattedText}`);
 	return formattedText;
 	
 	function breakText(range) {
@@ -385,7 +349,7 @@ function formatText(text, textFormats) {
 
 				let replacement = [...capturePrefix, ...original, ...captureSuffix];
 
-				//console.log(`capture ${captureIndex} = ${String.fromCodePoint(...replacement)}`);
+				console.log(`capture ${captureIndex} = ${String.fromCodePoint(...replacement)}`);
 				item = { start: captureRange[0], length: captureRange[1] - captureRange[0], replacement: replacement};
 				items.push(item);
 
@@ -397,7 +361,7 @@ function formatText(text, textFormats) {
 					let suffix = formatSuffix(remainderIndex);
 					let slice = codePoints.slice(remainderRange[0], remainderRange[1]);
 					let replacement = [...prefix, ...slice, ...suffix];
-					//console.log(`capture remainder ${index} = ${String.fromCodePoint(...replacement)} (${type}) range = ${remainderRange}`);
+					console.log(`capture remainder ${index} = ${String.fromCodePoint(...replacement)} (${type}) range = ${remainderRange}`);
 					item = { start: remainderRange[0], length: remainderRange[1] - remainderRange[0], replacement: replacement};
 					items.push(item);
 				}

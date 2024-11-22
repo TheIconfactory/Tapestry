@@ -5,6 +5,10 @@
 			"title": "Apple Newsroom"
 		},
 		{
+			"value": "https://daily.bandcamp.com/feed",
+			"title": "Bandcamp Daily"
+		},
+		{
 			"value": "https://www.thisiscolossal.com/feed/",
 			"title": "Colossal"
 		},
@@ -23,7 +27,11 @@
 		{
 			"value": "https://www.smithsonianmag.com/rss/latest_articles/",
 			"title": "Smithsonian Magazine"
-		}		
+		},
+		{
+			"value": "https://www.theverge.com/rss/front-page/index.xml",
+			"title": "The Verge"
+		},	
 	]
 }
 
