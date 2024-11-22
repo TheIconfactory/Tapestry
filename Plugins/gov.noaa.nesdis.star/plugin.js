@@ -1,8 +1,6 @@
 
 // gov.noaa.nesdis.star
 
-var lastDate = null;
-
 function verify() {
 	let displayName = "";
 	if (satellite == "East Coast") {
@@ -12,20 +10,39 @@ function verify() {
 		displayName = "GOES18 Satellite";
 	}
 	
-	lastDate = null;
+	setItem("lastUpdate", null);
 	
 	processVerification(displayName);
 }
 	
 // NOTE: Images update every five minutes, but it takes longer to see a visible difference.
-// A new post will only be generated when we're past the minuteThreshold.
+// A new post will only be generated when we're past the updateInterval.
+
+const updateInterval = 2 * 60 * 60 * 1000; // in milliseconds
 
 const minuteThreshold = 60;
 
 function load() {
 	const date = new Date();
+
+	let nowTimestamp = (new Date()).getTime();
 	
-	if (Math.floor((date - lastDate) / 1000 / 60) > minuteThreshold) {
+	let doUpdate = true;
+	let lastUpdate = getItem("lastUpdate");
+	if (lastUpdate != null) {
+		let lastUpdateTimestamp = parseInt(lastUpdate);
+		console.log(`lastUpdateTimestamp = ${new Date(lastUpdateTimestamp)}`);
+		console.log(`updateInterval = ${updateInterval}`);
+		let futureTimestamp = (lastUpdateTimestamp + updateInterval);
+		console.log(`futureTimestamp = ${new Date(futureTimestamp)}`);
+		if (nowTimestamp < futureTimestamp) {
+			// time has not elapsed, do not load
+			console.log(`time until next update = ${(futureTimestamp - nowTimestamp) / 1000} sec.`);
+			doUpdate = false;
+		}
+	}
+
+	if (doUpdate) {
 		let directory = "GOES18";
 		if (satellite == "East Coast") {
 			directory = "GOES16";
@@ -74,6 +91,7 @@ function load() {
 			
 			processResults([resultItem]);
 			
+			setItem("lastUpdate", String(nowTimestamp));
 		})
 		.catch((requestError) => {
 			processError(requestError);
