@@ -59,6 +59,11 @@ function load() {
 		}
 		else if (jsonObject.rss != null) {
 			// RSS 2.0
+			let icon = null;
+			if (jsonObject.rss.channel["itunes:image$attrs"] != null) {
+				icon = jsonObject.rss.channel["itunes:image$attrs"].href;
+			}
+
 			const items = jsonObject.rss.channel.item;
 			var results = [];
 			for (const item of items) {
@@ -70,12 +75,45 @@ function load() {
 					const enclosureUrl = item["enclosure$attrs"].url;
 					if (enclosureUrl != null) {
 						attachment = MediaAttachment.createWithUrl(enclosureUrl);
+						if (item["itunes:image$attrs"] != null) {
+							attachment.thumbnail = item["itunes:image$attrs"].href ?? icon;
+						}
+						else if (icon != null) {
+							attachment.thumbnail = icon;
+						}
+						
+						let text = "";
+						if (item["itunes:duration"] != null) {
+							let duration = item["itunes:duration"];
+						
+							if (parseInt(duration) == duration) {
+								// duration is in seconds
+								let date = new Date(0);
+								date.setSeconds(parseInt(duration));
+								text += "Duration: " + date.toISOString().slice(11,19);
+							}
+							else {
+								// duration is in some other format
+								text += "Duration: " + duration;
+							}
+						}
+						if (item["itunes:episode"] != null) {
+							let episode = item["itunes:episode"];
+							if (text.length != 0) {
+								text += "\n";
+							}
+							text += "Episode: " + episode;
+						}
+						
+						if (text.length > 0) {
+							attachment.text = text;
+						}
 					}
 				}
 
 				let title = null;
 				let subtitle = null;
-				let duration = null;
+				let description = null;
 				
 				if (item["itunes:title"] != null) {
 					title = item["itunes:title"];
@@ -86,17 +124,16 @@ function load() {
 				if (item["itunes:subtitle"] != null) {
 					subtitle = item["itunes:subtitle"];
 				}
-				if (item["itunes:duration"] != null) {
-					duration = item["itunes:duration"];
+				if (item["description"] != null) {
+					description = item["description"];
 				}
-				//var description = item["description"];
-				let description = "";
+
+				let content = "";
 				if (subtitle != null) {
-					description = "<em>" + subtitle + "</em>";
+					content += `<p><em>${subtitle}</em></p>`;
 				}
-				var content = `<p>${description}</p>`;
-				if (duration != null) {
-					content += `<p>Duration: ${duration}</p>`;
+				if (description != null) {
+					content += `<p>${description}</p>`;
 				}
 				
 				const resultItem = Item.createWithUriDate(url, date);
