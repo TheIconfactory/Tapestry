@@ -279,7 +279,7 @@ function queryMentions() {
 				let annotation = null;
 				let shortcodes = {};
 				
-				if (visibility == "public") {
+				if (visibility == "public" || visibility == "unlisted") {
 					if (postItem.mentions != null && postItem.mentions.length > 0) {
 						const mentions = postItem.mentions;
 						const account = mentions[0];
@@ -298,9 +298,6 @@ function queryMentions() {
 							}
 						}
 					}
-				}
-				else if (visibility == "unlisted") {
-					annotation = Annotation.createWithText(`UNLISTED`);
 				}
 				else if (visibility == "private") {
 					annotation = Annotation.createWithText(`FOLLOWERS ONLY`);
