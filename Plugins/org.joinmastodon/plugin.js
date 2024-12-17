@@ -201,7 +201,7 @@ function queryHomeTimeline(doIncrementalLoad) {
 				const jsonObject = JSON.parse(text);
 				for (const item of jsonObject) {
 					const date = new Date(item["created_at"]);
-						
+					
 					let annotation = null;
 					let shortcodes = {};
 					let postItem = item;
@@ -223,7 +223,17 @@ function queryHomeTimeline(doIncrementalLoad) {
 							
 						postItem = item["reblog"];
 					}
-						
+
+					if (annotation == null) {
+						let visibility = item["visibility"];
+						if (visibility == "private") {
+							annotation = Annotation.createWithText(`FOLLOWERS ONLY`);
+						}
+						else if (visibility == "direct") {
+							annotation = Annotation.createWithText(`PRIVATE MENTION`);
+						}	
+					}
+					
 					const post = postForItem(postItem, date, shortcodes);
 					if (annotation != null) {
 						post.annotations = [annotation];
@@ -264,26 +274,40 @@ function queryMentions() {
 			for (const item of jsonObject) {
 				let postItem = item["status"];
 
+				let visibility = postItem["visibility"];
+
 				let annotation = null;
 				let shortcodes = {};
-				if (postItem.mentions != null && postItem.mentions.length > 0) {
-					const mentions = postItem.mentions;
-					const account = mentions[0];
-					const userName = account["username"];
-					let text = "Replying to @" + userName;
-					if (mentions.length > 1) {
-						text += " and others";
-					}
-					annotation = Annotation.createWithText(text);
-					annotation.uri = account["url"];
-
-					const accountEmojis = account["emojis"];
-					if (accountEmojis != null && accountEmojis.length > 0) {
-						for (const emoji of accountEmojis) {
-							shortcodes[emoji.shortcode] = emoji.static_url;
+				
+				if (visibility == "public") {
+					if (postItem.mentions != null && postItem.mentions.length > 0) {
+						const mentions = postItem.mentions;
+						const account = mentions[0];
+						const userName = account["username"];
+						let text = "Replying to @" + userName;
+						if (mentions.length > 1) {
+							text += " and others";
+						}
+						annotation = Annotation.createWithText(text);
+						annotation.uri = account["url"];
+	
+						const accountEmojis = account["emojis"];
+						if (accountEmojis != null && accountEmojis.length > 0) {
+							for (const emoji of accountEmojis) {
+								shortcodes[emoji.shortcode] = emoji.static_url;
+							}
 						}
 					}
 				}
+				else if (visibility == "unlisted") {
+					annotation = Annotation.createWithText(`UNLISTED`);
+				}
+				else if (visibility == "private") {
+					annotation = Annotation.createWithText(`FOLLOWERS ONLY`);
+				}
+				else if (visibility == "direct") {
+					annotation = Annotation.createWithText(`PRIVATE MENTION`);
+				}	
 	
 				const post = postForItem(postItem, null, shortcodes);
 				if (annotation != null) {
@@ -309,17 +333,32 @@ function queryStatusesForUser(id) {
 			const jsonObject = JSON.parse(text);
 			let results = [];
 			for (const item of jsonObject) {
+				let annotation = null;
+				
 				let post = null;
 				if (item.reblog != null) {
 					post = postForItem(item.reblog);
 					annotation = Annotation.createWithText("Boosted by you");
 					annotation.uri = item.account["url"];
-					post.annotations = [annotation];
 				}
 				else {
 					post = postForItem(item);
 				}
+
+				if (annotation == null) {
+					let visibility = item["visibility"];
+					if (visibility == "private") {
+						annotation = Annotation.createWithText(`FOLLOWERS ONLY`);
+					}
+					else if (visibility == "direct") {
+						annotation = Annotation.createWithText(`PRIVATE MENTION`);
+					}	
+				}
 				
+				if (annotation != null) {
+					post.annotations = [annotation];
+				}
+
 				results.push(post);
 			}
 			resolve(results);
