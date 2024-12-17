@@ -121,7 +121,9 @@ function postForItem(item) {
 				const posterProperties = mediaProperties.poster;
 
 				const attachment = MediaAttachment.createWithUrl(mediaProperties.url);
-				attachment.text = contentBlock.alt_text;
+				if (contentBlock.alt_text != null) {
+					attachment.text = contentBlock.alt_text;
+				}
 				attachment.mimeType = mediaProperties.type;
 				attachment.aspectSize = {width: mediaProperties.width, height: mediaProperties.height};
 				if (posterProperties != null) {
@@ -160,6 +162,9 @@ function postForItem(item) {
 				const posterProperties = contentBlock.poster;
 				
 				const attachment = MediaAttachment.createWithUrl(mediaProperties.url);
+				if (contentBlock.title != null) {
+					attachment.text = contentBlock.title;
+				}
 				attachment.mimeType = mediaProperties.type;
 				attachment.aspectSize = {width: mediaProperties.width, height: mediaProperties.height};
 				if (posterProperties != null && posterProperties.length > 0) {

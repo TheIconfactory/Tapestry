@@ -301,7 +301,7 @@ function attachmentsForEmbed(embed) {
 					if (image.aspectRatio != null) {
 						attachment.aspectSize = image.aspectRatio;
 					}
-					if (image.alt != null) {
+					if (image.alt != null && image.alt.length != 0) {
 						attachment.text = image.alt;
 					}
 					if (image.thumb) {
@@ -319,7 +319,7 @@ function attachmentsForEmbed(embed) {
 				if (embed.aspectRatio != null) {
 					attachment.aspectSize = embed.aspectRatio;
 				}
-				if (embed.alt != null) {
+				if (embed.alt != null && embed.alt.length != 0) {
 					attachment.text = embed.alt;
 				}
 				if (embed.thumbnail != null) {
