@@ -104,6 +104,9 @@ function load() {
 			
 			processResults([item]);
 		}
+		else {
+			processResults([]);
+		}
 	})
 	.catch((requestError) => {
 		processError(requestError);
