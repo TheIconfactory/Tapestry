@@ -178,12 +178,20 @@ function postForItem(item, date = null, shortcodes = {}) {
 	return post;
 }
 
-function queryHomeTimeline(doIncrementalLoad) {
+function queryHomeTimeline(endDate) {
 
+	// NOTE: These constants are feed limits within Tapestry - it doesn't store more than 3,000 items or things older than 30 days.
+	// In reality, the Mastodon API returns a limited number of items (800-ish) over a shorter timespan.
+	const maxInterval = 30 * 24 * 60 * 60 * 1000; // days in milliseconds (approximately)
+	const maxItems = 3000;
+
+	let newestItemDate = null;
+	let oldestItemDate = null;
+	
 	return new Promise((resolve, reject) => {
 
 		// this function is called recursively to load & process batches of posts into a single list of results
-		function requestToId(id, doIncrementalLoad, resolve, reject, limit = 5, results = []) {
+		function requestToId(id, endDate, resolve, reject, results = []) {
 			let url = null
 			if (id == null) {
 				url = `${site}/api/v1/timelines/home?limit=40`;
@@ -192,12 +200,14 @@ function queryHomeTimeline(doIncrementalLoad) {
 				url = `${site}/api/v1/timelines/home?limit=40&since_id=1&max_id=${id}`;
 			}
 			
-			console.log(`doIncrementalLoad = ${doIncrementalLoad}, id = ${id}`);
+			console.log(`==== REQUEST id = ${id}`);
 			
 			sendRequest(url, "GET")
 			.then((text) => {
 				//console.log(text);
 				let lastId = null;
+				let lastDate = null;
+				let endUpdate = false;
 				const jsonObject = JSON.parse(text);
 				for (const item of jsonObject) {
 					const date = new Date(item["created_at"]);
@@ -234,6 +244,19 @@ function queryHomeTimeline(doIncrementalLoad) {
 						}	
 					}
 					
+					if (!endUpdate && date < endDate) {
+						console.log(`>>>> END date = ${date}`);
+						endUpdate = true;
+					}
+					if (date > newestItemDate) {
+						console.log(`>>>> NEW date = ${date}`);
+						newestItemDate = date;
+					}
+					if (date < oldestItemDate) {
+						console.log(`>>>> OLD date = ${date}`);
+						endUpdate = true;
+					}
+					
 					const post = postForItem(postItem, date, shortcodes);
 					if (annotation != null) {
 						post.annotations = [annotation];
@@ -242,15 +265,23 @@ function queryHomeTimeline(doIncrementalLoad) {
 					results.push(post);
 		
 					lastId = item["id"];
+					lastDate = date;
+				}
+
+				if (results.length > maxItems) {
+					endUpdate = true;
 				}
 				
-				const newLimit = limit - 1;
+				console.log(`>>>> BATCH results = ${results.length}, lastId = ${lastId}, endUpdate = ${endUpdate}`);
+				console.log(`>>>>       last   = ${lastDate}`);
+				console.log(`>>>>       newest = ${newestItemDate}`);
 				
-				if (lastId != null && newLimit > 0 && doIncrementalLoad == false) {
-					requestToId(lastId, doIncrementalLoad, resolve, reject, newLimit, results);
+				// NOTE: endUpdate signifies a date or count threshold has been reached, lastId indicates the API returned no items.
+				if (!endUpdate && lastId != null) {
+					requestToId(lastId, endDate, resolve, reject, results);
 				}
 				else {
-					resolve(results);
+					resolve([results, newestItemDate]);
 				}
 			})
 			.catch((error) => {
@@ -258,7 +289,14 @@ function queryHomeTimeline(doIncrementalLoad) {
 			});	
 		}
 
-		requestToId(null, doIncrementalLoad, resolve, reject);
+		console.log(`>>>> START endDate = ${endDate}`);
+		
+		let nowTimestamp = (new Date()).getTime();
+		let pastTimestamp = (nowTimestamp - maxInterval);
+		oldestItemDate = new Date(pastTimestamp);
+		console.log(`>>>> OLD date = ${oldestItemDate}`);
+			
+		requestToId(null, endDate, resolve, reject);
 
 	});
 	
@@ -367,33 +405,18 @@ function queryStatusesForUser(id) {
 	
 }
 
-// NOTE: The connector does incremental loads (only most recent items in home timeline) until 6 hours have
-// elapsed since the last full load (200 items in home timeline). The idea here is that this covers cases where
-// this script run from a manual or background refresh periodically.
-
-const fullUpdateInterval = 6 * 60 * 60 * 1000; // in milliseconds
-
 var userId = getItem("userId");
 
 // NOTE: This reference counter tracks loading so we can let the app know when all async loading work is complete.
 var loadCounter = 0;
 
 function load() {
-	let nowTimestamp = (new Date()).getTime();
-	
-	let doIncrementalLoad = false;
-	let lastFullUpdate = getItem("lastFullUpdate");
-	if (lastFullUpdate != null) {
-		let lastFullUpdateTimestamp = parseInt(lastFullUpdate);
-		console.log(`lastFullUpdateTimestamp = ${new Date(lastFullUpdateTimestamp)}`);
-		console.log(`fullUpdateInterval = ${fullUpdateInterval}`);
-		let futureTimestamp = (lastFullUpdateTimestamp + fullUpdateInterval);
-		console.log(`futureTimestamp = ${new Date(futureTimestamp)}`);
-		if (nowTimestamp < futureTimestamp) {
-			// time has not elapsed, do an incremental load
-			console.log(`time until next update = ${(futureTimestamp - nowTimestamp) / 1000} sec.`);
-			doIncrementalLoad = true;
-		}
+	// NOTE: The home timeline will be filled up to the endDate, if possible. If there is no endDate, up to
+	// 30 days or 3,000 items will be loaded.
+	let endDate = null;
+	let endDateTimestamp = getItem("endDateTimestamp");
+	if (endDateTimestamp != null) {
+		endDate = new Date(parseInt(endDateTimestamp));
 	}
 	
 	loadCounter = 0;
@@ -408,14 +431,14 @@ function load() {
 	}
 				
 	if (includeHome == "on") {
-		queryHomeTimeline(doIncrementalLoad)
-  		.then((results) =>  {
+		queryHomeTimeline(endDate)
+  		.then((parameters) =>  {
+  			results = parameters[0];
+  			newestItemDate = parameters[1];
   			loadCounter -= 1;
   			console.log(`finished home timeline, loadCounter = ${loadCounter}`);
 			processResults(results, loadCounter == 0);
-			if (!doIncrementalLoad) {
-				setItem("lastFullUpdate", String(nowTimestamp));
-			}
+			setItem("endDateTimestamp", String(newestItemDate.getTime()));
  		})
 		.catch((requestError) => {
   			loadCounter -= 1;
