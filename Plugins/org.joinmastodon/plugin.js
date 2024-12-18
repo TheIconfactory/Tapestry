@@ -180,9 +180,10 @@ function postForItem(item, date = null, shortcodes = {}) {
 
 function queryHomeTimeline(endDate) {
 
-	// NOTE: These constants are feed limits within Tapestry - it doesn't store more than 3,000 items or things older than 30 days.
-	// In reality, the Mastodon API returns a limited number of items (800-ish) over a shorter timespan.
-	const maxInterval = 30 * 24 * 60 * 60 * 1000; // days in milliseconds (approximately)
+	// NOTE: These constants are related to the feed limits within Tapestry - it doesn't store more than
+	// 3,000 items or things older than 30 days.
+	// In use, the Mastodon API returns a limited number of items (800-ish) over a shorter timespan.
+	const maxInterval = 3 * 24 * 60 * 60 * 1000; // days in milliseconds (approximately)
 	const maxItems = 3000;
 
 	let newestItemDate = null;
@@ -269,6 +270,7 @@ function queryHomeTimeline(endDate) {
 				}
 
 				if (results.length > maxItems) {
+					console.log(`>>>> MAX`);
 					endUpdate = true;
 				}
 				
@@ -411,8 +413,7 @@ var userId = getItem("userId");
 var loadCounter = 0;
 
 function load() {
-	// NOTE: The home timeline will be filled up to the endDate, if possible. If there is no endDate, up to
-	// 30 days or 3,000 items will be loaded.
+	// NOTE: The home timeline will be filled up to the endDate, if possible.
 	let endDate = null;
 	let endDateTimestamp = getItem("endDateTimestamp");
 	if (endDateTimestamp != null) {
@@ -431,15 +432,18 @@ function load() {
 	}
 				
 	if (includeHome == "on") {
+		let startTimestamp = (new Date()).getTime();
+
 		queryHomeTimeline(endDate)
   		.then((parameters) =>  {
   			results = parameters[0];
   			newestItemDate = parameters[1];
   			loadCounter -= 1;
-  			console.log(`finished home timeline, loadCounter = ${loadCounter}`);
 			processResults(results, loadCounter == 0);
 			setItem("endDateTimestamp", String(newestItemDate.getTime()));
- 		})
+			let endTimestamp = (new Date()).getTime();
+ 			console.log(`finished home timeline, loadCounter = ${loadCounter}: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
+		})
 		.catch((requestError) => {
   			loadCounter -= 1;
   			console.log(`error home timeline, loadCounter = ${loadCounter}`);
