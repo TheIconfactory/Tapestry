@@ -242,29 +242,44 @@ function postForItem(item) {
 	return post;
 }
 
-function queryDashboard(doIncrementalLoad) {
+function queryDashboard(endDate) {
 
+	// NOTE: These constants are related to the feed limits within Tapestry - it doesn't store more than
+	// 3,000 items or things older than 30 days.
+	// In use, the Tumblr API returns a limited number of items (300-ish) over a shorter timespan. Paging back
+	// through results (using offset) is fairly slow, and these requests have a 30 second timeout, so the
+	// the maxInterval is shorter than on other platforms.
+	const maxInterval = 1.5 * 24 * 60 * 60 * 1000; // days in milliseconds (approximately)
+	const maxItems = 3000;
+
+	let newestItemDate = null;
+	let oldestItemDate = null;
+	
 	return new Promise((resolve, reject) => {
 
 		// this function is called recursively to load & process batches of posts into a single list of results
-		function requestToId(id, doIncrementalLoad, resolve, reject, limit = 5, results = []) {
+		function requestBatch(id, endDate, pass, resolve, reject, results = []) {
 			let url = null
 			if (id == null) {
-				console.log("offset = none");
+				//console.log("offset = none");
 				url = `${site}/v2/user/dashboard?npf=true&reblog_info=true&notes_info=true&limit=20`;
 			}
 			else {
-				const offset = (requestLimit - limit) * 20;
-				console.log(`offset = ${offset}`);
+				const offset = pass * 20;
+				//console.log(`offset = ${offset}`);
 				url = `${site}/v2/user/dashboard?npf=true&reblog_info=true&notes_info=true&limit=20&offset=${offset}`;
 			}
 			
-			console.log(`doIncrementalLoad = ${doIncrementalLoad}, id = ${id}`);
+			console.log(`==== REQUEST id = ${id}, pass = ${pass}`);
 			
 			sendRequest(url, "GET")
 			.then((text) => {
 				//console.log(text);
+				let firstId = null;
+				let firstDate = null;
 				let lastId = null;
+				let lastDate = null;
+				let endUpdate = false;
 				
 				const jsonObject = JSON.parse(text);
 				const items = jsonObject.response.posts;
@@ -272,17 +287,55 @@ function queryDashboard(doIncrementalLoad) {
 					const post = postForItem(item);
 					if (post != null) {
 						results.push(post);
-						lastId = item["id"];
+
+						const date = post.date;
+
+						const currentId = item["id"];
+						if (firstId == null) {
+							firstId = currentId;
+							firstDate = date;
+						}
+						lastId = currentId;						
+						lastDate = date;
+						
+						if (!endUpdate && date < endDate) {
+							console.log(`>>>> END date = ${date}`);
+							endUpdate = true;
+						}
+						if (date > newestItemDate) {
+							console.log(`>>>> NEW date = ${date}`);
+							newestItemDate = date;
+						}
+						if (date < oldestItemDate) {
+							console.log(`>>>> OLD date = ${date}`);
+							endUpdate = true;
+						}
 					}
 				}
 				
-				const newLimit = limit - 1;
+				if (id == lastId) {
+					console.log(`>>>> ID MATCH`);
+					endUpdate = true;
+				}
+				if (pass >= 20) {
+					console.log(`>>>> PASS OVERFLOW`);
+					endUpdate = true;
+				}
+				if (results.length > maxItems) {
+					console.log(`>>>> MAX`);
+					endUpdate = true;
+				}
 				
-				if (lastId != null && newLimit > 0 && doIncrementalLoad == false) {
-					requestToId(lastId, doIncrementalLoad, resolve, reject, newLimit, results);
+				console.log(`>>>> BATCH results = ${results.length}, lastId = ${lastId}, endUpdate = ${endUpdate}`);
+				console.log(`>>>>       first  = ${firstDate}`);
+				console.log(`>>>>       last   = ${lastDate}`);
+				console.log(`>>>>       newest = ${newestItemDate}`);
+				
+				if (!endUpdate && lastId != null) {
+					requestBatch(lastId, endDate, pass + 1, resolve, reject, results);
 				}
 				else {
-					resolve(results);
+					resolve([results, newestItemDate]);
 				}
 			})
 			.catch((error) => {
@@ -290,49 +343,42 @@ function queryDashboard(doIncrementalLoad) {
 			});	
 		}
 
-		const requestLimit = 10;
-		requestToId(null, doIncrementalLoad, resolve, reject, requestLimit);
-
+		console.log(`>>>> START endDate = ${endDate}`);
+		
+		let nowTimestamp = (new Date()).getTime();
+		let pastTimestamp = (nowTimestamp - maxInterval);
+		oldestItemDate = new Date(pastTimestamp);
+		console.log(`>>>> OLD date = ${oldestItemDate}`);
+			
+		requestBatch(null, endDate, 0, resolve, reject);
 	});
 	
 }
 
-// NOTE: The connector does incremental loads (only most recent items in home timeline) until 6 hours have
-// elapsed since the last full load (200 items in dashboard). The idea here is that this covers cases where
-// this script run from a manual or background refresh periodically.
-
-const fullUpdateInterval = 6 * 60 * 60 * 1000; // in milliseconds
-
 function load() {
 	let nowTimestamp = (new Date()).getTime();
 
-	let doIncrementalLoad = false;
-	let lastFullUpdate = getItem("lastFullUpdate");
-	if (lastFullUpdate != null) {
-		let lastFullUpdateTimestamp = parseInt(lastFullUpdate);
-		console.log(`lastFullUpdateTimestamp = ${new Date(lastFullUpdateTimestamp)}`);
-		console.log(`fullUpdateInterval = ${fullUpdateInterval}`);
-		let futureTimestamp = (lastFullUpdateTimestamp + fullUpdateInterval);
-		console.log(`futureTimestamp = ${new Date(futureTimestamp)}`);
-		if (nowTimestamp < futureTimestamp) {
-			// time has not elapsed, do an incremental load
-			console.log(`time until next update = ${(futureTimestamp - nowTimestamp) / 1000} sec.`);
-			doIncrementalLoad = true;
-		}
+	// NOTE: The dashboard will be filled up to the endDate, if possible.
+	let endDate = null;
+	let endDateTimestamp = getItem("endDateTimestamp");
+	if (endDateTimestamp != null) {
+		endDate = new Date(parseInt(endDateTimestamp));
 	}
 
-	queryDashboard(doIncrementalLoad)
-	.then((results) =>  {
-		console.log(`finished dashboard`);
+	let startTimestamp = (new Date()).getTime();
+	
+	queryDashboard(endDate)
+	.then((parameters) =>  {
+		results = parameters[0];
+		newestItemDate = parameters[1];
 		processResults(results, true);
-		if (!doIncrementalLoad) {
-			setItem("lastFullUpdate", String(nowTimestamp));
-		}
+		setItem("endDateTimestamp", String(newestItemDate.getTime()));
+		let endTimestamp = (new Date()).getTime();
+		console.log(`finished dashboard: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
 	})
 	.catch((requestError) => {
 		console.log(`error dashboard`);
 		processError(requestError);
-		doIncrementalLoad = false;
 	});
 }
 
