@@ -25,7 +25,7 @@ function queryTimeline(endDate) {
 	// The Bluesky API is fast and can return the maximum number of items with 30 seconds, but a week's
 	// worth of content feels like a good amount to backfill.
 	const maxInterval = 7 * 24 * 60 * 60 * 1000; // days in milliseconds (approximately)
-	const maxItems = 3000;
+	const maxItems = 1000;
 
 	let newestItemDate = null;
 	let oldestItemDate = null;

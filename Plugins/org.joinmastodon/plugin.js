@@ -184,7 +184,7 @@ function queryHomeTimeline(endDate) {
 	// 3,000 items or things older than 30 days.
 	// In use, the Mastodon API returns a limited number of items (800-ish) over a shorter timespan.
 	const maxInterval = 3 * 24 * 60 * 60 * 1000; // days in milliseconds (approximately)
-	const maxItems = 3000;
+	const maxItems = 800;
 
 	let newestItemDate = null;
 	let oldestItemDate = null;
