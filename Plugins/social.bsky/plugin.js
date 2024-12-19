@@ -18,45 +18,96 @@ function verify() {
 
 const uriPrefix = "https://bsky.app";
 
-function queryTimeline(doIncrementalLoad) {
+function queryTimeline(endDate) {
+
+	// NOTE: These constants are related to the feed limits within Tapestry - it doesn't store more than
+	// 3,000 items or things older than 30 days.
+	// The Bluesky API is fast and can return the maximum number of items with 30 seconds, but a week's
+	// worth of content feels like a good amount to backfill.
+	const maxInterval = 7 * 24 * 60 * 60 * 1000; // days in milliseconds (approximately)
+	const maxItems = 3000;
+
+	let newestItemDate = null;
+	let oldestItemDate = null;
 
 	return new Promise((resolve, reject) => {
 
 		// this function is called recursively to load & process batches of posts into a single list of results
-		function requestToCursor(cursor, doIncrementalLoad, resolve, reject, limit = 5, results = []) {
+		function requestToCursor(cursor, endDate, resolve, reject, results = []) {
 			let url = null
 			if (cursor == null) {
-				console.log("cursor = none");
+				//console.log("cursor = none");
 				url = `${site}/xrpc/app.bsky.feed.getTimeline?algorithm=reverse-chronological&limit=50`;
 			}
 			else {
-				const offset = (requestLimit - limit) * 20;
-				console.log(`cursor = ${cursor}`);
+				//console.log(`cursor = ${cursor}`);
 				url = `${site}/xrpc/app.bsky.feed.getTimeline?algorithm=reverse-chronological&limit=50&cursor=${cursor}`;
 			}
 			
-			console.log(`doIncrementalLoad = ${doIncrementalLoad}, cursor = ${cursor}`);
+			console.log(`==== REQUEST cursor = ${cursor}`);
 			
 			sendRequest(url, "GET")
 			.then((text) => {
 				//console.log(text);
+				let firstId = null;
+				let firstDate = null;
+				let lastId = null;
+				let lastDate = null;
+				let endUpdate = false;
+
 				const jsonObject = JSON.parse(text);
 				const items = jsonObject.feed
 				for (const item of items) {
 					const post = postForItem(item);
 					if (post != null) {
 						results.push(post);
+						
+						let date = new Date(item.post.indexedAt); // date of the post
+						if (item.reason != null && item.reason.$type == "app.bsky.feed.defs#reasonRepost") {
+							date = new Date(item.reason.indexedAt); // date of the repost
+						}
+
+						const currentId = item.post.uri.split("/").pop();
+
+						if (firstId == null) {
+							firstId = currentId;
+							firstDate = date;
+						}
+						lastId = currentId;						
+						lastDate = date;
+						
+						if (!endUpdate && date < endDate) {
+							console.log(`>>>> END date = ${date}`);
+							endUpdate = true;
+						}
+						if (date > newestItemDate) {
+							console.log(`>>>> NEW date = ${date}`);
+							newestItemDate = date;
+						}
+						if (date < oldestItemDate) {
+							console.log(`>>>> OLD date = ${date}`);
+							endUpdate = true;
+						}
+
 					}
 				}
+				if (results.length > maxItems) {
+					console.log(`>>>> MAX`);
+					endUpdate = true;
+				}
+				
+				console.log(`>>>> BATCH results = ${results.length}, lastId = ${lastId}, endUpdate = ${endUpdate}`);
+				console.log(`>>>>       first  = ${firstDate}`);
+				console.log(`>>>>       last   = ${lastDate}`);
+				console.log(`>>>>       newest = ${newestItemDate}`);
+				
+				const cursor = jsonObject.cursor;			
 
-				const cursor = jsonObject.cursor;				
-				const newLimit = limit - 1;
-
-				if (cursor != null && newLimit > 0 && doIncrementalLoad == false) {
-					requestToCursor(cursor, doIncrementalLoad, resolve, reject, newLimit, results);
+				if (!endUpdate && cursor != null) {
+					requestToCursor(cursor, endDate, resolve, reject, results);
 				}
 				else {
-					resolve(results);
+					resolve([results, newestItemDate]);
 				}
 			})
 			.catch((error) => {
@@ -64,44 +115,36 @@ function queryTimeline(doIncrementalLoad) {
 			});	
 		}
 
-		const requestLimit = 4;
-		requestToCursor(null, doIncrementalLoad, resolve, reject, requestLimit);
+		console.log(`>>>> START endDate = ${endDate}`);
+		
+		let nowTimestamp = (new Date()).getTime();
+		let pastTimestamp = (nowTimestamp - maxInterval);
+		oldestItemDate = new Date(pastTimestamp);
+		console.log(`>>>> OLD date = ${oldestItemDate}`);
 
+		requestToCursor(null, endDate, resolve, reject);
 	});
 	
 }
 
-// NOTE: The connector does incremental loads (only most recent items in home timeline) until 6 hours have
-// elapsed since the last full load (200 items in main timeline). The idea here is that this covers cases where
-// this script run from a manual or background refresh periodically.
-
-const fullUpdateInterval = 6 * 60 * 60 * 1000; // in milliseconds
-
 function load() {
-	let nowTimestamp = (new Date()).getTime();
-	
-	let doIncrementalLoad = false;
-	let lastFullUpdate = getItem("lastFullUpdate");
-	if (lastFullUpdate != null) {
-		let lastFullUpdateTimestamp = parseInt(lastFullUpdate);
-		console.log(`lastFullUpdateTimestamp = ${new Date(lastFullUpdateTimestamp)}`);
-		console.log(`fullUpdateInterval = ${fullUpdateInterval}`);
-		let futureTimestamp = (lastFullUpdateTimestamp + fullUpdateInterval);
-		console.log(`futureTimestamp = ${new Date(futureTimestamp)}`);
-		if (nowTimestamp < futureTimestamp) {
-			// time has not elapsed, do an incremental load
-			console.log(`time until next update = ${(futureTimestamp - nowTimestamp) / 1000} sec.`);
-			doIncrementalLoad = true;
-		}
+	// NOTE: The timeline will be filled up to the endDate, if possible.
+	let endDate = null;
+	let endDateTimestamp = getItem("endDateTimestamp");
+	if (endDateTimestamp != null) {
+		endDate = new Date(parseInt(endDateTimestamp));
 	}
 
-	queryTimeline(doIncrementalLoad)
-	.then((results) =>  {
-		console.log(`finished timeline`);
+	let startTimestamp = (new Date()).getTime();
+
+	queryTimeline(endDate)
+	.then((parameters) =>  {
+		results = parameters[0];
+		newestItemDate = parameters[1];
 		processResults(results, true);
-		if (!doIncrementalLoad) {
-			setItem("lastFullUpdate", String(nowTimestamp));
-		}
+		setItem("endDateTimestamp", String(newestItemDate.getTime()));
+		let endTimestamp = (new Date()).getTime();
+		console.log(`finished timeline: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
 	})
 	.catch((requestError) => {
 		console.log(`error timeline`);
