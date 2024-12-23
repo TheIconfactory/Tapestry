@@ -193,6 +193,10 @@ function postForItem(item) {
 				attachments.push(attachment);
 			}
 			else if (contentBlock.embed_html != null) {
+				if (contentBlock.provider == "youtube" && contentBlock.url != null) {
+					let attachment = LinkAttachment.createWithUrl(contentBlock.url);
+					attachments.push(attachment);
+				}
 				body += `<p>${contentBlock.embed_html}</p>`;
 			}
 			else if (contentBlock.url != null) {
