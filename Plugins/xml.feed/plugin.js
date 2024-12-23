@@ -218,7 +218,14 @@ function load() {
 					date =  new Date(entry.updated);
 				}
 				const title = entry.title?.trim();
-				const content = entry.content ?? entry.summary;
+				
+				let content = ""
+				if (entry.content$attrs["type"] == "xhtml") {
+					content = entry.content$xhtml;
+				}
+				else {
+					content = entry.content ?? entry.summary;
+				}
 				
 				var identity = null;
 				if (entry.author != null) {
