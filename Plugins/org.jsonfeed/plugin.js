@@ -50,7 +50,7 @@ function load() {
 			const url = item["url"];
 			const date = new Date(item["date_published"]); // could also be "date_modified"
 			const title = item['title'];
-			const content = item['content_html'];
+			const content = item['content_html'] ?? item['content_text'] ?? "";
 			const authors = item["authors"];
 			
 			let linkAttachment = null;
