@@ -223,17 +223,23 @@ function itemForData(item) {
 	}
 
 	if (item["secure_media"] != null) {
-//		if (item["secure_media"].reddit_video != null && item["secure_media"].reddit_video.fallback_url != null) {
-//			let videoUrl = item["secure_media"].reddit_video.fallback_url;
 		if (item["secure_media"].reddit_video != null && item["secure_media"].reddit_video.hls_url != null) {
 			let videoUrl = item["secure_media"].reddit_video.hls_url;
 			let posterUrl = item.thumbnail;
+			let aspectSize = null;
 			if (attachments.length > 0) {
-				posterUrl = attachments[0].media;
+				posterUrl = attachments[0].url ?? attachments[0].media;
+
+				if (attachments[0].aspectSize != null) {
+					aspectSize = attachments[0].aspectSize;
+				}
 			}
 			
 			const attachment = MediaAttachment.createWithUrl(videoUrl);
 			attachment.thumbnail = posterUrl;
+			if (aspectSize != null) {
+				attachment.aspectSize = aspectSize;
+			}
 			attachment.mimeType = "video/mp4";
 			
 			// replace first attachment with video and poster image
