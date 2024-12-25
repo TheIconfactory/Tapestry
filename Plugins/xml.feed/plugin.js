@@ -83,7 +83,7 @@ function verify() {
 			}
 			
 		}
-		else if (jsonObject.rss != null) {
+		else if (jsonObject.rss != null && jsonObject.rss.channel != null) {
 			// RSS 2.0
 // TODO: Check that XML is good:
 // if (jsonObject.rss instanceof Object	&& jsonObject.rss.channel instanceof Object) { ... }
@@ -178,13 +178,15 @@ function load() {
 			}
 			const feedName = jsonObject.feed.title;
 		
-			const entry = jsonObject.feed.entry;
-			let entries = null;
-			if (entry instanceof Array) {
-				entries = entry;
-			}
-			else {
-				entries = [entry];
+			let entries = [];
+			if (jsonObject.feed.entry != null) {
+				const entry = jsonObject.feed.entry;
+				if (entry instanceof Array) {
+					entries = entry;
+				}
+				else {
+					entries = [entry];
+				}
 			}
 			var results = [];
 			for (const entry of entries) {
@@ -303,19 +305,22 @@ function load() {
 
 			processResults(results);
 		}
-		else if (jsonObject.rss != null) {
+		else if (jsonObject.rss != null && jsonObject.rss.channel != null) {
 			// RSS 2.0
 			const feedUrl = jsonObject.rss.channel.link;
 			const feedName = jsonObject.rss.channel.title;
 
-			const item = jsonObject.rss.channel.item;
-			let items = null;
-			if (item instanceof Array) {
-				items = item;
+			let items = [];
+			if (jsonObject.rss.channel.item != null) {
+				const item = jsonObject.rss.channel.item;
+				if (item instanceof Array) {
+					items = item;
+				}
+				else {
+					items = [item];
+				}
 			}
-			else {
-				items = [item];
-			}
+
 			let results = [];
 			for (const item of items) {
 				if (item.link == null || item.pubDate == null) {
