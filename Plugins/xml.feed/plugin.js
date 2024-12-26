@@ -222,7 +222,7 @@ function load() {
 				const title = entry.title?.trim();
 				
 				let content = ""
-				if (entry.content$attrs["type"] == "xhtml") {
+				if (entry.content$attrs != null && entry.content$attrs["type"] == "xhtml") {
 					content = entry.content$xhtml;
 				}
 				else {
