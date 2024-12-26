@@ -522,42 +522,47 @@ function contentForRecord(record) {
 	// NOTE: Facets are a pain in the butt since they use byte positions in UTF-8. The JSON parser generates UTF-16
 	// so we have to convert it back to bytes, find what we need, and then make a new UTF-16 string.
 	
-	if (record.facets != null) {
-		// NOTE: Facets are processed in reverse order determined by the starting index. This is because the output string
-		// is being modified in place.
-		const sortedFacets = record.facets.toSorted((a,b) => {return b?.index?.byteStart - a?.index?.byteStart})
-		for (const facet of sortedFacets) {
-			if (facet.features.length > 0) {
-				const bytes = stringToBytes(content);
-				
-				const prefixBytes = bytes.slice(0, facet.index.byteStart);
-				const suffixBytes = bytes.slice(facet.index.byteEnd);
-				const textBytes = bytes.slice(facet.index.byteStart, facet.index.byteEnd);
-
-				const prefix = bytesToString(prefixBytes);
-				const suffix = bytesToString(suffixBytes);
-				const text = bytesToString(textBytes);
-
-				const feature = facet.features[0];
-
-				if (feature.$type == "app.bsky.richtext.facet#link") {
-					const link = `<a href="${feature.uri}">${text}</a>`;
-					content = prefix + link + suffix;
-				}
-				else if (feature.$type == "app.bsky.richtext.facet#mention") {
-					const link = `<a href="${uriPrefix}/profile/${feature.did}">${text}</a>`;
-					content = prefix + link + suffix;
-				}
-				else if (feature.$type == "app.bsky.richtext.facet#tag") {
-					//console.log(`tag feature = ${JSON.stringify(feature)}`);
-					const link = `<a href="${uriPrefix}/hashtag/${feature.tag}">${text}</a>`;
-					content = prefix + link + suffix;
-				}
-				else {
-					console.log(`skipped feature.$type = ${feature.$type}`);
+	try {
+		if (record.facets != null) {
+			// NOTE: Facets are processed in reverse order determined by the starting index. This is because the output string
+			// is being modified in place.
+			const sortedFacets = record.facets.toSorted((a,b) => {return b?.index?.byteStart - a?.index?.byteStart})
+			for (const facet of sortedFacets) {
+				if (facet.features.length > 0) {
+					const bytes = stringToBytes(content);
+					
+					const prefixBytes = bytes.slice(0, facet.index.byteStart);
+					const suffixBytes = bytes.slice(facet.index.byteEnd);
+					const textBytes = bytes.slice(facet.index.byteStart, facet.index.byteEnd);
+	
+					const prefix = bytesToString(prefixBytes);
+					const suffix = bytesToString(suffixBytes);
+					const text = bytesToString(textBytes);
+	
+					const feature = facet.features[0];
+	
+					if (feature.$type == "app.bsky.richtext.facet#link") {
+						const link = `<a href="${feature.uri}">${text}</a>`;
+						content = prefix + link + suffix;
+					}
+					else if (feature.$type == "app.bsky.richtext.facet#mention") {
+						const link = `<a href="${uriPrefix}/profile/${feature.did}">${text}</a>`;
+						content = prefix + link + suffix;
+					}
+					else if (feature.$type == "app.bsky.richtext.facet#tag") {
+						//console.log(`tag feature = ${JSON.stringify(feature)}`);
+						const link = `<a href="${uriPrefix}/hashtag/${feature.tag}">${text}</a>`;
+						content = prefix + link + suffix;
+					}
+					else {
+						console.log(`skipped feature.$type = ${feature.$type}`);
+					}
 				}
 			}
 		}
+	}
+	catch (error) {
+		console.log(`facet conversion error = ${error}`);
 	}
 
 	let finalContent = "";
