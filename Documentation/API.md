@@ -661,7 +661,9 @@ Optional JWT properties:
   * jwt\_prompt: `String` with account information needed to login (e.g. "Email Address").
   * jwt\_authorize: `String` with endpoint to authorize account (e.g. "/xrpc/createSession").
   * jwt\_refresh: `String` with endpoint to refresh account (e.g. "/xrpc/refreshSession").
- 
+
+> **Note:** When using OAuth, Tapestry looks for `access_token` and `refresh_token` during the token exchange. With JWT, `accessJwt` and `refreshJwt` are used. These values are stored securely in the users' keychain.
+
 > **Note:** The oauth\_authorize, oauth\_token, jwt\_authorize, and jwt\_refresh endpoints can be relative or absolute URLs. Relative paths use the `site` variable above as a base (allowing a single connector to support multiple federated servers, like with Mastodon). Absolute paths allow different domains to be used for the initial authorize and token generation (as with Tumblr).
 
 The authorization\_header string provides a template for the API endpoints. The following items in the string will be replaced with values managed by the Tapestry app:
@@ -672,6 +674,12 @@ The authorization\_header string provides a template for the API endpoints. The 
 For example, you could set a string value of `OAuth oauth_consumer_key="__CLIENT_ID__", oauth_token="__ACCESS_TOKEN__"` and the following header would be generated:
 
 	Authorization: OAuth oauth_consumer_key="dead-beef-1234" oauth_token="feed-face-5678"
+
+Any credentials collected by Tapestry is used automatically during a `sendRequest`. An authorization header will be added when the following are true:
+
+  * URL scheme is HTTPS
+  * Port is 443
+  * The host is a domain or subdomain of the feed's URL. For example, if the feed originates at `example.com`, requests to `api.example.com` will get the header, but requests to `1337hacker.com` will not.
 
 #### EXAMPLES
 
