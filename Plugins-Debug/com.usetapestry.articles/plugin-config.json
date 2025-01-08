@@ -1,0 +1,11 @@
+{
+	"id": "com.usetapestry.articles",
+	"display_name": "Screenshot Articles",
+	"service_name": "Service",
+	"site": "https://screenshots.usetapestry.com",
+	"icon": "https://usetapestry.com/icons/generic.png",
+	"needs_verification": true,
+	"verify_variables": true,
+	"provides_attachments": true,
+	"item_style": "article",
+}

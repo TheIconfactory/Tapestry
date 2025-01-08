@@ -15,10 +15,16 @@ function load() {
 	let date = new Date();
 	let uri = site + `?value=${date.getTime()}`;
 	
+	let attachment = MediaAttachment.createWithUrl("https://usetapestry.com/icons/tumblr.png");
+	attachment.mimeType = "image/png";
+	attachment.text = "A test image";
+	
 	let identity = Identity.createWithName("Mysterion");
 	let item = Item.createWithUriDate(uri, date);
 	item.body = `<b>Hello, ${name}. TURBO is ${turbo}. currentTurboUpdate = ${currentTurboUpdate ?? "not set"}`;
+	//item.body = 'this is a bunch of text\n\nwith newlines\nand other non-HTML stuff';
 	item.author = identity;
+	item.attachments = [attachment];
 	
 	if (turbo == "on") {
 		let bigString = "";
