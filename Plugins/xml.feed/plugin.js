@@ -236,6 +236,9 @@ function load() {
 						if (authorName instanceof Array) {
 							authorName = authorName.join(", ");
 						}
+						else {
+							authorName = authorName.trim();
+						}
 						identity = Identity.createWithName(authorName);
 						if (entry.author.uri != null) {
 							identity.uri = entry.author.uri;
@@ -337,6 +340,9 @@ function load() {
 					if (authorName instanceof Array) {
 						authorName = authorName.join(", ");
 					}
+					else {
+						authorName = authorName.trim();
+					}
 					identity = Identity.createWithName(authorName);
 					identity.uri = feedUrl;
 				}
@@ -434,6 +440,9 @@ function load() {
 				if (authorName != null) {
 					if (authorName instanceof Array) {
 						authorName = authorName.join(", ");
+					}
+					else {
+						authorName = authorName.trim();
 					}
 					identity = Identity.createWithName(authorName);
 					identity.uri = feedUrl;
