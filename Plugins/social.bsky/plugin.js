@@ -215,27 +215,29 @@ function postForItem(item) {
 }
 
 function identityForAccount(account) {
-	if (account == null || account.handle == null || account.displayName == null) {
+	if (account == null || account.handle == null) {
 		return null;
 	}
 	
 	const authorUri = uriPrefix + "/profile/" + account.handle;
-	const name = account.displayName;
+	const name = account.displayName ?? account.handle;
 	const identity = Identity.createWithName(name);
 	identity.username = "@" + account.handle;
 	identity.uri = authorUri;
-	identity.avatar = account.avatar;
+	if (account.avatar != null) {
+		identity.avatar = account.avatar;
+	}
 	
 	return identity;
 }
 
 function contentForAccount(account, prefix = "") {
-	if (account == null || account.handle == null || account.displayName == null) {
+	if (account == null || account.handle == null) {
 		return "";
 	}
 
 	const authorUri = uriPrefix + "/profile/" + account.handle;
-	const name = account.displayName;
+	const name = account.displayName ?? account.handle;
 	
 	const content = `<p>${prefix}<a href="${authorUri}">${name}</a></p>`;
 	return content;
@@ -263,7 +265,7 @@ function handleForAccount(account) {
 }
 
 function uriForAccount(account) {
-	if (account == null || account.handle == null || account.displayName == null) {
+	if (account == null || account.handle == null) {
 		return null;
 	}
 
@@ -316,7 +318,7 @@ function contentForReply(reply) {
 
 	if (reply != null && reply.parent != null) {
 		const replyContent = contentForRecord(reply.parent.record);
-		const replyAuthor = reply.parent.author?.displayName
+		const replyAuthor = reply.parent.author?.displayName ?? reply.parent.author?.handle
 		if (replyAuthor != null) {
 			content = `<blockquote><p>${replyAuthor} said:</p><p>${replyContent}</p></blockquote>`;
 		}
@@ -393,7 +395,7 @@ function attachmentsForEmbed(embed) {
 				const record = embed.record;
 				
 				const authorHandle = record.author?.handle;
-				const authorDisplayName = record.author?.displayName;
+				const authorDisplayName = record.author?.displayName ?? record.author?.handle;
 				const recordText = record.value?.text;
 				
 				const embedUrl = record.uri.split("/").pop();
