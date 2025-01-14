@@ -32,7 +32,11 @@ function postForItem(item, date = null, shortcodes = {}) {
 	const fullAccountName = account["acct"];
 	const identity = Identity.createWithName(accountName);
 	identity.username = "@" + fullAccountName;
-	identity.uri = account["url"];
+	let identityUrl = account["url"];
+	if (account["acct"] != null) {
+		identityUrl = `${site}/@${account["acct"]}`;
+	}
+	identity.uri = identityUrl;
 	identity.avatar = account["avatar"];
 
 	let content = item["content"];
@@ -55,7 +59,11 @@ function postForItem(item, date = null, shortcodes = {}) {
 		postDate = date;
 	}
 	
-	const uri = item["url"];
+	let uri = item["url"];
+	if (account["acct"] != null && item["id"] != null) {
+		uri = `${site}/@${account["acct"]}/${item["id"]}`;
+	}
+	
 	const post = Item.createWithUriDate(uri, postDate);
 
 	post.author = identity;
