@@ -6,10 +6,27 @@ function verify() {
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		const displayName = "@" + jsonObject.handle;
+		const did = jsonObject.did;
 		
-		// TODO: Use getProfile to get avatar: https://docs.bsky.app/docs/api/app-bsky-actor-get-profile
-		
-		processVerification(displayName);
+		sendRequest(site + `/xrpc/app.bsky.actor.getProfile?actor=${did}`)
+		.then((text) => {
+			const jsonObject = JSON.parse(text);
+			
+			if (jsonObject.avatar != null) {
+				const icon = jsonObject.avatar
+				const verification = {
+					displayName: displayName,
+					icon: icon
+				};
+				processVerification(verification);
+			}
+			else {
+				processVerification(displayName);
+			}
+		})
+		.catch((requestError) => {
+			processError(requestError);
+		});
 	})
 	.catch((requestError) => {
 		processError(requestError);
