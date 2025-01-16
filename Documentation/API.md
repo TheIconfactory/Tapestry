@@ -1157,7 +1157,7 @@ The first rule checks that there is an RSS feed while the second rule checks if 
 
 #### xml
 
-If none of the rules above apply, the content will be checked for XML. There are two parameters, both of which are optional. This example will identify podcast feeds:
+If none of the rules above apply, the content can be checked for XML elements. There are two parameters, both of which are required. This example will identify podcast feeds:
 
 ```json
 	"xml": [
@@ -1171,6 +1171,21 @@ If none of the rules above apply, the content will be checked for XML. There are
 The `root` element must be the first element in the content. In the example above, it guarantees that the XML data is in the RSS format.
 
 The `with` element must occur at least once in the content. The example above checks that the RSS feed contains an iTunes image, which is required for a podcast.
+
+#### json
+
+If none of the rules above apply, the content can be checked for JSON keys. There are two parameters, both of which are required. This example identifies the JSON Feed format:
+
+```json
+	"json": [
+		{
+			"key": "version",
+			"value": "https://jsonfeed.org/version/1.1"
+		}
+	]
+```
+
+The `key` must be a top-level key in the JSON content. The example ensures that the JSON dictionary has a `version` key with the correct `value`.
 
 ## HTML Content
 

@@ -15,5 +15,15 @@
 			"use": "href",
 			"variable": "site"
 		}
+	],
+	"json": [
+		{
+			"key": "version",
+			"value": "https://jsonfeed.org/version/1"
+		},
+		{
+			"key": "version",
+			"value": "https://jsonfeed.org/version/1.1"
+		}
 	]
 }
