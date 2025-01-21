@@ -224,6 +224,10 @@ function itemForData(item) {
 
 	if (item["secure_media"] != null) {
 		if (item["secure_media"].reddit_video != null && item["secure_media"].reddit_video.hls_url != null) {
+			if (attachments == null) {
+				attachments = [];
+			}
+		
 			let videoUrl = item["secure_media"].reddit_video.hls_url;
 			let posterUrl = item.thumbnail;
 			let aspectSize = null;
