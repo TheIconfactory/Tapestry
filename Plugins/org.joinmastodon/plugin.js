@@ -236,13 +236,13 @@ function queryHomeTimeline(endDate) {
 					}
 
 					if (annotation == null) {
-						let visibility = item["visibility"];
+						let visibility = item["visibility"] ?? "public";
 						if (visibility == "private") {
 							annotation = Annotation.createWithText(`FOLLOWERS ONLY`);
 						}
 						else if (visibility == "direct") {
 							annotation = Annotation.createWithText(`PRIVATE MENTION`);
-						}	
+						}
 					}
 					
 					if (!endUpdate && date < endDate) {
@@ -314,7 +314,7 @@ function queryMentions() {
 			for (const item of jsonObject) {
 				let postItem = item["status"];
 
-				let visibility = postItem["visibility"];
+				let visibility = postItem["visibility"] ?? "public";
 
 				let annotation = null;
 				let shortcodes = {};
@@ -383,7 +383,7 @@ function queryStatusesForUser(id) {
 				}
 
 				if (annotation == null) {
-					let visibility = item["visibility"];
+					let visibility = item["visibility"] ?? "public";
 					if (visibility == "private") {
 						annotation = Annotation.createWithText(`FOLLOWERS ONLY`);
 					}
