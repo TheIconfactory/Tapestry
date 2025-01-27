@@ -29,6 +29,12 @@
 			"name": "Mona",
 			"template": "mona://__HOST_PATH__",
 			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
+		},
+		{
+			"id": "org.joinmastodon",
+			"name": "Mastodon",
+			"template": "mastodon://__HOST_PATH__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
 		}
 	]
 }
