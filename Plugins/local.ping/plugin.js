@@ -61,11 +61,17 @@ function load() {
 		}
 	})
 	.catch((requestError) => {
-		let date = new Date();
-		let uri = `${site}?timestamp=${date.valueOf()}`;
-		let content = `<p>Request to ${site} failed with <strong>${requestError}</strong></p>`;
-		const resultItem = Item.createWithUriDate(uri, date);
-		resultItem.body = content;
-		processResults([resultItem]);
+		if (requestError == "Error: cancelled") {
+			// ignore errors from cancelled (background) refreshes
+			processResults(null);
+		}
+		else {
+			let date = new Date();
+			let uri = `${site}?timestamp=${date.valueOf()}`;
+			let content = `<p>Request to ${site} failed with <strong>${requestError}</strong></p>`;
+			const resultItem = Item.createWithUriDate(uri, date);
+			resultItem.body = content;
+			processResults([resultItem]);
+		}
 	});
 }
