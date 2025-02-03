@@ -47,6 +47,12 @@ function postForItem(item, date = null, shortcodes = {}) {
 		}			
 	}
 
+	let contentWarning = null;
+	const spoilerText = item["spoiler_text"];
+	if (spoilerText != null && spoilerText.length > 0) {
+		contentWarning = spoilerText;
+	}
+	
 	let postDate;
 	if (date == null) {
 		postDate = new Date(item["created_at"]);
@@ -61,6 +67,10 @@ function postForItem(item, date = null, shortcodes = {}) {
 	post.author = identity;
 	post.body = content;
 
+	if (contentWarning != null) {
+		post.contentWarning = contentWarning;
+	}
+	
 	const itemEmojis = item["emojis"];
 	if (itemEmojis != null && itemEmojis.length > 0) {
 		for (const emoji of itemEmojis) {
