@@ -324,6 +324,11 @@ function queryMentions() {
 			for (const item of jsonObject) {
 				let postItem = item["status"];
 
+				if (postItem == null) {
+					// NOTE: Not sure why this happens, but sometimes a mention payload doesn't have a status. If that happens, we just skip it.
+					continue;
+				}
+				
 				let visibility = postItem["visibility"] ?? "public";
 
 				let annotation = null;
