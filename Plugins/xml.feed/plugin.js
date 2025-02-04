@@ -476,7 +476,7 @@ function load() {
 
 function attachmentForAttributes(mediaAttributes) {
 	let attachment = null;
-	if (mediaAttributes.url != null) {
+	if (mediaAttributes != null && mediaAttributes.url != null) {
 		attachment = MediaAttachment.createWithUrl(mediaAttributes.url);
 		if (mediaAttributes.width != null && mediaAttributes.height != null) {
 			let width = mediaAttributes.width;
