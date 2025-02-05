@@ -326,11 +326,12 @@ function load() {
 
 			let results = [];
 			for (const item of items) {
-				if (item.link == null || item.pubDate == null) {
+				const itemDate = item["pubDate"] ?? item["dc:date"];
+				if (item.link == null || itemDate == null) {
 					continue;
 				}
 				const url = item.link;
-				const date = new Date(item.pubDate);
+				const date = new Date(itemDate);
 				let title = item.title?.trim();
 				let content = item["content:encoded"] ?? item.description;
 
