@@ -77,7 +77,9 @@ function load() {
 			}
 			
 			const resultItem = Item.createWithUriDate(url, date);
-			resultItem.title = title;
+			if (title != null) {
+				resultItem.title = title;
+			}
 			resultItem.body = content;
 			resultItem.author = identity;
 			if (linkAttachment != null) {
