@@ -18,7 +18,7 @@ Connectors are created by folks who understand web technologies like JavaScript;
 
 A familiar example is an RSS connector: it processes XML text with JavaScript to generate objects for a blog feed. Tapestry then takes these items and displays them chronologically in the user’s timeline.
 
-Connectors are simple by design: everything is created with text files that you can edit with your favorite editor. As you’re developing these connectors, a tool called [Tapestry Loom](https://testflight.apple.com/join/SMcNQbCs) will help you build and test your work.
+Connectors are simple by design: everything is created with text files that you can edit with your favorite editor. As you’re developing these connectors, a tool called [Tapestry Loom](https://apps.apple.com/app/tapestry-loom/id6578414736?mt=12&pt=8934&at=10l4G7&ct=TAPESTRY_REPO) will help you build and test your work.
 
 Think of this setup like creating a web page: you edit HTML and refresh your browser to see the changes. In this scenario, Tapestry Loom is the browser where you reload content.
 
@@ -65,7 +65,7 @@ At this point, you could put the connector on your device and try it out. But th
 
 That’s why we created Tapestry Loom: it lets you do all your work on a Mac and uses the same code as the mobile app to process information. It’s like a cross between the Xcode Simulator and a web browser.
 
-Tapestry Loom is currently [available in TestFlight](https://testflight.apple.com/join/SMcNQbCs). It’s an important tool that will eventually be a free download on the Mac App Store.
+Tapestry Loom is a [free download](https://apps.apple.com/app/tapestry-loom/id6578414736?mt=12&pt=8934&at=10l4G7&ct=TAPESTRY_REPO) on the Mac App Store. You can also join the [TestFlight](https://testflight.apple.com/join/SMcNQbCs) to get versions that are in development.
 
 The first thing you need to do is tell Loom where your "Connectors" folder is located. Use _File_ > _Select Connectors Folder…_ (or **Cmd-F**) to bring up a standard dialog and **Open** the folder you created above.
 
