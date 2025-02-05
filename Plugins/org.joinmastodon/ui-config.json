@@ -17,5 +17,11 @@
 			"type": "switch",
 			"prompt": "Include Mentions From Others"
 		},
+		{
+			"name": "filterByAuthors",
+			"type": "text",
+			"placeholder": "@a@example.com, @b@example.com",
+			"prompt": "Include only posts by specific authors"
+		}
 	]
 }

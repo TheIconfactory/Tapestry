@@ -188,7 +188,7 @@ function postForItem(item, date = null, shortcodes = {}) {
 	return post;
 }
 
-function queryHomeTimeline(endDate) {
+function queryHomeTimeline(endDate, authors) {
 
 	// NOTE: These constants are related to the feed limits within Tapestry - it doesn't store more than
 	// 3,000 items or things older than 30 days.
@@ -273,8 +273,11 @@ function queryHomeTimeline(endDate) {
 						post.annotations = [annotation];
 					}
 						
-					results.push(post);
-		
+					let author = item["account"]["acct"];
+					if (authors.length === 0 || authors.includes(author)) {
+						results.push(post);
+					}
+
 					lastId = item["id"];
 					lastDate = date;
 				}
@@ -449,7 +452,7 @@ function load() {
 	if (includeHome == "on") {
 		let startTimestamp = (new Date()).getTime();
 
-		queryHomeTimeline(endDate)
+		queryHomeTimeline(endDate, filterByAuthors.split(",").map((author) => author.trim()))
   		.then((parameters) =>  {
   			results = parameters[0];
   			newestItemDate = parameters[1];
