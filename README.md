@@ -13,7 +13,7 @@ A JavaScript-based API is used by Tapestry to gather information from the public
 
 [This document](Documentation/API.md) explains the variables, objects, actions, and functions that are available for JavaScript development. A section at the end explains how plug-ins are configured.
 
-We also have a [tutorial that guides you through the development](Documentation/GettingStarted.md) of a connector using the API. This includes how to setup and use our free developer tool: [Tapestry Loom](https://testflight.apple.com/join/SMcNQbCs).
+We also have a [tutorial that guides you through the development](Documentation/GettingStarted.md) of a connector using the API. This includes how to setup and use our free developer tool: [Tapestry Loom](https://apps.apple.com/app/tapestry-loom/id6578414736?mt=12&pt=8934&at=10l4G7&ct=TAPESTRY_REPO).
 
 
 ## Examples
