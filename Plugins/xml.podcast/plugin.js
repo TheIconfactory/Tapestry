@@ -67,13 +67,24 @@ function load() {
 			const items = jsonObject.rss.channel.item;
 			var results = [];
 			for (const item of items) {
-				const url = item.link;
+				let url = item.link;
+				if (url != null) {
+					// only use the link URL if it has a path (to an episode)
+					const path = url.split("/").splice(3).join("/");
+					if (path.length == 0) {
+						url = null;
+					}
+				}
 				const date = new Date(item.pubDate);
 				
 				let attachment = null;
 				if (item["enclosure$attrs"] != null) {
 					const enclosureUrl = item["enclosure$attrs"].url;
 					if (enclosureUrl != null) {
+						if (url == null) {
+							// some podcast feeds don't have a URL for the episode, so the best we can do is link against the media URL
+							url = enclosureUrl;
+						}
 						attachment = MediaAttachment.createWithUrl(enclosureUrl);
 						if (item["itunes:image$attrs"] != null) {
 							attachment.thumbnail = item["itunes:image$attrs"].href ?? icon;
