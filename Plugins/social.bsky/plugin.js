@@ -232,12 +232,12 @@ function postForItem(item) {
 }
 
 function identityForAccount(account) {
-	if (account == null || account.handle == null) {
+	const name = nameForAccount(account);
+	if (name == null) {
 		return null;
 	}
 	
 	const authorUri = uriPrefix + "/profile/" + account.handle;
-	const name = account.displayName ?? account.handle;
 	const identity = Identity.createWithName(name);
 	identity.username = "@" + account.handle;
 	identity.uri = authorUri;
@@ -249,15 +249,14 @@ function identityForAccount(account) {
 }
 
 function contentForAccount(account, prefix = "") {
-	if (account == null || account.handle == null) {
+	const name = nameForAccount(account);
+	if (name == null) {
 		return "";
 	}
 
 	const authorUri = uriPrefix + "/profile/" + account.handle;
-	const name = account.displayName ?? account.handle;
 	
-	const content = `<p>${prefix}<a href="${authorUri}">${name}</a></p>`;
-	return content;
+	return `<p>${prefix}<a href="${authorUri}">${name}</a></p>`;
 }
 
 function nameForAccount(account) {
@@ -335,9 +334,9 @@ function contentForReply(reply) {
 
 	if (reply != null && reply.parent != null) {
 		const replyContent = contentForRecord(reply.parent.record);
-		const replyAuthor = reply.parent.author?.displayName ?? reply.parent.author?.handle
-		if (replyAuthor != null) {
-			content = `<blockquote><p>${replyAuthor} said:</p><p>${replyContent}</p></blockquote>`;
+		const replyName = nameForAccount(reply.parent.author);
+		if (replyName != null) {
+			content = `<blockquote><p>${replyName} said:</p><p>${replyContent}</p></blockquote>`;
 		}
 		else {
 			content = `<blockquote><p>${replyContent}</p></blockquote>`;
@@ -412,7 +411,7 @@ function attachmentsForEmbed(embed) {
 				const record = embed.record;
 				
 				const authorHandle = record.author?.handle;
-				const authorDisplayName = record.author?.displayName ?? record.author?.handle;
+				const authorName = nameForAccount(record.author);
 				const recordText = record.value?.text;
 				
 				const embedUrl = record.uri.split("/").pop();
@@ -420,16 +419,12 @@ function attachmentsForEmbed(embed) {
 					const postUri = uriPrefix + "/profile/" + authorHandle + "/post/" + embedUrl;
 	
 					let attachment = LinkAttachment.createWithUrl(postUri);
-					if (authorDisplayName != null && authorDisplayName.length > 0) {
-						attachment.title = authorDisplayName;
+					if (authorName != null && authorName.length > 0) {
+						attachment.title = authorName;
 					}
 					if (recordText != null && recordText.length > 0) {
 						attachment.subtitle = recordText;
 					}
-// 					if (authorDisplayName != null && authorDisplayName.length > 0) {
-// 						attachment.authorName = authorDisplayName;
-// 					}
-// 					attachment.authorProfile = uriPrefix + "/profile/" + authorHandle;
 					
 					if (record.embeds != null && record.embeds.length > 0) {
 						if (record.embeds[0].images != null && record.embeds[0].images.length > 0) {
@@ -454,7 +449,7 @@ function attachmentsForEmbed(embed) {
 				const record = embed.record.record;
 				if (record != null) {
 					const handle = record.author?.handle;
-					const title = record.author?.displayName;
+					const title = nameForAccount(record.author);
 					const description = record.value?.text;
 					
 					const embedUrl = record.uri.split("/").pop();
