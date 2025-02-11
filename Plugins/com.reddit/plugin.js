@@ -259,6 +259,16 @@ function itemForData(item) {
 		}
 	}
 	
+	if (includeTags == "on") {
+		if (item["link_flair_type"] != null && item["link_flair_type"] == "text") {
+			if (item["link_flair_text"] != null && item["link_flair_text"].length > 0) {
+				const linkFlairText = item["link_flair_text"];
+				const linkFlairParameter = encodeURIComponent(`flair_name:"${linkFlairText}"`);
+				content += `<p><a href="${site}/r/${subreddit}/?f=${linkFlairParameter}">#${linkFlairText}</a></p>`;
+			}
+		}
+	}
+
 	const resultItem = Item.createWithUriDate(uri, date);
 	resultItem.title = title;
 	resultItem.body = content;

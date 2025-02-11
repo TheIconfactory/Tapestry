@@ -5,6 +5,12 @@
 			"type": "text",
 			"prompt": "Subreddit",
 			"placeholder": "weirdwheels"
+		},
+		{
+			"name": "includeTags",
+			"type": "switch",
+			"prompt": "Include Tags for Flair",
+			"value": "on",
 		}
 	]
 }
