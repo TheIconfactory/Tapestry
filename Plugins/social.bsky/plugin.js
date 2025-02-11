@@ -183,6 +183,12 @@ function postForItem(item) {
 				
 	let content = contentForRecord(item.post.record);
 	
+	let contentWarning = null;
+	if (item.post.labels != null && item.post.labels.length > 0) {
+		const labels = item.post.labels.map((label) => { return label?.val ?? "" }).join(", ");
+		contentWarning = `Labeled: ${labels}`;
+	}
+	
 	let annotation = null;
 	
 	const replyContent = contentForReply(item.reply);
@@ -226,6 +232,9 @@ function postForItem(item) {
 		}
 		if (annotation != null) {
 			post.annotations = [annotation];
+		}
+		if (contentWarning != null) {
+			post.contentWarning = contentWarning;
 		}
 		
 		return post;
