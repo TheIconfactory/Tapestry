@@ -170,7 +170,7 @@ function load() {
 }
 
 function postForItem(item) {
-	const date = new Date(item.post.indexedAt);
+	let date = new Date(item.post.indexedAt);
 
 	const author = item.post.author;
 	
@@ -193,6 +193,9 @@ function postForItem(item) {
 
 	const repostContent = contentForRepost(item.reason);
 	if (repostContent != null) {
+		if (item.reason.indexedAt != null) {
+			date = new Date(item.reason.indexedAt);
+		}
 		annotation = annotationForRepost(item.reason);
 		content = repostContent + content;
 	}
