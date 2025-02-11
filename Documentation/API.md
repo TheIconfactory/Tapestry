@@ -325,7 +325,7 @@ Loads any new data and return it to the app with `processResults` or `processErr
 
 The following functions are available to the script to help it perform the actions listed above.
 
-### sendRequest(url, method, parameters, extraHeaders) → Promise
+### sendRequest(url, method, parameters, extraHeaders, fullResponse) → Promise
 
 Sends a request. If configured, a bearer token will be included with the request automatically.
 
@@ -333,7 +333,8 @@ Sends a request. If configured, a bearer token will be included with the request
   * method: `String` with the HTTP method for the request (default is "GET").
   * parameters: `String` with the parameters for HTML body of "POST" or "PUT" request. For example: "foo=1&bar=something" (default is null).
   * extraHeaders: `Dictionary` of `String` key/value pairs. They will be added to the request (default is null for no extra headers).
-
+  * fullResponse: `Boolean` which causes response to include status code, headers, and body text.
+  
 Returns a `Promise` with a resolve handler with a String parameter and a reject handler with an Error parameter. The resolve handler’s string is:
 
 > **Note:** The `url` is assumed to be properly encoded. Use JavaScript’s `encodeURI`, if needed.
@@ -351,7 +352,7 @@ For the "HEAD" method, the string result contains a JSON dictionary:
 }
 ```
 
-For all other successful requests, the string contains the response body. Typically this will be HTML text or a JSON payload. Regular expressions can be used on HTML and `JSON.parse` can be used to build queryable object. In both cases, the data extracted will be returned to the Tapestry app.
+All successful requests return a string. Typically this will be HTML text or a JSON payload created from the response body. Regular expressions can be used on HTML and `JSON.parse` can be used to build queryable object. For XML text, `xmlParse()` can convert it to an object. In all cases, the data extracted will be returned to the Tapestry app.
 
 The `parameters` string and values in `extraHeaders` can contain patterns that will be replaced with values managed by the Tapestry app:
 
@@ -364,6 +365,20 @@ For example, if you need to "POST" the client ID, you would use "client=\_\_CLIE
 	let extraHeaders = { "X-Client-Id", "__CLIENT_ID__" };
 	sendRequest(url, "GET", null, extraHeaders)
 	...
+```
+
+The `fullResponse` flag can be set to `true`. In this mode, the text response is a JSON dictionary that contains all the results from the request:
+
+```json
+{
+	"status": 200,
+	"headers": {
+		"last-modified": "Thu, 02 Mar 2023 21:46:29 GMT",
+		"content-length": "15287",
+		"...": "..."
+	},
+	"body": "<!DOCTYPE html> ..."
+}
 ```
 
 #### EXAMPLE

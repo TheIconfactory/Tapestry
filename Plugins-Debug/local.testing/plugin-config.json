@@ -1,0 +1,6 @@
+{
+	"id": "local.testing",
+	"display_name": "API Testing",
+	"icon": "https://usetapestry.com/icons/generic.png",
+	"site_prompt": "Test URL"
+}

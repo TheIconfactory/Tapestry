@@ -49,9 +49,49 @@ function verify() {
 }
 
 function load() {	
-	sendRequest(site)
-	.then((xml) => {
-		let jsonObject = xmlParse(xml);
+	let extraHeaders = [];	
+	let lastModified = getItem("lastModified");
+	if (lastModified != null) {
+		console.log(`lastModified = ${lastModified}`);
+		extraHeaders["if-modified-since"] = lastModified;
+	}
+	let eTag = getItem("eTag");
+	if (eTag != null) {
+		console.log(`eTag = ${eTag}`);
+		extraHeaders["if-none-match"] = eTag;
+	}
+	extraHeaders["accept-encoding"] = "gzip,deflate";
+
+	sendRequest(site, "GET", null, extraHeaders, true)
+	.then((text) => {
+		const response = JSON.parse(text);
+		console.log(`response.status = ${response.status}`);
+
+		if (response.status != 200) {
+			// 304, 500 and other non-200 responses return no results 
+			processResults([]);
+			return;
+		}
+		
+		const headers = response.headers;
+		if (headers["last-modified"] != null) {
+			console.log(`headers["last-modified"] = ${headers["last-modified"]}`);
+			setItem("lastModified", headers["last-modified"]);
+		}
+		if (headers["etag"] != null) {
+			console.log(`headers["etag"] = ${headers["etag"]}`);
+			let eTag = headers["etag"];
+			if (eTag.startsWith("W/")) {
+				eTag = eTag.substring(2);
+				//eTag = eTag.slice(3, -1);
+			}
+			if (eTag.endsWith("-gzip\"")) {
+				eTag = eTag.slice(0, -6) + "\"";
+			}
+			setItem("eTag", eTag);
+		}
+		
+		let jsonObject = xmlParse(response.body);
 				
 		if (jsonObject.feed != null) {
 			// Atom 1.0
