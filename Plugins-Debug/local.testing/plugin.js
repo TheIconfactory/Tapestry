@@ -38,11 +38,11 @@ async function load() {
 				console.log(`headers["etag"] = ${headers["etag"]}`);
 				body += `etag = ${headers["etag"]}<br/>`;
 				let eTag = headers["etag"];
-// 				if (eTag.startsWith("W/")) {
-// 					body += `stripped W/<br/>`;
-// 					eTag = eTag.substring(2);
-// 					//eTag = eTag.slice(3, -1);
-// 				}
+				if (eTag.startsWith("W/")) {
+					body += `stripped W/<br/>`;
+					eTag = eTag.substring(2);
+					//eTag = eTag.slice(3, -1);
+				}
 				if (eTag.endsWith("-gzip\"")) {
 					eTag = eTag.slice(0, -6) + "\"";
 					body += `stripped -gzip<br/>`;

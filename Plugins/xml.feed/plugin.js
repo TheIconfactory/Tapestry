@@ -185,7 +185,7 @@ function load() {
 			console.log(`headers["etag"] = ${headers["etag"]}`);
 			let eTag = headers["etag"];
 			if (eTag.startsWith("W/")) {
-				// the weak comparison algorithm is not used for if-none-match and including breaks some servers
+				// the weak comparison algorithm is not used for if-none-match and including it breaks some servers
 				// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match
 				eTag = eTag.substring(2);
 			}
