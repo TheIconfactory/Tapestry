@@ -23,7 +23,7 @@ function verify() {
 					baseUrl = feedAttributes.href;
 				}
 			}
-			const displayName = jsonObject.feed.title;
+			const displayName = jsonObject.feed.title?.trim();
 			let icon = null;
 			if (jsonObject.feed.icon != null) {
 				icon = jsonObject.feed.icon;
@@ -89,7 +89,7 @@ function verify() {
 // if (jsonObject.rss instanceof Object	&& jsonObject.rss.channel instanceof Object) { ... }
 
 			const baseUrl = jsonObject.rss.channel.link;
-			const displayName = jsonObject.rss.channel.title;
+			const displayName = jsonObject.rss.channel.title?.trim();
 
 // NOTE: In theory, the channel image could be used to get an icon for the feed. But some
 // use non-square images that look bad when squished. For example, the New York Times feed
@@ -116,7 +116,7 @@ function verify() {
 		else if (jsonObject["rdf:RDF"] != null) {
 			// RSS 1.0
 			const baseUrl = jsonObject["rdf:RDF"].channel.link;
-			const displayName = jsonObject["rdf:RDF"].channel.title;
+			const displayName = jsonObject["rdf:RDF"].channel.title?.trim();
 
 // NOTE: In theory, you can get the icon from the RDF channel. In practice, places like
 // Slashdot haven't updated this image since the beginning of this century.
@@ -269,7 +269,7 @@ function load() {
 					content = entry.content$xhtml;
 				}
 				else {
-					content = extractString(entry.content ?? entry.summary);
+					content = extractString((entry.content ?? entry.summary), true);
 				}
 				
 				var identity = null;
@@ -376,7 +376,7 @@ function load() {
 				const url = item.link;
 				const date = new Date(itemDate);
 				let title = extractString(item.title);
-				let content = extractString(item["content:encoded"] ?? item.description);
+				let content = extractString((item["content:encoded"] ?? item.description), true);
 
 				let identity = null;
 				let authorName = item["dc:creator"];
@@ -477,7 +477,7 @@ function load() {
 				const url = item.link;
 				const date = new Date(item["dc:date"]);
 				let title = extractString(item.title);
-				let content = extractString(item.description);
+				let content = extractString(item.description, true);
 
 				let identity = null;
 				let authorName = item["dc:creator"];
@@ -532,17 +532,46 @@ function attachmentForAttributes(mediaAttributes) {
 	return attachment;
 }
 
-function extractString(node) {
+function extractString(node, allowHTML = false) {
+	// people love to put HTML in title & descriptions, where it's not allowed - this attempts to undo that damage
 	if (node != null) {
-		// people love to put HTML in title & descriptions, where it's not allowed
 		if (typeof(node) == "string") {
-			return node.trim();
+			let value = node.trim();
+			if (allowHTML) {
+				return `<p>${value}</p>`;
+			}
+			return value;
 		}
 		else if (typeof(node["a"]) == "string") {
-			return node["a"].trim();
+			let value = node["a"].trim();
+			if (allowHTML) {
+				if (node["a$attrs"]?.href != null) {
+					return `<a href="${node["a$attrs"]?.href}">${value}</a>`;
+				}
+			}
+			return value;
 		}
 		else if (typeof(node["p"]) == "string") {
-			return node["p"].trim();
+			let value = node["p"].trim();
+			if (allowHTML) {
+				return `<p>${value}</p>`;
+			}
+			return value;
+		}
+		else if (typeof(node) == "object") {
+			let string = "";
+			if (node["p"] instanceof Array) {
+				for (childNode of node["p"]) {
+					string += extractString(childNode, allowHTML);
+				}
+				return string;
+			}
+			else {
+				return string += extractString(node["p"], allowHTML);
+			}
+		}
+		else {
+			console.log(node);
 		}
 		// TODO: do a traversal of the node graph to generate a string representation
 	}
