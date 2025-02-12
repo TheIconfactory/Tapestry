@@ -262,14 +262,14 @@ function load() {
 				else if (entry.updated) {
 					date =  new Date(entry.updated);
 				}
-				const title = entry.title?.trim();
+				const title = extractString(entry.title);
 				
 				let content = ""
 				if (entry.content$attrs != null && entry.content$attrs["type"] == "xhtml") {
 					content = entry.content$xhtml;
 				}
 				else {
-					content = entry.content ?? entry.summary;
+					content = extractString(entry.content ?? entry.summary);
 				}
 				
 				var identity = null;
@@ -375,8 +375,8 @@ function load() {
 				}
 				const url = item.link;
 				const date = new Date(itemDate);
-				let title = item.title?.trim();
-				let content = item["content:encoded"] ?? item.description;
+				let title = extractString(item.title);
+				let content = extractString(item["content:encoded"] ?? item.description);
 
 				let identity = null;
 				let authorName = item["dc:creator"];
@@ -476,8 +476,8 @@ function load() {
 				}
 				const url = item.link;
 				const date = new Date(item["dc:date"]);
-				let title = item.title?.trim();
-				let content = item.description;
+				let title = extractString(item.title);
+				let content = extractString(item.description);
 
 				let identity = null;
 				let authorName = item["dc:creator"];
@@ -530,4 +530,22 @@ function attachmentForAttributes(mediaAttributes) {
 		attachment.mimeType = "image";
 	}
 	return attachment;
+}
+
+function extractString(node) {
+	if (node != null) {
+		// people love to put HTML in title & descriptions, where it's not allowed
+		if (typeof(node) == "string") {
+			return node.trim();
+		}
+		else if (typeof(node["a"]) == "string") {
+			return node["a"].trim();
+		}
+		else if (typeof(node["p"]) == "string") {
+			return node["p"].trim();
+		}
+		// TODO: do a traversal of the node graph to generate a string representation
+	}
+	
+	return null;
 }
