@@ -533,47 +533,66 @@ function attachmentForAttributes(mediaAttributes) {
 }
 
 function extractString(node, allowHTML = false) {
-	// people love to put HTML in title & descriptions, where it's not allowed - this attempts to undo that damage
+	// people love to put HTML in title & descriptions, where it's not allowed - this is an
+	// imperfect attempt to undo that damage
 	if (node != null) {
 		if (typeof(node) == "string") {
-			let value = node.trim();
-			if (allowHTML) {
-				return `<p>${value}</p>`;
-			}
-			return value;
-		}
-		else if (typeof(node["a"]) == "string") {
-			let value = node["a"].trim();
-			if (allowHTML) {
-				if (node["a$attrs"]?.href != null) {
-					return `<a href="${node["a$attrs"]?.href}">${value}</a>`;
-				}
-			}
-			return value;
-		}
-		else if (typeof(node["p"]) == "string") {
-			let value = node["p"].trim();
-			if (allowHTML) {
-				return `<p>${value}</p>`;
-			}
-			return value;
+			return node.trim();
 		}
 		else if (typeof(node) == "object") {
-			let string = "";
-			if (node["p"] instanceof Array) {
-				for (childNode of node["p"]) {
-					string += extractString(childNode, allowHTML);
+			// do a traversal of the node graph to generate a string representation of <p> and <a> elements
+			if (node["p"] != null) {
+				if (node["p"] instanceof Array) {
+					let value = "";
+					for (childNode of node["p"]) {
+						const string = extractString(childNode, allowHTML);
+						if (allowHTML) {
+							value += `<p>${string}</p>\n`;
+						}
+						else {
+							value += string;
+						}
+					}
+					return value;
 				}
-				return string;
+				else {
+					const string = extractString(node["p"], allowHTML);
+					if (allowHTML) {
+						return `<p>${string}</p>\n`;
+					}
+					else {
+						return string;
+					}
+				}
 			}
-			else {
-				return string += extractString(node["p"], allowHTML);
+			else if (node["a"] != null) {
+				if (node["a"] instanceof Array) {
+					let value = "";
+					for (childNode of node["a"]) {
+						const string = extractString(childNode, allowHTML);
+						if (allowHTML && node["a$attrs"]?.href != null) {
+							value += `<a href="${node["a$attrs"]?.href}">${string}</a>`;
+						}
+						else {
+							value += string;
+						}
+					}
+					return value;
+				}
+				else {
+					const string = extractString(node["a"], allowHTML);
+					if (allowHTML && node["a$attrs"]?.href != null) {
+						return `<a href="${node["a$attrs"]?.href}">${string}</a>`;
+					}
+					else {
+						return string;
+					}
+				}
 			}
 		}
 		else {
 			console.log(node);
 		}
-		// TODO: do a traversal of the node graph to generate a string representation
 	}
 	
 	return null;
