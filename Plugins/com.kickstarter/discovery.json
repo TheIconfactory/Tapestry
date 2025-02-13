@@ -8,7 +8,7 @@
 			"variable": "creator_username"
 		},
 		{
-			"extract": "/kickstarter.com/projects/[^/]+/([^/]+)/",
+			"extract": "/kickstarter.com/projects/[^/]+/([^/?]+)/",
 			"variable": "project_slug"
 		},
 	]
