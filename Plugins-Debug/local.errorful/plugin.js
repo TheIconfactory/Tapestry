@@ -1,8 +1,16 @@
 
 var missing = {value: true};
 
+let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<description>
+	<p>text text text. <a href="https://example.com" target="_blank">Go!</a></p>
+	<p>more text</p>
+</description>`;
+	
 function load() {
 	//SIN TAX ERR DUH
+	
+	let jsonObject = xmlParse(xml);
 	
 	if (missing.value == undefined) {
 		//processError("WTF?");
