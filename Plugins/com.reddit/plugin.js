@@ -259,12 +259,15 @@ function itemForData(item) {
 		}
 	}
 	
-	if (includeTags == "on") {
+	let annotation = null;
+	if (includeFlair == "on") {
 		if (item["link_flair_type"] != null && item["link_flair_type"] == "text") {
 			if (item["link_flair_text"] != null && item["link_flair_text"].length > 0) {
 				const linkFlairText = item["link_flair_text"];
 				const linkFlairParameter = encodeURIComponent(`flair_name:"${linkFlairText}"`);
-				content += `<p><a href="${site}/r/${subreddit}/?f=${linkFlairParameter}">#${linkFlairText}</a></p>`;
+				annotation = Annotation.createWithText(linkFlairText);
+				annotation.uri = `${site}/r/${subreddit}/?f=${linkFlairParameter}`;
+//				content += `<p><a href="${site}/r/${subreddit}/?f=${linkFlairParameter}">#${linkFlairText}</a></p>`;
 			}
 		}
 	}
@@ -273,8 +276,13 @@ function itemForData(item) {
 	resultItem.title = title;
 	resultItem.body = content;
 	resultItem.author = identity;
-	resultItem.attachments = attachments;
-
+	if (attachments != null) {
+		resultItem.attachments = attachments;
+	}
+	if (annotation != null) {
+		resultItem.annotations = [annotation];
+	}
+	
 	return resultItem;
 }
 

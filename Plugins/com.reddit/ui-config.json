@@ -7,9 +7,9 @@
 			"placeholder": "weirdwheels"
 		},
 		{
-			"name": "includeTags",
+			"name": "includeFlair",
 			"type": "switch",
-			"prompt": "Include Tags for Flair",
+			"prompt": "Include Annotation for Flair",
 			"value": "on",
 		}
 	]

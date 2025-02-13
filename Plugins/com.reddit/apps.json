@@ -5,6 +5,12 @@
 			"name": "Reddit",
 			"template": "reddit://__PATH__",
 			"pattern": "https://([a-z0-9_]+\\.|)reddit\\.com"
+		},
+		{
+			"id": "app.narwhal",
+			"name": "Narwhal",
+			"template": "narwhal://open-url/__URL__",
+			"pattern": "https://([a-z0-9_]+\\.|)reddit\\.com"
 		}
 	]
 }
