@@ -544,7 +544,7 @@ function extractString(node, allowHTML = false) {
 			if (node["p"] != null) {
 				if (node["p"] instanceof Array) {
 					let value = "";
-					for (childNode of node["p"]) {
+					for (const childNode of node["p"]) {
 						const string = extractString(childNode, allowHTML);
 						if (allowHTML) {
 							value += `<p>${string}</p>\n`;
@@ -568,7 +568,7 @@ function extractString(node, allowHTML = false) {
 			else if (node["a"] != null) {
 				if (node["a"] instanceof Array) {
 					let value = "";
-					for (childNode of node["a"]) {
+					for (const childNode of node["a"]) {
 						const string = extractString(childNode, allowHTML);
 						if (allowHTML && node["a$attrs"]?.href != null) {
 							value += `<a href="${node["a$attrs"]?.href}">${string}</a>`;
