@@ -445,6 +445,10 @@ function load() {
 	if (includeStatuses == "on") {
 		loadCounter += 1;
 	}
+	if (loadCounter == 0) {
+		processResults([]);
+		return;
+	}
 				
 	if (includeHome == "on") {
 		let startTimestamp = (new Date()).getTime();
