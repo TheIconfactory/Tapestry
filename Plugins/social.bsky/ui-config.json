@@ -1,6 +1,12 @@
 {
 	"inputs": [
 		{
+			"name": "includeHome",
+			"type": "switch",
+			"prompt": "Include People You Follow",
+			"value": "on",
+		},
+		{
 			"name": "includeReposts",
 			"type": "switch",
 			"prompt": "Include Reposts"
@@ -9,6 +15,12 @@
 			"name": "includeReplies",
 			"type": "switch",
 			"prompt": "Include Replies"
-		}
+		},
+		{
+			"name": "includeMentions",
+			"type": "switch",
+			"prompt": "Include Mentions From Others",
+			"value": "on",
+		},
 	]
 }

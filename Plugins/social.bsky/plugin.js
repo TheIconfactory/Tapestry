@@ -34,6 +34,8 @@ function verify() {
 }
 
 const uriPrefix = "https://bsky.app";
+const uriPrefixContent = "https://cdn.bsky.app";
+const uriPrefixVideo = "https://video.bsky.app";
 
 function queryTimeline(endDate) {
 
@@ -144,6 +146,89 @@ function queryTimeline(endDate) {
 	
 }
 
+function queryMentions() {
+
+	return new Promise((resolve, reject) => {
+		const url = `${site}/xrpc/app.bsky.notification.listNotifications?limit=100`;
+		sendRequest(url)
+		.then((text) => {
+			const jsonObject = JSON.parse(text);
+
+			let results = [];
+			
+			if (jsonObject.notifications != null) {
+				for (const notification of jsonObject.notifications) {
+					if (notification.reason != null && notification.reason == "mention") {
+						const post = postForNotification(notification);
+						results.push(post);
+					}
+				}
+			}
+			
+			resolve(results);
+			/*
+			let results = [];
+			for (const item of jsonObject) {
+				let postItem = item["status"];
+
+				if (postItem == null) {
+					// NOTE: Not sure why this happens, but sometimes a mention payload doesn't have a status. If that happens, we just skip it.
+					continue;
+				}
+				
+				let visibility = postItem["visibility"] ?? "public";
+
+				let annotation = null;
+				let shortcodes = {};
+				
+				if (visibility == "public" || visibility == "unlisted") {
+					if (postItem.mentions != null && postItem.mentions.length > 0) {
+						const mentions = postItem.mentions;
+						const account = mentions[0];
+						const userName = account["username"];
+						let text = "Replying to @" + userName;
+						if (mentions.length > 1) {
+							text += " and others";
+						}
+						annotation = Annotation.createWithText(text);
+						annotation.uri = account["url"];
+	
+						const accountEmojis = account["emojis"];
+						if (accountEmojis != null && accountEmojis.length > 0) {
+							for (const emoji of accountEmojis) {
+								shortcodes[emoji.shortcode] = emoji.static_url;
+							}
+						}
+					}
+				}
+				else if (visibility == "private") {
+					annotation = Annotation.createWithText(`FOLLOWERS ONLY`);
+				}
+				else if (visibility == "direct") {
+					annotation = Annotation.createWithText(`PRIVATE MENTION`);
+				}	
+	
+				const post = postForItem(postItem, null, shortcodes);
+				if (annotation != null) {
+					post.annotations = [annotation];
+				}
+	
+				results.push(post);
+			}
+			resolve(results);
+			*/
+			resolve([]);
+		})
+		.catch((error) => {
+			reject(error);
+		});
+	});
+	
+}
+
+// NOTE: This reference counter tracks loading so we can let the app know when all async loading work is complete.
+var loadCounter = 0;
+
 function load() {
 	// NOTE: The timeline will be filled up to the endDate, if possible.
 	let endDate = null;
@@ -152,21 +237,50 @@ function load() {
 		endDate = new Date(parseInt(endDateTimestamp));
 	}
 
-	let startTimestamp = (new Date()).getTime();
-
-	queryTimeline(endDate)
-	.then((parameters) =>  {
-		results = parameters[0];
-		newestItemDate = parameters[1];
-		processResults(results, true);
-		setItem("endDateTimestamp", String(newestItemDate.getTime()));
-		let endTimestamp = (new Date()).getTime();
-		console.log(`finished timeline: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
-	})
-	.catch((requestError) => {
-		console.log(`error timeline`);
-		processError(requestError);
-	});
+	loadCounter = 0;
+	if (includeHome == "on") {
+		loadCounter += 1;
+	}
+	if (includeMentions == "on") {
+		loadCounter += 1;
+	}
+	if (loadCounter == 0) {
+		processResults([]);
+		return;
+	}
+	
+	if (includeHome == "on") {
+		let startTimestamp = (new Date()).getTime();
+	
+		queryTimeline(endDate)
+		.then((parameters) =>  {
+			results = parameters[0];
+			newestItemDate = parameters[1];
+  			loadCounter -= 1;
+			processResults(results, loadCounter == 0);
+			setItem("endDateTimestamp", String(newestItemDate.getTime()));
+			let endTimestamp = (new Date()).getTime();
+			console.log(`finished timeline: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
+		})
+		.catch((requestError) => {
+			console.log(`error timeline`);
+			processError(requestError);
+		});
+	}
+	
+	if (includeMentions == "on") {
+		queryMentions()
+		.then((results) =>  {
+			loadCounter -= 1;
+			console.log(`finished mentions, loadCounter = ${loadCounter}`);
+			processResults(results, loadCounter == 0);
+		})
+		.catch((requestError) => {
+			loadCounter -= 1;
+			console.log(`error mentions, loadCounter = ${loadCounter}`);
+			processError(requestError);
+		});	
+	}
 }
 
 function postForItem(item) {
@@ -213,7 +327,7 @@ function postForItem(item) {
 		}
 	}
 	if (includeReplies != "on") {
-		if (repostContent == null && replyContent != null) { // filter out replies only if they are not reposted
+		if (replyContent != null && repostContent == null) { // show replies only if they are not reposted
 			showItem = false;
 		}
 	}
@@ -241,6 +355,44 @@ function postForItem(item) {
 	}
 	
 	return null;
+}
+
+function postForNotification(notification) {
+	let date = new Date(notification.indexedAt);
+
+	const author = notification.author;
+	
+	const identity = identityForAccount(author);
+	
+	let content = contentForRecord(notification.record);
+	
+	let contentWarning = null;
+	if (notification.labels != null && notification.labels.length > 0) {
+		const labels = notification.labels.map((label) => { return label?.val ?? "" }).join(", ");
+		contentWarning = labels; //`Labeled: ${ labels }`;
+	}
+	
+	let annotation = Annotation.createWithText("Mention");
+		
+	let attachments = attachmentsForEmbed(notification.record.embed, encodeURIComponent(author.did));
+				
+	const itemIdentifier = notification.uri.split("/").pop();
+	const postUri = uriPrefix + "/profile/" + author.handle + "/post/" + itemIdentifier;
+		
+	const post = Item.createWithUriDate(postUri, date);
+	post.body = content;
+	post.author = identity;
+	if (attachments != null) {
+		post.attachments = attachments
+	}
+	if (annotation != null) {
+		post.annotations = [annotation];
+	}
+	if (contentWarning != null) {
+		post.contentWarning = contentWarning;
+	}
+		
+	return post;
 }
 
 function identityForAccount(account) {
@@ -358,52 +510,96 @@ function contentForReply(reply) {
 	return content;
 }
 
-function attachmentsForEmbed(embed) {
+function attachmentsForEmbed(embed, did = null) {
 	let attachments = null;
 	
 	if (embed != null) {
-		if (embed.$type == "app.bsky.embed.images#view") {
+		if (embed.$type.startsWith("app.bsky.embed.images")) {
 			const images = embed.images;
 			if (images != null) {
 				attachments = []
 				let count = images.length;
 				for (let index = 0; index < count; index++) {
 					let image = images[index];
-					const media = image.fullsize;
+					const isBlob = (image.image?.$type == "blob");
+					let media = null;
+					if (isBlob) {
+						if (did != null && image.image?.ref?.$link != null) {
+							const ref = image.image.ref.$link;
+							const suffix = image.image.mimeType.split("/")[1] ?? "";
+							media = `${uriPrefixContent}/img/feed_fullsize/plain/${did}/${ref}@${suffix}`;
+						}
+					}
+					else {
+						media = image.fullsize;
+					}
+					if (media != null) {
+						const attachment = MediaAttachment.createWithUrl(media);
+						if (image.aspectRatio != null) {
+							attachment.aspectSize = image.aspectRatio;
+						}
+						if (image.alt != null && image.alt.length != 0) {
+							attachment.text = image.alt;
+						}
+						if (isBlob) {
+							if (did != null && image.image?.ref?.$link != null) {
+								const ref = image.image.ref.$link;
+								const suffix = image.image.mimeType.split("/")[1] ?? "";
+								attachment.thumbnail = `${uriPrefixContent}/img/feed_thumbnail/plain/${did}/${ref}@${suffix}`;
+							}
+						}
+						else {
+							if (image.thumb) {
+								attachment.thumbnail = image.thumb;
+							}
+						}
+						attachment.mimeType = "image";
+						attachments.push(attachment);
+					}
+				}
+			}
+		}
+		else if (embed.$type.startsWith("app.bsky.embed.video")) {
+			const isBlob = (embed.video?.$type == "blob");
+			if (isBlob) {
+				if (did != null && embed.video?.ref?.$link != null) {
+					const ref = embed.video?.ref?.$link;
+					const media = `${uriPrefixVideo}/watch/${did}/${ref}/playlist.m3u8`;
+					const thumbnail = `${uriPrefixVideo}/watch/${did}/${ref}/thumbnail.jpg`;
 					const attachment = MediaAttachment.createWithUrl(media);
-					if (image.aspectRatio != null) {
-						attachment.aspectSize = image.aspectRatio;
+					if (embed.aspectRatio != null) {
+						attachment.aspectSize = embed.aspectRatio;
 					}
-					if (image.alt != null && image.alt.length != 0) {
-						attachment.text = image.alt;
+					if (embed.alt != null && embed.alt.length != 0) {
+						attachment.text = embed.alt;
 					}
-					if (image.thumb) {
-						attachment.thumbnail = image.thumb;
+					attachment.thumbnail = thumbnail;
+					attachment.mimeType = "video/mp4";
+					attachments = [attachment];
+				}				
+			}
+			else {
+				if (embed.playlist != null) {
+					const media = embed.playlist;
+					const attachment = MediaAttachment.createWithUrl(media);
+					if (embed.aspectRatio != null) {
+						attachment.aspectSize = embed.aspectRatio;
 					}
-					attachment.mimeType = "image";
-					attachments.push(attachment);
+					if (embed.alt != null && embed.alt.length != 0) {
+						attachment.text = embed.alt;
+					}
+					if (embed.thumbnail != null) {
+						attachment.thumbnail = embed.thumbnail;
+					}
+					attachment.mimeType = "video/mp4";
+					attachments = [attachment];
 				}
 			}
 		}
-		else if (embed.$type == "app.bsky.embed.video#view") {
-			if (embed.playlist != null) {
-				const media = embed.playlist;
-				const attachment = MediaAttachment.createWithUrl(media);
-				if (embed.aspectRatio != null) {
-					attachment.aspectSize = embed.aspectRatio;
-				}
-				if (embed.alt != null && embed.alt.length != 0) {
-					attachment.text = embed.alt;
-				}
-				if (embed.thumbnail != null) {
-					attachment.thumbnail = embed.thumbnail;
-				}
-				attachment.mimeType = "video/mp4";
-				attachments = [attachment];
-			}
-		}
-		else if (embed.$type == "app.bsky.embed.external#view") {
+		else if (embed.$type.startsWith("app.bsky.embed.external")) {
 			if (embed.external != null && embed.external.uri != null) {
+				const isBlob = (embed.external?.thumb?.$type == "blob");
+				
 				const external = embed.external;
 				let attachment = LinkAttachment.createWithUrl(external.uri);
 				if (external.title != null && external.title.length > 0) {
@@ -412,13 +608,98 @@ function attachmentsForEmbed(embed) {
 				if (external.description != null && external.description.length > 0) {
 					attachment.subtitle = external.description;
 				}
-				if (external.thumb != null && external.thumb.length > 0) {
-					attachment.image = external.thumb;
+				if (isBlob) {
+					if (did != null && embed.external?.thumb?.ref?.$link != null) {
+						const ref = embed.external?.thumb?.ref?.$link;
+						const suffix = embed.external?.thumb?.mimeType.split("/")[1] ?? "";
+						attachment.image = `${uriPrefixContent}/img/feed_thumbnail/plain/${did}/${ref}@${suffix}`;
+					}
+				}
+				else {
+					if (external.thumb != null && external.thumb.length > 0) {
+						attachment.image = external.thumb;
+					}
 				}
 				attachments = [attachment];
 			}
 		}
-		else if (embed.$type == "app.bsky.embed.record#view") {
+		else if (embed.$type.startsWith("app.bsky.embed.recordWithMedia")) {
+			if (embed.record != null && embed.media != null) {
+				const media = embed.media;
+				
+				attachments = attachmentsForEmbed(media);
+				
+				const record = embed.record.record;
+				if (record != null) {
+					const handle = record.author?.handle;
+					const title = nameForAccount(record.author);
+					const description = record.value?.text;
+					
+					const embedUrl = record.uri.split("/").pop();
+					if (handle != null) {
+						const postUri = uriPrefix + "/profile/" + handle + "/post/" + embedUrl;
+		
+						let attachment = LinkAttachment.createWithUrl(postUri);
+						if (title != null && title.length > 0) {
+							attachment.title = title;
+						}
+						if (description != null && description.length > 0) {
+							attachment.subtitle = description;
+						}
+						
+						if (record.embeds != null && record.embeds.length > 0) {
+							const firstRecordEmbed = record.embeds[0];
+							if (firstRecordEmbed.$type.startsWith("app.bsky.embed.images")) {
+								if (firstRecordEmbed.images != null && firstRecordEmbed.images.length > 0) {
+									const image = firstRecordEmbed.images[0];
+									attachment.image = image.thumb;
+									if (image.aspectRatio != null) {
+										attachment.aspectSize = image.aspectRatio;
+									}
+								}
+							}
+							else if (firstRecordEmbed.$type.startsWith("app.bsky.embed.video")) {
+								if (firstRecordEmbed.thumbnail != null) {
+									attachment.image = firstRecordEmbed.thumbnail;
+									if (firstRecordEmbed.aspectRatio != null) {
+										attachment.aspectSize = firstRecordEmbed.aspectRatio;
+									}
+								}
+							}
+							else if (firstRecordEmbed.$type.startsWith("app.bsky.embed.recordWithMedia")) {
+								if (firstRecordEmbed.media != null) {
+									const firsRecordEmbedMedia = firstRecordEmbed.media;
+									if (firsRecordEmbedMedia.$type.startsWith("app.bsky.embed.images")) {
+										if (firsRecordEmbedMedia.images != null && firsRecordEmbedMedia.images.length > 0) {
+											const image = firsRecordEmbedMedia.images[0];
+											attachment.image = image.thumb;
+											if (image.aspectRatio != null) {
+												attachment.aspectSize = image.aspectRatio;
+											}
+										}
+									}
+									else if (firsRecordEmbedMedia.$type.startsWith("app.bsky.embed.video")) {
+										if (firsRecordEmbedMedia.thumbnail != null) {
+											attachment.image = firsRecordEmbedMedia.thumbnail;
+											if (firsRecordEmbedMedia.aspectRatio != null) {
+												attachment.aspectSize = firsRecordEmbedMedia.aspectRatio;
+											}
+										}
+									}
+								}
+							}
+						}
+						if (attachments == null) {
+							attachments = [attachment];
+						}
+						else {
+							attachments.push(attachment);
+						}
+					}
+				}
+			}
+		}
+		else if (embed.$type.startsWith("app.bsky.embed.record")) { // NOTE: This one needs to be after app.bsky.embed.recordWithMedia because of the lazy match
 			if (embed.record != null) {
 				const record = embed.record;
 				
@@ -449,82 +730,6 @@ function attachmentsForEmbed(embed) {
 					}
 					
 					attachments = [attachment];
-				}
-			}
-		}
-		else if (embed.$type == "app.bsky.embed.recordWithMedia#view") {
-			if (embed.record != null && embed.media != null) {
-				const media = embed.media;
-				
-				attachments = attachmentsForEmbed(media);
-				
-				const record = embed.record.record;
-				if (record != null) {
-					const handle = record.author?.handle;
-					const title = nameForAccount(record.author);
-					const description = record.value?.text;
-					
-					const embedUrl = record.uri.split("/").pop();
-					if (handle != null) {
-						const postUri = uriPrefix + "/profile/" + handle + "/post/" + embedUrl;
-		
-						let attachment = LinkAttachment.createWithUrl(postUri);
-						if (title != null && title.length > 0) {
-							attachment.title = title;
-						}
-						if (description != null && description.length > 0) {
-							attachment.subtitle = description;
-						}
-						
-						if (record.embeds != null && record.embeds.length > 0) {
-							const firstRecordEmbed = record.embeds[0];
-							if (firstRecordEmbed.$type == "app.bsky.embed.images#view") {
-								if (firstRecordEmbed.images != null && firstRecordEmbed.images.length > 0) {
-									const image = firstRecordEmbed.images[0];
-									attachment.image = image.thumb;
-									if (image.aspectRatio != null) {
-										attachment.aspectSize = image.aspectRatio;
-									}
-								}
-							}
-							else if (firstRecordEmbed.$type == "app.bsky.embed.video#view") {
-								if (firstRecordEmbed.thumbnail != null) {
-									attachment.image = firstRecordEmbed.thumbnail;
-									if (firstRecordEmbed.aspectRatio != null) {
-										attachment.aspectSize = firstRecordEmbed.aspectRatio;
-									}
-								}
-							}
-							else if (firstRecordEmbed.$type == "app.bsky.embed.recordWithMedia#view") {
-								if (firstRecordEmbed.media != null) {
-									const firsRecordEmbedMedia = firstRecordEmbed.media;
-									if (firsRecordEmbedMedia.$type == "app.bsky.embed.images#view") {
-										if (firsRecordEmbedMedia.images != null && firsRecordEmbedMedia.images.length > 0) {
-											const image = firsRecordEmbedMedia.images[0];
-											attachment.image = image.thumb;
-											if (image.aspectRatio != null) {
-												attachment.aspectSize = image.aspectRatio;
-											}
-										}
-									}
-									else if (firsRecordEmbedMedia.$type == "app.bsky.embed.video#view") {
-										if (firsRecordEmbedMedia.thumbnail != null) {
-											attachment.image = firsRecordEmbedMedia.thumbnail;
-											if (firsRecordEmbedMedia.aspectRatio != null) {
-												attachment.aspectSize = firsRecordEmbedMedia.aspectRatio;
-											}
-										}
-									}
-								}
-							}
-						}
-						if (attachments == null) {
-							attachments = [attachment];
-						}
-						else {
-							attachments.push(attachment);
-						}
-					}
 				}
 			}
 		}
