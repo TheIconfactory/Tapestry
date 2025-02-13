@@ -27,8 +27,9 @@ function verify() {
 				}
 			}
 			const feedName = jsonObject.feed.title;
-			
-			sendRequest(baseUrl)
+					
+			const extraHeaders = {"user-agent": "WhatsApp/2"}; // avoid EU cookie nonsense
+			sendRequest(baseUrl, "GET", null, extraHeaders)
 			.then((html) => {
 				const match = html.match(avatarRegex);
 				const icon = match[1];
