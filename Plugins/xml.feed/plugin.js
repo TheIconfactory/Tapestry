@@ -2,7 +2,9 @@
 // xml.feed
 
 function verify() {
-	sendRequest(site)
+	const extraHeaders = {"user-agent": "WhatsApp/2"}; // people who sniff user agents are dumb and their rules are even dumber
+
+	sendRequest(site, "GET", null, extraHeaders)
 	.then((xml) => {	
 		let jsonObject = xmlParse(xml);
 		
@@ -163,6 +165,7 @@ function load() {
 		extraHeaders["if-none-match"] = eTag;
 	}
 	extraHeaders["accept-encoding"] = "gzip,deflate";
+	extraHeaders["user-agent"] = "WhatsApp/2"; // people who sniff user agents are dumb and their rules are even dumber
 
 	sendRequest(site, "GET", null, extraHeaders, true)
 	.then((text) => {
