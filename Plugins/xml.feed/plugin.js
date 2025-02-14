@@ -1,8 +1,17 @@
 
 // xml.feed
 
+// people who sniff user agents are dumb and their rules are even dumber, because of course we are:
+//   a Macintosh
+//   with an Intel processor
+//   running Mac OS X 10.6.3
+//   in Germany
+//   using WebKit
+//   in an awesome RSS reader
+const userAgent = "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; de-de) AppleWebKit/531.22.7 (KHTML, like Gecko) NetNewsWire/3.2.7";
+
 function verify() {
-	const extraHeaders = {"user-agent": "WhatsApp/2"}; // people who sniff user agents are dumb and their rules are even dumber
+	const extraHeaders = {"user-agent": userAgent}; 
 
 	sendRequest(site, "GET", null, extraHeaders)
 	.then((xml) => {	
@@ -165,7 +174,7 @@ function load() {
 		extraHeaders["if-none-match"] = eTag;
 	}
 	extraHeaders["accept-encoding"] = "gzip,deflate";
-	extraHeaders["user-agent"] = "WhatsApp/2"; // people who sniff user agents are dumb and their rules are even dumber
+	extraHeaders["user-agent"] = userAgent;
 
 	sendRequest(site, "GET", null, extraHeaders, true)
 	.then((text) => {
