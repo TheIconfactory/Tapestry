@@ -382,7 +382,7 @@ function load() {
 				let content = extractString((item["content:encoded"] ?? item.description), true);
 
 				let identity = null;
-				let authorName = item["dc:creator"];
+				let authorName = item["dc:creator"] ?? item["author"];
 				if (authorName != null) {
 					if (authorName instanceof Array) {
 						authorName = authorName.join(", ");
