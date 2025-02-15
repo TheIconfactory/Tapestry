@@ -381,10 +381,14 @@ function load() {
 
 			let results = [];
 			for (const item of items) {
-				const itemDate = item["pubDate"] ?? item["dc:date"];
+				let itemDate = item["pubDate"] ?? item["dc:date"];
 				if (item.link == null || itemDate == null) {
 					continue;
 				}
+				if (itemDate.endsWith(" Z")) { // the Date parser is pretty dumb
+					itemDate = itemDate.slice(0, -2) + "GMT";
+				}
+				
 				const url = item.link;
 				const date = new Date(itemDate);
 				let title = extractString(item.title);
