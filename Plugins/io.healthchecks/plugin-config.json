@@ -4,5 +4,6 @@
 	"icon": "https://healthchecks.io/static/img/apple-touch-icon.png",
 	"site": "https://healthchecks.io",
 	"provides_attachments": true,
-	"check_interval": 300
+	"check_interval": 300,
+	"version": 1
 }

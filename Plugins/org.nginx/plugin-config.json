@@ -6,5 +6,6 @@
 	"site_prompt": "Status URL",
 	"site_placeholder": "https://example.com/basic_status",
 	"needs_verification": true,
-	"check_interval": 300
+	"check_interval": 300,
+	"version": 1
 }

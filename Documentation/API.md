@@ -646,6 +646,7 @@ Recommended properties:
   * service\_name: `String` with the name of the service (e.g. "Tumblr", "YouTube", "Blog", "Podcast").
   * default\_color: `String` with a default color name for feeds created by the connector. Valid values are "purple", "gold", "blue", "coral", "slate", "orange", "green", "teal". If no value is specified, "gray" will be used.
   * item\_style: `String` with either "post" or "article" to define the content layout.
+  * version: `Number` with an integer value that increments with newer versions of the connector. If no value is supplied, 1 is assumed.
  	
 Optional properties:
 

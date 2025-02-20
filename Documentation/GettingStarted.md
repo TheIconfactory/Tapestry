@@ -56,8 +56,9 @@ The `plugin.js` file can be empty for now, but the `plugin-config.json` file req
 	"id": "com.usetapestry.mystic9ball",
 	"display_name": "Mystic 9-Ball",
 }
-
 ```
+
+The `id` in the configuration file _must_ be the same as the folder name. If you starting out by copying an existing connector and changing its name, you need to make sure that change is also made in the `plugin-config.json` file. You won't be able to edit until the names match.
 
 ### Check It Out
 

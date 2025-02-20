@@ -3,5 +3,6 @@
 	"display_name": "USGS Earthquakes",
 	"icon": "https://earthquake.usgs.gov/earthquakes/map/assets/pwa/icon-192x192.png",
 	"site": "https://earthquake.usgs.gov",
-	"check_interval": 300
+	"check_interval": 300,
+	"version": 1
 }

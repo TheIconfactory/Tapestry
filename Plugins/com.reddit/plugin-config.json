@@ -8,5 +8,6 @@
 	"needs_verification": true,
 	"verify_variables": true,
 	"provides_attachments": true,
-	"check_interval": 300
+	"check_interval": 300,
+	"version": 1
 }

@@ -8,5 +8,6 @@
 	"site_placeholder": "https://foo.com/feed.xml",
 	"site_help": "Enter the path to the website’s XML file.\n\nIf you don’t know this URL, use the [Feed Finder](tapestry://feedfinder) and enter a value like `daringfireball.net`",
 	"needs_verification": true,
-	"check_interval": 300
+	"check_interval": 300,
+	"version": 2
 }

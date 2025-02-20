@@ -381,7 +381,7 @@ function load() {
 
 			let results = [];
 			for (const item of items) {
-				let itemDate = item["pubDate"] ?? item["dc:date"];
+				let itemDate = item["pubDate"] ?? item["dc:date"] ?? item["a10:updated"];
 				if (item.link == null || itemDate == null) {
 					continue;
 				}

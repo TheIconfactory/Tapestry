@@ -5,5 +5,6 @@
 	"site_prompt": "Website",
 	"site_placeholder": "https://example.com",
 	"needs_verification": true,
-	"check_interval": 300
+	"check_interval": 300,
+	"version": 1
 }
