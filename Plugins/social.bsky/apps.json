@@ -5,6 +5,12 @@
 			"name": "Bluesky",
 			"template": "bluesky:__PATH__",
 			"pattern": "https://bsky.app"
+		},
+		{
+			"id": "dev.mozzius.graysky",
+			"name": "Graysky",
+			"template": "graysky:/__PATH__",
+			"pattern": "https://bsky.app"
 		}
 	]
 }
