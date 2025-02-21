@@ -339,7 +339,7 @@ Returns a `Promise` with a resolve handler with a String parameter and a reject 
 
 > **Note:** The `url` is assumed to be properly encoded. Use JavaScript’s `encodeURI`, if needed.
 
-For the "HEAD" method, the string result contains a JSON dictionary:
+For the "HEAD" method, the string result contains a JSON dictionary containing the HTTP status code, the response headers, and the URL that was loaded (which may be different than the request due to redirects):
   
 ```json
 {
@@ -348,7 +348,8 @@ For the "HEAD" method, the string result contains a JSON dictionary:
 		"last-modified": "Thu, 02 Mar 2023 21:46:29 GMT",
 		"content-length": "15287",
 		"...": "..."
-	}
+	},
+	"url": "https://example.com/redirect"
 }
 ```
 
@@ -377,6 +378,7 @@ The `fullResponse` flag can be set to `true`. In this mode, the text response is
 		"content-length": "15287",
 		"...": "..."
 	},
+	"url": "https://example.com/redirect",
 	"body": "<!DOCTYPE html> ..."
 }
 ```
