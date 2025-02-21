@@ -25,7 +25,7 @@ struct OPMLGenerator {
 			if let feeds = root["feeds"] as? Array<Dictionary<String, Any>> {
 				for feed in feeds {
 					if let connectorId = feed["connectorId"] as? String {
-						if (connectorId == "xml.feed" || connectorId == "org.jsonfeed") {
+						if ["xml.feed", "xml.podcast", "com.youtube", "org.jsonfeed"].contains(connectorId) {
 							if let xmlUrl = feed["site"] as? String, let title = feed["displayName"] as? String {
 								let encodedTitle = encodeXMLEntities(title)
 								let encodedXmlUrl = encodeXMLEntities(xmlUrl)
