@@ -2,7 +2,8 @@
 // com.reddit
 
 function verify() {
-	sendRequest(`${site}/r/${subreddit}/hot.json?raw_json=1`, "HEAD")
+	const type = feedType.toLowerCase();
+	sendRequest(`${site}/r/${subreddit}/${type}.json?raw_json=1`, "HEAD")
 	.then((dictionary) => {
 		const jsonObject = JSON.parse(dictionary);
 		
@@ -23,7 +24,8 @@ function verify() {
 }
 
 function load() {
-	sendRequest(`${site}/r/${subreddit}/hot.json?raw_json=1`, "GET")
+	const type = feedType.toLowerCase();
+	sendRequest(`${site}/r/${subreddit}/${type}.json?raw_json=1`, "GET")
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		
