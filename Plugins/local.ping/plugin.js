@@ -2,16 +2,14 @@
 // local.ping
 
 function verify() {
-	sendRequest(site, "HEAD")
-	.then((dictionary) => {
-		const jsonObject = JSON.parse(dictionary);
+	sendRequest(site, "GET", null, null, true)
+	.then((text) => {
+		const response = JSON.parse(text);
+		console.log(`response.status = ${response.status}`);
 
-		const responseStatus = jsonObject["status"];
-		if (responseStatus == 200) {
-			// NOTE: The responseUrl may not be the same as the original url if there was a redirect.
-			const responseUrl = jsonObject["url"];
-			
-			let displayName = responseUrl;
+		if (response.status == 200) {
+			// NOTE: The response.url may not be the same as the original url if there was a redirect.
+			let displayName = response.url;
 			if (displayName.startsWith("https://")) {
 				displayName = displayName.replace("https://", "");
 			}
@@ -22,7 +20,7 @@ function verify() {
 				displayName = displayName.substring(0, displayName.length - 1);
 			}
 			
-			lookupIcon(site).then((icon) => {
+			lookupIcon(response.url).then((icon) => {
 				const verification = {
 					displayName: displayName,
 					icon: icon
@@ -42,12 +40,12 @@ function verify() {
 
 function load() {
 	console.log(`site = ${site}`);
-	sendRequest(site, "HEAD")
-	.then((dictionary) => {
-		const jsonObject = JSON.parse(dictionary);
-		
-		const responseStatus = jsonObject["status"];
-		if (responseStatus != 200) {
+	sendRequest(site, "GET", null, null, true)
+	.then((text) => {
+		const response = JSON.parse(text);
+		console.log(`response.status = ${response.status}`);
+
+		if (response.status != 200) {
 			let date = new Date();
 			let uri = `${site}?{date.valueOf()}`;
 			let content = `<p>Response from ${site} failed with HTTP ${responseStatus} response.`;
@@ -56,7 +54,8 @@ function load() {
 			processResults([resultItem]);
 		}
 		else {
-			console.log(JSON.stringify(jsonObject, null, "    "));
+			console.log(`response.url = ${response.url}`);
+			console.log(JSON.stringify(response.headers, null, "    "));
 			processResults(null);
 		}
 	})
