@@ -108,7 +108,7 @@ function itemForData(item) {
 			const mediaMetadata = item["media_metadata"];
 			if (mediaMetadata != null) {
 				const metadata = mediaMetadata[mediaId];
-				if (metadata.status == "valid") {
+				if (metadata?.status == "valid") {
 					if (metadata.s != null) {
 						let width = null;
 						if (metadata.s.x != null) {
@@ -151,7 +151,7 @@ function itemForData(item) {
 		const mediaMetadata = item["media_metadata"];
 		for (let key in mediaMetadata) {
 			const metadata = mediaMetadata[key];
-			if (metadata.status == "valid") {
+			if (metadata?.status == "valid") {
 				if (metadata.s != null) {
 					let width = null;
 					if (metadata.s.x != null) {
