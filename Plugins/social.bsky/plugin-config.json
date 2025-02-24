@@ -13,5 +13,5 @@
 	"fail_status_code": 400,
 	"provides_attachments": true,
 	"check_interval": 300,
-	"version": 1
+	"version": 2
 }

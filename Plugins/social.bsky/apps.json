@@ -11,6 +11,12 @@
 			"name": "Graysky",
 			"template": "graysky:/__PATH__",
 			"pattern": "https://bsky.app"
-		}
+		},
+		{
+			"id": "com.skeetsapp",
+			"name": "Skeets",
+			"template": "skeets://bskylink?link=__URL__",
+			"pattern": "https://bsky.app"
+		},
 	]
 }
