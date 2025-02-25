@@ -1,0 +1,20 @@
+{
+	"inputs": [
+		{
+			"name": "account",
+			"type": "text",
+			"prompt": "Account",
+			"placeholder": "jay.bsky.team",
+		},
+		{
+			"name": "includeReposts",
+			"type": "switch",
+			"prompt": "Include Their Reposts"
+		},
+		{
+			"name": "includeReplies",
+			"type": "switch",
+			"prompt": "Include Their Replies"
+		},
+	]
+}

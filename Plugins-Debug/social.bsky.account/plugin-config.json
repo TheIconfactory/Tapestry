@@ -1,5 +1,5 @@
 {
-	"id": "account.social.bsky",
+	"id": "social.bsky.account",
 	"display_name": "Follow Account (Bluesky)",
 	"service_name": "Bluesky",
 	"default_color": "blue",

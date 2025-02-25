@@ -1,0 +1,20 @@
+{
+	"inputs": [
+		{
+			"name": "account",
+			"type": "text",
+			"prompt": "Account",
+			"placeholder": "Gargron",
+		},
+		{
+			"name": "includeBoosts",
+			"type": "switch",
+			"prompt": "Include Their Boosts"
+		},
+		{
+			"name": "includeReplies",
+			"type": "switch",
+			"prompt": "Include Their Replies"
+		},
+	]
+}

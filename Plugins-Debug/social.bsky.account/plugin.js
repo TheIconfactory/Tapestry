@@ -38,194 +38,6 @@ const uriPrefix = "https://bsky.app";
 const uriPrefixContent = "https://cdn.bsky.app";
 const uriPrefixVideo = "https://video.bsky.app";
 
-function queryTimeline(endDate) {
-
-	// NOTE: These constants are related to the feed limits within Tapestry - it doesn't store more than
-	// 3,000 items or things older than 30 days.
-	// The Bluesky API is fast and can return the maximum number of items with 30 seconds, but a week's
-	// worth of content feels like a good amount to backfill.
-	const maxInterval = 7 * 24 * 60 * 60 * 1000; // days in milliseconds (approximately)
-	const maxItems = 1000;
-
-	let newestItemDate = null;
-	let oldestItemDate = null;
-
-	return new Promise((resolve, reject) => {
-
-		// this function is called recursively to load & process batches of posts into a single list of results
-		function requestToCursor(cursor, endDate, resolve, reject, results = []) {
-			let url = null
-			if (cursor == null) {
-				//console.log("cursor = none");
-				url = `${site}/xrpc/app.bsky.feed.getTimeline?algorithm=reverse-chronological&limit=50`;
-			}
-			else {
-				//console.log(`cursor = ${cursor}`);
-				url = `${site}/xrpc/app.bsky.feed.getTimeline?algorithm=reverse-chronological&limit=50&cursor=${cursor}`;
-			}
-			
-			console.log(`==== REQUEST cursor = ${cursor}`);
-			
-			sendRequest(url, "GET")
-			.then((text) => {
-				//console.log(text);
-				let firstId = null;
-				let firstDate = null;
-				let lastId = null;
-				let lastDate = null;
-				let endUpdate = false;
-
-				const jsonObject = JSON.parse(text);
-				const items = jsonObject.feed
-				for (const item of items) {
-					const post = postForItem(item);
-					if (post != null) {
-						results.push(post);
-						
-						let date = new Date(item.post.indexedAt); // date of the post
-						if (item.reason != null && item.reason.$type == "app.bsky.feed.defs#reasonRepost") {
-							date = new Date(item.reason.indexedAt); // date of the repost
-						}
-
-						const currentId = item.post.uri.split("/").pop();
-
-						if (firstId == null) {
-							firstId = currentId;
-							firstDate = date;
-						}
-						lastId = currentId;						
-						lastDate = date;
-						
-						if (!endUpdate && date < endDate) {
-							console.log(`>>>> END date = ${date}`);
-							endUpdate = true;
-						}
-						if (date > newestItemDate) {
-							console.log(`>>>> NEW date = ${date}`);
-							newestItemDate = date;
-						}
-						if (date < oldestItemDate) {
-							console.log(`>>>> OLD date = ${date}`);
-							endUpdate = true;
-						}
-
-					}
-				}
-				if (results.length > maxItems) {
-					console.log(`>>>> MAX`);
-					endUpdate = true;
-				}
-				
-				console.log(`>>>> BATCH results = ${results.length}, lastId = ${lastId}, endUpdate = ${endUpdate}`);
-				console.log(`>>>>       first  = ${firstDate}`);
-				console.log(`>>>>       last   = ${lastDate}`);
-				console.log(`>>>>       newest = ${newestItemDate}`);
-				
-				const cursor = jsonObject.cursor;			
-
-				if (!endUpdate && cursor != null) {
-					requestToCursor(cursor, endDate, resolve, reject, results);
-				}
-				else {
-					resolve([results, newestItemDate]);
-				}
-			})
-			.catch((error) => {
-				reject(error);
-			});	
-		}
-
-		console.log(`>>>> START endDate = ${endDate}`);
-		
-		let nowTimestamp = (new Date()).getTime();
-		let pastTimestamp = (nowTimestamp - maxInterval);
-		oldestItemDate = new Date(pastTimestamp);
-		console.log(`>>>> OLD date = ${oldestItemDate}`);
-
-		requestToCursor(null, endDate, resolve, reject);
-	});
-	
-}
-
-function queryMentions() {
-
-	return new Promise((resolve, reject) => {
-		const url = `${site}/xrpc/app.bsky.notification.listNotifications?limit=100`;
-		sendRequest(url)
-		.then((text) => {
-			const jsonObject = JSON.parse(text);
-
-			let results = [];
-			
-			if (jsonObject.notifications != null) {
-				for (const notification of jsonObject.notifications) {
-					if (notification.reason != null && notification.reason == "mention") {
-						const post = postForNotification(notification);
-						results.push(post);
-					}
-				}
-			}
-			
-			resolve(results);
-			/*
-			let results = [];
-			for (const item of jsonObject) {
-				let postItem = item["status"];
-
-				if (postItem == null) {
-					// NOTE: Not sure why this happens, but sometimes a mention payload doesn't have a status. If that happens, we just skip it.
-					continue;
-				}
-				
-				let visibility = postItem["visibility"] ?? "public";
-
-				let annotation = null;
-				let shortcodes = {};
-				
-				if (visibility == "public" || visibility == "unlisted") {
-					if (postItem.mentions != null && postItem.mentions.length > 0) {
-						const mentions = postItem.mentions;
-						const account = mentions[0];
-						const userName = account["username"];
-						let text = "Replying to @" + userName;
-						if (mentions.length > 1) {
-							text += " and others";
-						}
-						annotation = Annotation.createWithText(text);
-						annotation.uri = account["url"];
-	
-						const accountEmojis = account["emojis"];
-						if (accountEmojis != null && accountEmojis.length > 0) {
-							for (const emoji of accountEmojis) {
-								shortcodes[emoji.shortcode] = emoji.static_url;
-							}
-						}
-					}
-				}
-				else if (visibility == "private") {
-					annotation = Annotation.createWithText(`FOLLOWERS ONLY`);
-				}
-				else if (visibility == "direct") {
-					annotation = Annotation.createWithText(`PRIVATE MENTION`);
-				}	
-	
-				const post = postForItem(postItem, null, shortcodes);
-				if (annotation != null) {
-					post.annotations = [annotation];
-				}
-	
-				results.push(post);
-			}
-			resolve(results);
-			*/
-			resolve([]);
-		})
-		.catch((error) => {
-			reject(error);
-		});
-	});
-	
-}
 
 function load() {
 	var did = getItem("did");
@@ -238,7 +50,7 @@ function load() {
 		})
 		.catch((requestError) => {
 			loadCounter -= 1;
-			console.log(`error (cached) user statuses`);
+			console.log(`error (cached) feed`);
 			processError(requestError);
 		});	
 	}
@@ -252,12 +64,12 @@ function load() {
 		
 			queryFeedForUser(did)
 			.then((results) =>  {
-				console.log(`finished (cached) feed`);
+				console.log(`finished feed`);
 				processResults(results, true);
 			})
 			.catch((requestError) => {
 				loadCounter -= 1;
-				console.log(`error (cached) user statuses`);
+				console.log(`error feed`);
 				processError(requestError);
 			});	
 		})
@@ -351,16 +163,16 @@ function postForItem(item) {
 	}
 
 	let showItem = true;
-// 	if (includeReposts != "on") {
-// 		if (repostContent != null) {
-// 			showItem = false;
-// 		}
-// 	}
-// 	if (includeReplies != "on") {
-// 		if (replyContent != null && repostContent == null) { // show replies only if they are not reposted
-// 			showItem = false;
-// 		}
-// 	}
+	if (includeReposts != "on") {
+		if (repostContent != null) {
+			showItem = false;
+		}
+	}
+	if (includeReplies != "on") {
+		if (replyContent != null && repostContent == null) { // show replies only if they are not reposted
+			showItem = false;
+		}
+	}
 	
 	if (showItem) {
 		let attachments = attachmentsForEmbed(item.post.embed);
@@ -385,44 +197,6 @@ function postForItem(item) {
 	}
 	
 	return null;
-}
-
-function postForNotification(notification) {
-	let date = new Date(notification.indexedAt);
-
-	const author = notification.author;
-	
-	const identity = identityForAccount(author);
-	
-	let content = contentForRecord(notification.record);
-	
-	let contentWarning = null;
-	if (notification.labels != null && notification.labels.length > 0) {
-		const labels = notification.labels.map((label) => { return label?.val ?? "" }).join(", ");
-		contentWarning = labels; //`Labeled: ${ labels }`;
-	}
-	
-	let annotation = Annotation.createWithText("Mention");
-		
-	let attachments = attachmentsForEmbed(notification.record.embed, encodeURIComponent(author.did));
-				
-	const itemIdentifier = notification.uri.split("/").pop();
-	const postUri = uriPrefix + "/profile/" + author.handle + "/post/" + itemIdentifier;
-		
-	const post = Item.createWithUriDate(postUri, date);
-	post.body = content;
-	post.author = identity;
-	if (attachments != null) {
-		post.attachments = attachments
-	}
-	if (annotation != null) {
-		post.annotations = [annotation];
-	}
-	if (contentWarning != null) {
-		post.contentWarning = contentWarning;
-	}
-		
-	return post;
 }
 
 function identityForAccount(account) {

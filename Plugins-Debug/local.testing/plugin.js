@@ -1,7 +1,5 @@
 
 async function load() {
-	//let query = "https://www.mtgpics.com/art"
-	//let url = "https://sixcolors.com/feed/json/"
 	console.log(`site = ${site}`)
 	
 	let extraHeaders = [];	
