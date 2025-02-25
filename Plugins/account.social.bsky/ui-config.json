@@ -1,0 +1,10 @@
+{
+	"inputs": [
+		{
+			"name": "account",
+			"type": "text",
+			"prompt": "Account",
+			"placeholder": "jay.bsky.team",
+		},
+	]
+}
