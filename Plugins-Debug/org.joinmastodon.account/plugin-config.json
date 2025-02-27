@@ -1,6 +1,6 @@
 {
 	"id": "org.joinmastodon.account",
-	"display_name": "Follow Account (Mastodon)",
+	"display_name": "Account Follow (Mastodon)",
 	"service_name": "Mastodon",
 	"default_color": "slate",
 	"icon": "https://mastodon.social/packs/media/icons/apple-touch-icon-180x180-a75559a0af48064c1b7c71b81f3bf7c6.png",

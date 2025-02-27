@@ -1,5 +1,5 @@
 
-// org.joinmastodon
+// org.joinmastodon.account
 
 function verify() {
 	const url = `${site}/api/v1/accounts/lookup?acct=${account}`
@@ -85,15 +85,9 @@ function queryStatusesForUser(id) {
 			for (const item of jsonObject) {
 				let showItem = true;
 
-				let annotation = null;
-				
-// 	if (includeReplies != "on") {
-// 		if (replyContent != null && repostContent == null) { // show replies only if they are not reposted
-// 			showItem = false;
-// 		}
-// 	}
-
 				let post = null;
+				let annotation = null;
+
 				if (item.reblog != null) {
 					if (includeBoosts == "on") {
 						post = postForItem(item.reblog);
