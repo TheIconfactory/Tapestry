@@ -1,0 +1,11 @@
+{
+	"sites": [
+		"reddit.com"
+	],
+	"url": [
+		{
+			"extract": "/reddit.com/u/([^/]+)/",
+			"variable": "account"
+		}
+	]
+}
