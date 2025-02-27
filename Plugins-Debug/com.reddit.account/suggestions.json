@@ -1,19 +1,4 @@
 {
 	"variables": [
-		{
-			"name": "subreddit",
-			"value": "apple",
-			"title": "/r/Apple"
-		},
-		{
-			"name": "subreddit",
-			"value": "aww",
-			"title": "/r/aww"
-		},
-		{
-			"name": "subreddit",
-			"value": "weirdwheels",
-			"title": "/r/WeirdWheels"
-		}
 	]
 }

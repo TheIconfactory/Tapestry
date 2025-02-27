@@ -1,6 +1,6 @@
 {
 	"id": "com.reddit.account",
-	"display_name": "Follow Account (Reddit)",
+	"display_name": "Account Follow (Reddit)",
 	"service_name": "Reddit",
 	"default_color": "coral",
 	"icon": "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png",
