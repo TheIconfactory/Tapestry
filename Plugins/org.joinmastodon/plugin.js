@@ -389,7 +389,8 @@ function queryStatusesForUser(id) {
 				
 				let post = null;
 				if (item.reblog != null) {
-					post = postForItem(item.reblog);
+					const date = new Date(item["created_at"]);
+					post = postForItem(item.reblog, date);
 					annotation = Annotation.createWithText("Boosted by you");
 					annotation.uri = item.account["url"];
 				}
