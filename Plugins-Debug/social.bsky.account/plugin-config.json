@@ -1,6 +1,6 @@
 {
 	"id": "social.bsky.account",
-	"display_name": "Account Follow (Bluesky)",
+	"display_name": "Bluesky - Follow Account",
 	"service_name": "Bluesky",
 	"default_color": "blue",
 	"icon": "https://bsky.app/static/apple-touch-icon.png",
@@ -10,5 +10,5 @@
 	"verify_variables": true,
 	"provides_attachments": true,
 	"check_interval": 300,
-	"version": 1
+	"version": 2
 }

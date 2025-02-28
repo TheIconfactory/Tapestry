@@ -12,12 +12,5 @@
 			"prompt": "Include Annotation for Flair",
 			"value": "on",
 		},
-		{
-			"name": "feedType",
-			"type": "choices",
-			"prompt": "Feed Type",
-			"value": "Hot",
-			"choices": "Hot, New, Top, Rising",
-		},
 	]
 }

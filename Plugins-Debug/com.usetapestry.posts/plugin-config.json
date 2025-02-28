@@ -1,11 +1,12 @@
 {
 	"id": "com.usetapestry.posts",
-	"display_name": "Screenshot Posts",
-	"service_name": "Service",
+	"display_name": "Posts",
+	"service_name": "Screenshot",
 	"site": "https://screenshots.usetapestry.com",
 	"icon": "https://usetapestry.com/icons/generic.png",
 	"needs_verification": true,
 	"verify_variables": true,
 	"provides_attachments": true,
 	"item_style": "post",
+	"version": 2,
 }

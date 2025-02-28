@@ -82,13 +82,6 @@ function itemForData(item) {
 				let url = image.source.url;
 				let width = image.source.width;
 				let height = image.source.height;
-// 						let thumbnailUrl = null;
-// 						for (const resolution of image.resolutions) {
-// 							if (resolution.width > 300) {
-// 								thumbnailUrl = resolution.url;
-// 								break;
-// 							}
-// 						}
 				if (url != null) {
 					const attachment = MediaAttachment.createWithUrl(url);
 					attachment.mimeType = "image";
@@ -262,14 +255,40 @@ function itemForData(item) {
 	}
 	
 	let annotation = null;
+	let shortcodes = null;
 	if (includeFlair == "on") {
-		if (item["link_flair_type"] != null && item["link_flair_type"] == "text") {
-			if (item["link_flair_text"] != null && item["link_flair_text"].length > 0) {
-				const linkFlairText = item["link_flair_text"];
-				const linkFlairParameter = encodeURIComponent(`flair_name:"${linkFlairText}"`);
-				annotation = Annotation.createWithText(linkFlairText);
-				annotation.uri = `${site}/r/${subreddit}/?f=${linkFlairParameter}`;
-//				content += `<p><a href="${site}/r/${subreddit}/?f=${linkFlairParameter}">#${linkFlairText}</a></p>`;
+		if (item["link_flair_type"] != null) {
+			if (item["link_flair_type"] == "text") {
+				if (item["link_flair_text"]?.length > 0) {
+					const linkFlairText = item["link_flair_text"];
+					const linkFlairParameter = encodeURIComponent(`flair_name:"${linkFlairText}"`);
+					annotation = Annotation.createWithText(linkFlairText);
+					annotation.uri = `${site}/r/${subreddit}/?f=${linkFlairParameter}`;
+				}
+			}
+			else if (item["link_flair_type"] == "richtext") {
+				if (item["link_flair_text"]?.length > 0) {
+					const linkFlairText = item["link_flair_text"];
+					const linkFlairParameter = encodeURIComponent(`flair_name:"${linkFlairText}"`);
+					annotation = Annotation.createWithText(linkFlairText);
+					annotation.uri = `${site}/r/${subreddit}/?f=${linkFlairParameter}`;
+					
+					const itemLinkFlairRichText = item["link_flair_richtext"];
+					if (itemLinkFlairRichText instanceof Array) {
+						shortcodes = {};
+						for (const linkFlairRichText of itemLinkFlairRichText) {
+							if (linkFlairRichText?.e == "emoji") {
+								let name = linkFlairRichText?.a.slice(1, -1);
+								if (name?.length > 0) {
+									let url = linkFlairRichText?.u;
+									if (url?.length > 0) {
+										shortcodes[name] = url;
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -283,6 +302,9 @@ function itemForData(item) {
 	}
 	if (annotation != null) {
 		resultItem.annotations = [annotation];
+	}
+	if (shortcodes != null) {
+		resultItem.shortcodes = shortcodes;
 	}
 	
 	return resultItem;

@@ -1,6 +1,6 @@
 {
 	"id": "com.reddit",
-	"display_name": "Reddit",
+	"display_name": "Reddit - Follow Subreddit",
 	"service_name": "Reddit",
 	"default_color": "coral",
 	"icon": "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png",
@@ -9,5 +9,5 @@
 	"verify_variables": true,
 	"provides_attachments": true,
 	"check_interval": 300,
-	"version": 3
+	"version": 4
 }
