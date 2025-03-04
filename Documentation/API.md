@@ -151,7 +151,7 @@ A unique URI for the creator on the Internet. Can be an individual’s account p
 
 #### avatar: String
 
-A string containing the URL for the creator’s avatar on the Internet. If no avatar is specified a generic image will be displayed in the timeline.
+A string containing the URL for the creator’s avatar on the Internet. A Base64 encoded data URL can be used, if needed. If no avatar is specified a generic image will be displayed in the timeline.
 
 ### Annotation
 
@@ -224,7 +224,7 @@ An HLS playlist (.m3u8) should be specified explicitly as "video" or "audio" sin
 
 #### url: String (required)
 
-A string containing the URL for the media on the Internet.
+A string containing the URL for the media on the Internet. A Base64 encoded data URL can be used, if needed.
 
 #### thumbnail: String
 
