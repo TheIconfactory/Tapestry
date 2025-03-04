@@ -25,6 +25,10 @@ Look at the [tutorial](Documentation/GettingStarted.md) to understand how the fi
 Connectors are user installable. For example, if you have custom built Raspberry Pi monitoring your garden's water tank, it can be added to Tapestry to give periodic updates in a timeline.
 
 
+## Supporting Tools
+
+If you use VS Code or BBEdit to develop JavaScript, you'll want to check out these [TypeScript Definitions](https://github.com/Davvie/tapestry-api-definitions). They will give you code completion and inline help as you work on your connectors!
+
 ## Screencast
 
 For an in-depth look at what you can do with connectors, take a moment to watch [Project Tapestry - Weaving An API](https://www.youtube.com/watch?v=H5C2_zwy8cQ) on YouTube. This 30 minute video will help you get set up, show some tip and tricks, and give you a demo of how they're used in an iOS app.
