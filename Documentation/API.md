@@ -881,30 +881,26 @@ For example, the RSS connector suggests a few sites to help someone set up a fee
 }
 ```
 
-Settings for variables can also be suggested. The `name` parameter should match the one in `ui-config.json`. The `title` should be kept fairly short because of the width limitations on mobile devices:
+Settings for variables can also be suggested. The `name` parameter should match the one in `ui-config.json`. The `title` should be kept fairly short because of the width limitations on mobile devices. If `site` is included, it will also be used when setting up the feed:
 
 ```json
 {
 	"variables": [
-		{
-			"name": "dessert_choice",
-			"value": "Apple Pie",
-			"title": "American as..."
-		},
 		{
 			"name": "reticulate_splines",
 			"value": "false",
 			"title": "ECO Mode"
 		},
 		{
-			"name": "title",
+			"name": "message",
 			"value": "Now is the time for all good men to come to the aid of their party",
-			"title": "Long Title"
+			"title": "Long Message"
 		},
 		{
-			"name": "title",
-			"value": "Hello",
-			"title": "Short"
+			"name": "short",
+			"value": "Hi.",
+			"title": "Short",
+			"site": "https://example.com"
 		}
 	]
 }
