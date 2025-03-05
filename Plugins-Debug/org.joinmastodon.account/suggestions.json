@@ -1,0 +1,16 @@
+{
+	"variables": [
+		{
+			"name": "account",
+			"value": "Gargron",
+			"title": "@Gargron",
+			"site": "https://mastodon.social",
+		},
+		{
+			"name": "account",
+			"value": "Iconfactory",
+			"title": "@Iconfactory",
+			"site": "https://iconfactory.world",
+		},
+	]
+}

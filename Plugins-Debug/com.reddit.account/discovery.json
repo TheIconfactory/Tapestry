@@ -4,7 +4,7 @@
 	],
 	"url": [
 		{
-			"extract": "/reddit.com/u/([^/]+)/",
+			"extract": "/reddit.com/(?:u|user)/([^/]+)/",
 			"variable": "account"
 		}
 	]
