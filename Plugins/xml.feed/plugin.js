@@ -269,10 +269,13 @@ function load() {
 				const url = entryUrl;
 				let date = null;
 				if (entry.published) {
-					date =  new Date(entry.published);
+					date = new Date(entry.published);
 				}
 				else if (entry.updated) {
-					date =  new Date(entry.updated);
+					date = new Date(entry.updated);
+				}
+				else {
+					date = new Date();
 				}
 				const title = extractString(entry.title);
 				
@@ -381,16 +384,17 @@ function load() {
 
 			let results = [];
 			for (const item of items) {
-				let itemDate = item["pubDate"] ?? item["dc:date"] ?? item["a10:updated"];
-				if (item.link == null || itemDate == null) {
+				if (item.link == null) {
 					continue;
 				}
-				if (itemDate.endsWith(" Z")) { // the Date parser is pretty dumb
+
+				let itemDate = item["pubDate"] ?? item["dc:date"] ?? item["a10:updated"];
+				if (itemDate?.endsWith(" Z")) { // the Date parser is pretty dumb
 					itemDate = itemDate.slice(0, -2) + "GMT";
 				}
+				const date = (itemDate == null ? new Date() : new Date(itemDate));
 				
 				const url = item.link;
-				const date = new Date(itemDate);
 				let title = extractString(item.title);
 				let content = extractString((item["content:encoded"] ?? item.description), true);
 

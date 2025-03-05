@@ -9,16 +9,8 @@
 			"title": "Bandcamp Daily"
 		},
 		{
-			"value": "https://www.thisiscolossal.com/feed/",
-			"title": "Colossal"
-		},
-		{
 			"value": "https://blog.iconfactory.com/feed/",
-			"title": "Iconfactory",
-		},
-		{
-			"value": "https://feeds.kottke.org/main",
-			"title": "Kottke.org"
+			"title": "Iconfactory Breakroom",
 		},
 		{
 			"value": "https://mjtsai.com/blog/feed/",
@@ -28,10 +20,6 @@
 			"value": "https://www.smithsonianmag.com/rss/latest_articles/",
 			"title": "Smithsonian Magazine"
 		},
-		{
-			"value": "https://www.theverge.com/rss/front-page/index.xml",
-			"title": "The Verge"
-		},	
 	]
 }
 
