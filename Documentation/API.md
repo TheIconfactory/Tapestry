@@ -1042,7 +1042,7 @@ The rules for the user’s URL consist of two parts:
 
 If the `extract` pattern is empty it's considered a match and the full URL will be passed to the variable (this will likely be the `site`). The following example sets the `site` variable with the URL entered by the user.
 
-```json
+``` json
 	"url": [
 		{
 			"extract": "",
@@ -1051,7 +1051,7 @@ If the `extract` pattern is empty it's considered a match and the full URL will 
 	]
 ```
 
-The `extract` regex pattern begins and ends with a single slash ("/") character. The first capture group in the pattern is used to set the variable’s value. If no match is found, the rule fails and the connector is not offered as a suggestion.
+The `extract` regex pattern begins and ends with a single slash ("/") character. If no match is found, the rule fails and the connector is not offered as a suggestion. The `variable` parameter can contain a single variable name or a comma separated list.
 
 All regular expressions are, like the web itself, case insensitive. The pattern "/foo/" will match "FOOBAR" in both the URL and HTML.
 
@@ -1059,11 +1059,22 @@ If necessary, non-capturing groups like "(?:foo|bar)" can be used in the regular
 
 This example extracts the "aww" from `http://reddit.com/r/aww/whatever` and puts it in a "subreddit" variable:
 
-```json
+``` json
 	"url": [
 		{
 			"extract": "/reddit.com/r/([^/]+)/",
 			"variable": "subreddit"
+		}
+	]
+```
+
+This example extracts two capture groups from `https://mastodon.social/tags/TapestryApp`. The first one sets `site` to "https://mastodon.social" and the second puts "TapestryApp" in a "tag" variable:
+
+``` json
+	"url": [
+		{
+			"extract": "/(https://[^:/\\s]+)/tags/([a-zA-Z0-9_]+.*)/",
+			"variable": "site, tag"
 		}
 	]
 ```
@@ -1074,7 +1085,7 @@ The content at the URL provided by the user can also be checked. The strategy is
 
 This approach allows your connector to check things like `<link>` or `<meta>` tags for things that it needs. For example, a page that has the following HTML markup can be used with a connector that handles RSS feeds:
 
-```html
+``` html
 <link rel="alternate" type="application/atom+xml" href="/feeds/main" />
 ```
 
