@@ -5,8 +5,8 @@
  	],
  	"url": [
 		{
-			"extract": "/https://[^/]+/profile/(.*)/feed/(.*)/",
-			"variable": "account, feed",
+			"extract": "/https://[^/]+/profile/([^/]+)/feed/([^/]+)/",
+			"variable": "account, feedId",
 		}
 	]
 }
