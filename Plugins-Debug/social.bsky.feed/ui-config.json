@@ -1,0 +1,16 @@
+{
+	"inputs": [
+		{
+			"name": "account",
+			"type": "text",
+			"prompt": "Account",
+			"placeholder": "bossett.social",
+		},
+		{
+			"name": "feedId",
+			"type": "text",
+			"prompt": "Feed Identifier",
+			"placeholder": "for-science",
+		},
+	]
+}

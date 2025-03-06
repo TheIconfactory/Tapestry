@@ -1,0 +1,26 @@
+{
+	"variables": [
+		{
+			"names": [
+				"account",
+				"feed",
+			],
+			"values": [
+				"bossett.social",
+				"for-science",
+			],
+			"title": "Science"
+		},
+		{
+			"names": [
+				"account",
+				"feed",
+			],
+			"values": [
+				"davelevitan.bsky.social",
+				"aaadvxju4txkk",
+			],
+			"title": "NBAsky"
+		},
+	]
+}
