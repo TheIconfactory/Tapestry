@@ -1,0 +1,26 @@
+{
+	"variables": [
+		{
+			"title": "Artists: Trending",
+			"names": [
+				"account",
+				"feedId",
+			],
+			"values": [
+				"bsky.arg",
+				"art-new",
+			],
+		},
+		{
+			"title": "Science",
+			"names": [
+				"account",
+				"feedId",
+			],
+			"values": [
+				"bossett.social",
+				"for-science",
+			],
+		},
+	]
+}

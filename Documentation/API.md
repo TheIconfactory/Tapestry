@@ -881,7 +881,7 @@ For example, the RSS connector suggests a few sites to help someone set up a fee
 }
 ```
 
-Settings for variables can also be suggested. The `name` parameter should match the one in `ui-config.json`. The `title` should be kept fairly short because of the width limitations on mobile devices. If `site` is included, it will also be used when setting up the feed:
+Settings for variables can also be suggested. The `name` parameter should match the one in `ui-config.json`. The `title` should be kept fairly short because of the width limitations on mobile devices:
 
 ```json
 {
@@ -900,10 +900,27 @@ Settings for variables can also be suggested. The `name` parameter should match 
 			"name": "short",
 			"value": "Hi.",
 			"title": "Short",
-			"site": "https://example.com"
 		}
 	]
 }
+```
+
+If multiple names and values are needed, the following form can be used:
+
+```json
+	"variables": [
+		{
+			"title": "@Gargron",
+			"names": [
+				"account",
+				"site"
+			],
+			"values": [
+				"Gargron",
+				"https://mastodon.social"
+			]
+		}
+	]
 ```
 
 ### apps.json
