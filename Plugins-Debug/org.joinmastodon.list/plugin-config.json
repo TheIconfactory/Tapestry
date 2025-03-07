@@ -1,0 +1,22 @@
+{
+	"id": "org.joinmastodon.list",
+	"display_name": "Mastodon - List",
+	"service_name": "Mastodon",
+	"default_color": "slate",
+	"icon": "https://mastodon.social/packs/media/icons/apple-touch-icon-180x180-a75559a0af48064c1b7c71b81f3bf7c6.png",
+	"item_style": "post",
+	"site_prompt": "Instance",
+	"site_placeholder": "https://mastodon.social",
+	"site_help": "Enter the the URL for the Mastodon instance where your account is located.",
+	"register": "/api/v1/apps",
+	"oauth_authorize": "/oauth/authorize",
+	"oauth_token": "/oauth/token",
+	"oauth_type": "code",
+	"oauth_code_key": "code",
+	"oauth_scope": "read+write+push",
+	"oauth_grant_type": "authorization_code",
+	"provides_attachments": true,
+	"canPost": true,
+	"check_interval": 300,
+	"version": 3
+}
