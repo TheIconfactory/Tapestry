@@ -1,6 +1,6 @@
 {
 	"id": "org.joinmastodon.list",
-	"display_name": "Mastodon - List",
+	"display_name": "Mastodon - List Timeline",
 	"service_name": "Mastodon",
 	"default_color": "slate",
 	"icon": "https://mastodon.social/packs/media/icons/apple-touch-icon-180x180-a75559a0af48064c1b7c71b81f3bf7c6.png",
@@ -16,7 +16,6 @@
 	"oauth_scope": "read+write+push",
 	"oauth_grant_type": "authorization_code",
 	"provides_attachments": true,
-	"canPost": true,
 	"check_interval": 300,
-	"version": 3
+	"version": 1
 }
