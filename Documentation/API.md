@@ -1055,7 +1055,7 @@ The rules for the user’s URL consist of two parts:
 
 If the `extract` pattern is empty it's considered a match and the full URL will be passed to the variable (this will likely be the `site`). The following example sets the `site` variable with the URL entered by the user.
 
-``` json
+```json
 	"url": [
 		{
 			"extract": "",
@@ -1072,7 +1072,7 @@ If necessary, non-capturing groups like "(?:foo|bar)" can be used in the regular
 
 This example extracts the "aww" from `http://reddit.com/r/aww/whatever` and puts it in a "subreddit" variable:
 
-``` json
+```json
 	"url": [
 		{
 			"extract": "/reddit.com/r/([^/]+)/",
@@ -1083,7 +1083,7 @@ This example extracts the "aww" from `http://reddit.com/r/aww/whatever` and puts
 
 This example extracts two capture groups from `https://mastodon.social/tags/TapestryApp`. The first one sets `site` to "https://mastodon.social" and the second puts "TapestryApp" in a "tag" variable:
 
-``` json
+```json
 	"url": [
 		{
 			"extract": "/(https://[^:/\\s]+)/tags/([a-zA-Z0-9_]+.*)/",
@@ -1098,7 +1098,7 @@ The content at the URL provided by the user can also be checked. The strategy is
 
 This approach allows your connector to check things like `<link>` or `<meta>` tags for things that it needs. For example, a page that has the following HTML markup can be used with a connector that handles RSS feeds:
 
-``` html
+```html
 <link rel="alternate" type="application/atom+xml" href="/feeds/main" />
 ```
 
@@ -1228,6 +1228,88 @@ If none of the rules above apply, the content can be checked for JSON keys. Ther
 ```
 
 The `key` must be a top-level key in the JSON content. The example ensures that the JSON dictionary has a `version` key with the correct `value`.
+
+### actions.json
+
+This file defines actions that can affect items supplied by a connector.
+
+```json
+{
+	"items": [
+		{
+			id: "favorite",
+			name: "Favorite",
+			icon: "heart.fill",
+		},
+		{
+			id: "unfavorite",
+			name: "Remove Favorite",
+			icon: "heart",
+		},
+		{
+			id: "boost",
+			name: "Boost",
+			icon: "arrow.up.to.line.circle.fill",
+		},
+		{
+			id: "unboost",
+			name: "Remove Boost",
+			icon: "arrow.down.to.line.circle",
+		},
+		{
+			id: "reply",
+			name: "Reply",
+			icon: "tapestry.reply",
+			requires: [
+				"text"
+			]
+		},
+		{
+			id: "quote",
+			name: "Quote",
+			icon: "tapestry.quote",
+			requires: [
+				"text"
+			]
+		},
+	],
+	"tbd": [],
+}
+```
+
+These actions can be specified by their `id` in an `Item` that's returned in `processResults()`. For example, a post on Mastodon might use the following JavaScript code:
+
+```javascript
+	
+	item.actions = { favorite: "123456", boost: "123456", bookmark, "123456" ];
+
+```
+
+An `Item` on Bluesky might use:
+
+```javascript
+	
+	item.actions = { like: `{ "uri": "at:..." }`, repost: `{ "uri": "at:..." }` };
+
+```
+
+
+Tapestry will display a menu with these actions for every item in the timeline. When a user selects one of the actions the `performAction` function is called.
+
+### perform(id, value, item) → Promise
+
+Sends an action to the connector.
+
+  * id: A `String` with the action id
+  * value: The `String` value that was assigned to the action.
+  * item: `Item` to be processed.
+
+### actionComplete(item, error)
+
+Indicates that the action has been performed. Must be called.
+
+  * item: `Item` to be updated (can be null).
+  * error: `Error` which indicates what went wrong. Will be displayed in the user interface.
 
 ## HTML Content
 

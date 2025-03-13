@@ -40,9 +40,15 @@ function load() {
 		
 		const resultItem = Item.createWithUriDate(uri, date);
 		resultItem.body = content;
+		resultItem.actions = { favorite: "123", boost: "456" };
 		processResults([resultItem]);
 	})
 	.catch((error) => {
 		processError(error);
 	});
+}
+
+function perform(action, value, item) {
+	console.log(`action = ${action}, value = ${value}`);
+	actionComplete(item, `can't handle value = ${value}`);
 }

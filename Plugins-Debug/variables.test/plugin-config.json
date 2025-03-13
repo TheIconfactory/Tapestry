@@ -3,9 +3,9 @@
 	"display_name": "Test Variables",
 	"icon": "https://iconfactory.com/favicon.ico",
 	"site": "https://example.com",
-	"oauth_authorize": "https://example.com/oauth/authorize",
+	"xxx_oauth_authorize": "https://example.com/oauth/authorize",
 	"needs_verification": true,
-	"needs_api_keys": true,
+	"xxx_needs_api_keys": true,
 	"verify_variables": true,
 	"check_interval": 300
 }
