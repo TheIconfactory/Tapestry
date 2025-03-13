@@ -43,6 +43,8 @@ function load() {
 		let object = {abc: 123, def: "xyz"};
 		let payload = JSON.stringify(object);
 		resultItem.actions = { favorite: payload, boost: "456" };
+		resultItem.shortcodes = { "ONE": "https://example.com/one.jpg", "CHOCK": "http://chocklock.com/favicon.ico" };
+		resultItem.annotations = [Annotation.createWithText("Test")];
 		processResults([resultItem]);
 	})
 	.catch((error) => {
@@ -60,6 +62,14 @@ function performAction(actionId, value, item) {
 		catch (error) {
 			console.log(`value = ${value}`);
 		}
+		let content = item.body;
+		content += "<p>Faved!</p>";
+		item.body = content;
+		
+		let shortcodes = item.shortcodes;
+		shortcodes["NEW"] = "https://example.com/new.png";
+		item.shortcodes = shortcodes;
+		
 		let actions = item.actions;
 		delete actions["favorite"];
 		actions["unfavorite"] = "nah";
@@ -68,6 +78,10 @@ function performAction(actionId, value, item) {
 	}
 	else if (actionId == "unfavorite") {
 		console.log(`value = ${value}`);
+		let content = item.body;
+		content += "<p><strong>UNFAVED!</strong></p>";
+		item.body = content;
+
 		let actions = item.actions;
 		delete actions["unfavorite"];
 		actions["favorite"] = "yay";
