@@ -1296,7 +1296,7 @@ An `Item` on Bluesky might use:
 
 Tapestry will display a menu with these actions for every item in the timeline. When a user selects one of the actions the `performAction` function is called.
 
-### perform(id, value, item) → Promise
+### perform(id, value, item)
 
 Sends an action to the connector.
 

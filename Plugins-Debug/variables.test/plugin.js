@@ -40,7 +40,9 @@ function load() {
 		
 		const resultItem = Item.createWithUriDate(uri, date);
 		resultItem.body = content;
-		resultItem.actions = { favorite: "123", boost: "456" };
+		let object = {abc: 123, def: "xyz"};
+		let payload = JSON.stringify(object);
+		resultItem.actions = { favorite: payload, boost: "456" };
 		processResults([resultItem]);
 	})
 	.catch((error) => {
@@ -48,7 +50,35 @@ function load() {
 	});
 }
 
-function perform(action, value, item) {
-	console.log(`action = ${action}, value = ${value}`);
-	actionComplete(item, `can't handle value = ${value}`);
+function performAction(actionId, value, item) {
+	console.log(`actionId = ${actionId}`);
+	if (actionId == "favorite") {
+		try {
+			let object = JSON.parse(value);
+			console.log(`value = ${JSON.stringify(object, null, 4)}`);
+		}
+		catch (error) {
+			console.log(`value = ${value}`);
+		}
+		let actions = item.actions;
+		delete actions["favorite"];
+		actions["unfavorite"] = "nah";
+		item.actions = actions;
+		actionComplete(item, null);
+	}
+	else if (actionId == "unfavorite") {
+		console.log(`value = ${value}`);
+		let actions = item.actions;
+		delete actions["unfavorite"];
+		actions["favorite"] = "yay";
+		item.actions = actions;
+		actionComplete(item, null);
+	}
+	else if (actionId == "boost") {
+		const delay = 2000;
+		let start = new Date().getTime();
+		while (new Date().getTime() < start + delay);
+		actionComplete(item, `can't handle value = ${value}`);
+	}
+	
 }

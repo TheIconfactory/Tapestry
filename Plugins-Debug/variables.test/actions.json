@@ -2,7 +2,7 @@
 	"items": [
 		{
 			"id": "favorite",
-			"name": "Favorite",
+			"name": "Add Favorite",
 			"icon": "heart.fill",
 		},
 		{
@@ -12,7 +12,7 @@
 		},
 		{
 			"id": "boost",
-			"name": "Boost",
+			"name": "Add Boost",
 			"icon": "arrow.up.to.line.circle.fill",
 		},
 		{
