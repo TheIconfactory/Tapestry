@@ -50,7 +50,8 @@ function load() {
 		});	
 	}
 	else {
-		sendRequest(site + "/api/v1/accounts/" + id + "/statuses?limit=40")
+		const url = `${site}/api/v1/accounts/lookup?acct=${account}`
+		sendRequest(url)
 		.then((text) => {
 			const jsonObject = JSON.parse(text);
 		
