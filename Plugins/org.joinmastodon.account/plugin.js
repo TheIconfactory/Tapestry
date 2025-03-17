@@ -91,7 +91,7 @@ function queryStatusesForUser(id) {
 					if (includeBoosts == "on") {
 						post = postForItem(item.reblog);
 						
-						annotation = Annotation.createWithText("Boosted");
+						annotation = Annotation.createWithText("BOOSTED");
 						annotation.uri = item.account["url"];
 					}
 				}
@@ -99,7 +99,7 @@ function queryStatusesForUser(id) {
 					if (includeReplies == "on") {
 						post = postForItem(item);
 
-						annotation = Annotation.createWithText("Reply");
+						annotation = Annotation.createWithText("REPLY");
 						annotation.uri = item.account["url"];
 					}
 				}

@@ -166,58 +166,6 @@ function queryMentions() {
 			}
 			
 			resolve(results);
-			/*
-			let results = [];
-			for (const item of jsonObject) {
-				let postItem = item["status"];
-
-				if (postItem == null) {
-					// NOTE: Not sure why this happens, but sometimes a mention payload doesn't have a status. If that happens, we just skip it.
-					continue;
-				}
-				
-				let visibility = postItem["visibility"] ?? "public";
-
-				let annotation = null;
-				let shortcodes = {};
-				
-				if (visibility == "public" || visibility == "unlisted") {
-					if (postItem.mentions != null && postItem.mentions.length > 0) {
-						const mentions = postItem.mentions;
-						const account = mentions[0];
-						const userName = account["username"];
-						let text = "Replying to @" + userName;
-						if (mentions.length > 1) {
-							text += " and others";
-						}
-						annotation = Annotation.createWithText(text);
-						annotation.uri = account["url"];
-	
-						const accountEmojis = account["emojis"];
-						if (accountEmojis != null && accountEmojis.length > 0) {
-							for (const emoji of accountEmojis) {
-								shortcodes[emoji.shortcode] = emoji.static_url;
-							}
-						}
-					}
-				}
-				else if (visibility == "private") {
-					annotation = Annotation.createWithText(`FOLLOWERS ONLY`);
-				}
-				else if (visibility == "direct") {
-					annotation = Annotation.createWithText(`PRIVATE MENTION`);
-				}	
-	
-				const post = postForItem(postItem, null, shortcodes);
-				if (annotation != null) {
-					post.annotations = [annotation];
-				}
-	
-				results.push(post);
-			}
-			resolve(results);
-			*/
-			resolve([]);
 		})
 		.catch((error) => {
 			reject(error);
@@ -372,7 +320,7 @@ function postForNotification(notification) {
 		contentWarning = labels; //`Labeled: ${ labels }`;
 	}
 	
-	let annotation = Annotation.createWithText("Mention");
+	let annotation = Annotation.createWithText("MENTION");
 		
 	let attachments = attachmentsForEmbed(notification.record.embed, encodeURIComponent(author.did));
 				
