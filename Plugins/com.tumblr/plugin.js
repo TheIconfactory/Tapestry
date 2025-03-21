@@ -23,6 +23,38 @@ function verify() {
 	});
 }
 
+function load() {
+	let nowTimestamp = (new Date()).getTime();
+
+	// NOTE: The dashboard will be filled up to the endDate, if possible.
+	let endDate = null;
+	let endDateTimestamp = getItem("endDateTimestamp");
+	if (endDateTimestamp != null) {
+		endDate = new Date(parseInt(endDateTimestamp));
+	}
+
+	let startTimestamp = (new Date()).getTime();
+	
+	queryDashboard(endDate)
+	.then((parameters) =>  {
+		results = parameters[0];
+		newestItemDate = parameters[1];
+		processResults(results, true);
+		setItem("endDateTimestamp", String(newestItemDate.getTime()));
+		let endTimestamp = (new Date()).getTime();
+		console.log(`finished dashboard: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
+	})
+	.catch((requestError) => {
+		console.log(`error dashboard`);
+		processError(requestError);
+	});
+}
+
+function performAction(actionId, actionValue, item) {
+	let error = new Error(`actionId "${actionId}" not implemented`);
+	actionComplete(null, error);
+}
+
 function postForItem(item) {
 	if (item.type != "blocks") {
 		return null;
@@ -358,34 +390,6 @@ function queryDashboard(endDate) {
 	});
 	
 }
-
-function load() {
-	let nowTimestamp = (new Date()).getTime();
-
-	// NOTE: The dashboard will be filled up to the endDate, if possible.
-	let endDate = null;
-	let endDateTimestamp = getItem("endDateTimestamp");
-	if (endDateTimestamp != null) {
-		endDate = new Date(parseInt(endDateTimestamp));
-	}
-
-	let startTimestamp = (new Date()).getTime();
-	
-	queryDashboard(endDate)
-	.then((parameters) =>  {
-		results = parameters[0];
-		newestItemDate = parameters[1];
-		processResults(results, true);
-		setItem("endDateTimestamp", String(newestItemDate.getTime()));
-		let endTimestamp = (new Date()).getTime();
-		console.log(`finished dashboard: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
-	})
-	.catch((requestError) => {
-		console.log(`error dashboard`);
-		processError(requestError);
-	});
-}
-
 
 function formatText(text, textFormats) {
 	let index = -1;

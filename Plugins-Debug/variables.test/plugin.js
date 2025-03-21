@@ -1,10 +1,16 @@
 
 // variables.test
 
+if (require('stuff.js') == false) {
+	console.log("failed to read stuff.js")
+}
+
 function verify() {
+	let base64Image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=";
+
 	const verification = {
 		displayName: title,
-		icon: "https://iconfactory.com/favicon.ico"
+		icon: base64Image
 	};
 	processVerification(verification)
 }
@@ -19,14 +25,14 @@ function load() {
 		"X-CLIENT-ID": "My __CLIENT_ID__",
 		"X-ACCESS_TOKEN": "__ACCESS_TOKEN__"
 	};
-	sendRequest("https://example.com", "GET", "client_id=__CLIENT_ID__&access_token=__ACCESS_TOKEN__", headers)
-	.then((text) => {
-		console.log("got response");
+// 	sendRequest("https://example.com", "GET", "client_id=__CLIENT_ID__&access_token=__ACCESS_TOKEN__", headers)
+// 	.then((text) => {
+// 		console.log("got response");
 		let uri = "custom://variables.test";
 		let date = new Date();
 		let status = ""
 		if (reticulate_splines == "on") {
-			status = "Splines are being reticulated";
+			status = CHOCK("Splines are being reticulated");
 		}
 		if (turbo == "on") {
 			if (status.length > 0) {
@@ -46,21 +52,21 @@ function load() {
 		resultItem.shortcodes = { "ONE": "https://example.com/one.jpg", "CHOCK": "http://chocklock.com/favicon.ico" };
 		resultItem.annotations = [Annotation.createWithText("Test")];
 		processResults([resultItem]);
-	})
-	.catch((error) => {
-		processError(error);
-	});
+// 	})
+// 	.catch((error) => {
+// 		processError(error);
+// 	});
 }
 
-function performAction(actionId, value, item) {
+function performAction(actionId, actionValue, item) {
 	console.log(`actionId = ${actionId}`);
 	if (actionId == "favorite") {
 		try {
-			let object = JSON.parse(value);
-			console.log(`value = ${JSON.stringify(object, null, 4)}`);
+			let object = JSON.parse(actionValue);
+			console.log(`actionValue = ${JSON.stringify(object, null, 4)}`);
 		}
 		catch (error) {
-			console.log(`value = ${value}`);
+			console.log(`actionValue = ${actionValue}`);
 		}
 		let content = item.body;
 		content += "<p>Faved!</p>";
@@ -77,7 +83,7 @@ function performAction(actionId, value, item) {
 		actionComplete(item, null);
 	}
 	else if (actionId == "unfavorite") {
-		console.log(`value = ${value}`);
+		console.log(`actionValue = ${actionValue}`);
 		let content = item.body;
 		content += "<p><strong>UNFAVED!</strong></p>";
 		item.body = content;
@@ -92,7 +98,8 @@ function performAction(actionId, value, item) {
 		const delay = 2000;
 		let start = new Date().getTime();
 		while (new Date().getTime() < start + delay);
-		actionComplete(item, `can't handle value = ${value}`);
+		let error = new Error(`can't handle actionValue = ${actionValue}`)
+		actionComplete(item, error);
 	}
 	
 }

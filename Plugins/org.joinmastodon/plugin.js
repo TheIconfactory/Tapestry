@@ -24,6 +24,114 @@ function verify() {
 	});
 }
 
+var userId = getItem("userId");
+
+// NOTE: This reference counter tracks loading so we can let the app know when all async loading work is complete.
+var loadCounter = 0;
+
+function load() {
+	// NOTE: The home timeline will be filled up to the endDate, if possible.
+	let endDate = null;
+	let endDateTimestamp = getItem("endDateTimestamp");
+	if (endDateTimestamp != null) {
+		endDate = new Date(parseInt(endDateTimestamp));
+	}
+	
+	loadCounter = 0;
+	if (includeHome == "on") {
+		loadCounter += 1;
+	}
+	if (includeMentions == "on") {
+		loadCounter += 1;
+	}
+	if (includeStatuses == "on") {
+		loadCounter += 1;
+	}
+	if (loadCounter == 0) {
+		processResults([]);
+		return;
+	}
+				
+	if (includeHome == "on") {
+		let startTimestamp = (new Date()).getTime();
+
+		queryHomeTimeline(endDate)
+  		.then((parameters) =>  {
+  			results = parameters[0];
+  			newestItemDate = parameters[1];
+  			loadCounter -= 1;
+			processResults(results, loadCounter == 0);
+			setItem("endDateTimestamp", String(newestItemDate.getTime()));
+			let endTimestamp = (new Date()).getTime();
+ 			console.log(`finished home timeline, loadCounter = ${loadCounter}: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
+		})
+		.catch((requestError) => {
+  			loadCounter -= 1;
+  			console.log(`error home timeline, loadCounter = ${loadCounter}`);
+			processError(requestError);
+		});	
+	}
+	
+	if (includeMentions == "on") {
+		queryMentions()
+		.then((results) =>  {
+			loadCounter -= 1;
+			console.log(`finished mentions, loadCounter = ${loadCounter}`);
+			processResults(results, loadCounter == 0);
+		})
+		.catch((requestError) => {
+			loadCounter -= 1;
+			console.log(`error mentions, loadCounter = ${loadCounter}`);
+			processError(requestError);
+		});	
+	}
+
+	if (includeStatuses == "on") {
+		if (userId != null) {
+			queryStatusesForUser(userId)
+			.then((results) =>  {
+				loadCounter -= 1;
+  				console.log(`finished (cached) user statuses, loadCounter = ${loadCounter}`);
+				processResults(results, loadCounter == 0);
+			})
+			.catch((requestError) => {
+  				loadCounter -= 1;
+  				console.log(`error (cached) user statuses, loadCounter = ${loadCounter}`);
+				processError(requestError);
+			});	
+		}
+		else {
+			sendRequest(site + "/api/v1/accounts/verify_credentials")
+			.then((text) => {
+				const jsonObject = JSON.parse(text);
+				
+				userId = jsonObject["id"];
+				setItem("userId", userId);
+
+				queryStatusesForUser(userId)
+				.then((results) =>  {
+					loadCounter -= 1;
+	  				console.log(`finished user statuses, loadCounter = ${loadCounter}`);
+					processResults(results, loadCounter == 0);
+				})
+				.catch((requestError) => {
+					loadCounter -= 1;
+  					console.log(`error user statuses, loadCounter = ${loadCounter}`);
+					processError(requestError);
+				});	
+			})
+			.catch((requestError) => {
+				processError(requestError);
+			});
+		}
+	}
+}
+
+function performAction(actionId, actionValue, item) {
+	let error = new Error(`actionId "${actionId}" not implemented`);
+	actionComplete(null, error);
+}
+
 function postForItem(item, date = null, shortcodes = {}) {
 	const account = item["account"];
 	const displayName = account["display_name"];
@@ -423,106 +531,4 @@ function queryStatusesForUser(id) {
 	
 }
 
-var userId = getItem("userId");
-
-// NOTE: This reference counter tracks loading so we can let the app know when all async loading work is complete.
-var loadCounter = 0;
-
-function load() {
-	// NOTE: The home timeline will be filled up to the endDate, if possible.
-	let endDate = null;
-	let endDateTimestamp = getItem("endDateTimestamp");
-	if (endDateTimestamp != null) {
-		endDate = new Date(parseInt(endDateTimestamp));
-	}
-	
-	loadCounter = 0;
-	if (includeHome == "on") {
-		loadCounter += 1;
-	}
-	if (includeMentions == "on") {
-		loadCounter += 1;
-	}
-	if (includeStatuses == "on") {
-		loadCounter += 1;
-	}
-	if (loadCounter == 0) {
-		processResults([]);
-		return;
-	}
-				
-	if (includeHome == "on") {
-		let startTimestamp = (new Date()).getTime();
-
-		queryHomeTimeline(endDate)
-  		.then((parameters) =>  {
-  			results = parameters[0];
-  			newestItemDate = parameters[1];
-  			loadCounter -= 1;
-			processResults(results, loadCounter == 0);
-			setItem("endDateTimestamp", String(newestItemDate.getTime()));
-			let endTimestamp = (new Date()).getTime();
- 			console.log(`finished home timeline, loadCounter = ${loadCounter}: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
-		})
-		.catch((requestError) => {
-  			loadCounter -= 1;
-  			console.log(`error home timeline, loadCounter = ${loadCounter}`);
-			processError(requestError);
-		});	
-	}
-	
-	if (includeMentions == "on") {
-		queryMentions()
-		.then((results) =>  {
-			loadCounter -= 1;
-			console.log(`finished mentions, loadCounter = ${loadCounter}`);
-			processResults(results, loadCounter == 0);
-		})
-		.catch((requestError) => {
-			loadCounter -= 1;
-			console.log(`error mentions, loadCounter = ${loadCounter}`);
-			processError(requestError);
-		});	
-	}
-
-	if (includeStatuses == "on") {
-		if (userId != null) {
-			queryStatusesForUser(userId)
-			.then((results) =>  {
-				loadCounter -= 1;
-  				console.log(`finished (cached) user statuses, loadCounter = ${loadCounter}`);
-				processResults(results, loadCounter == 0);
-			})
-			.catch((requestError) => {
-  				loadCounter -= 1;
-  				console.log(`error (cached) user statuses, loadCounter = ${loadCounter}`);
-				processError(requestError);
-			});	
-		}
-		else {
-			sendRequest(site + "/api/v1/accounts/verify_credentials")
-			.then((text) => {
-				const jsonObject = JSON.parse(text);
-				
-				userId = jsonObject["id"];
-				setItem("userId", userId);
-
-				queryStatusesForUser(userId)
-				.then((results) =>  {
-					loadCounter -= 1;
-	  				console.log(`finished user statuses, loadCounter = ${loadCounter}`);
-					processResults(results, loadCounter == 0);
-				})
-				.catch((requestError) => {
-					loadCounter -= 1;
-  					console.log(`error user statuses, loadCounter = ${loadCounter}`);
-					processError(requestError);
-				});	
-			})
-			.catch((requestError) => {
-				processError(requestError);
-			});
-		}
-	}
-}
 

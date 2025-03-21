@@ -1,0 +1,24 @@
+{
+	"items": [
+		{
+			"id": "like",
+			"name": "Like",
+			"icon": "heart.fill",
+		},
+		{
+			"id": "unlike",
+			"name": "Unlike",
+			"icon": "heart",
+		},
+		{
+			"id": "repost",
+			"name": "Repost",
+			"icon": "arrow.up.to.line.circle.fill",
+		},
+		{
+			"id": "unrepost",
+			"name": "Remove Repost",
+			"icon": "arrow.down.to.line.circle",
+		},
+	],
+}

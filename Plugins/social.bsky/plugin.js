@@ -33,6 +33,68 @@ function verify() {
 	});
 }
 
+// NOTE: This reference counter tracks loading so we can let the app know when all async loading work is complete.
+var loadCounter = 0;
+
+function load() {
+	// NOTE: The timeline will be filled up to the endDate, if possible.
+	let endDate = null;
+	let endDateTimestamp = getItem("endDateTimestamp");
+	if (endDateTimestamp != null) {
+		endDate = new Date(parseInt(endDateTimestamp));
+	}
+
+	loadCounter = 0;
+	if (includeHome == "on") {
+		loadCounter += 1;
+	}
+	if (includeMentions == "on") {
+		loadCounter += 1;
+	}
+	if (loadCounter == 0) {
+		processResults([]);
+		return;
+	}
+	
+	if (includeHome == "on") {
+		let startTimestamp = (new Date()).getTime();
+	
+		queryTimeline(endDate)
+		.then((parameters) =>  {
+			results = parameters[0];
+			newestItemDate = parameters[1];
+  			loadCounter -= 1;
+			processResults(results, loadCounter == 0);
+			setItem("endDateTimestamp", String(newestItemDate.getTime()));
+			let endTimestamp = (new Date()).getTime();
+			console.log(`finished timeline: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
+		})
+		.catch((requestError) => {
+			console.log(`error timeline`);
+			processError(requestError);
+		});
+	}
+	
+	if (includeMentions == "on") {
+		queryMentions()
+		.then((results) =>  {
+			loadCounter -= 1;
+			console.log(`finished mentions, loadCounter = ${loadCounter}`);
+			processResults(results, loadCounter == 0);
+		})
+		.catch((requestError) => {
+			loadCounter -= 1;
+			console.log(`error mentions, loadCounter = ${loadCounter}`);
+			processError(requestError);
+		});	
+	}
+}
+
+function performAction(actionId, actionValue, item) {
+	let error = new Error(`actionId "${actionId}" not implemented`);
+	actionComplete(null, error);
+}
+
 const uriPrefix = "https://bsky.app";
 const uriPrefixContent = "https://cdn.bsky.app";
 const uriPrefixVideo = "https://video.bsky.app";
@@ -224,63 +286,6 @@ function queryMentions() {
 		});
 	});
 	
-}
-
-// NOTE: This reference counter tracks loading so we can let the app know when all async loading work is complete.
-var loadCounter = 0;
-
-function load() {
-	// NOTE: The timeline will be filled up to the endDate, if possible.
-	let endDate = null;
-	let endDateTimestamp = getItem("endDateTimestamp");
-	if (endDateTimestamp != null) {
-		endDate = new Date(parseInt(endDateTimestamp));
-	}
-
-	loadCounter = 0;
-	if (includeHome == "on") {
-		loadCounter += 1;
-	}
-	if (includeMentions == "on") {
-		loadCounter += 1;
-	}
-	if (loadCounter == 0) {
-		processResults([]);
-		return;
-	}
-	
-	if (includeHome == "on") {
-		let startTimestamp = (new Date()).getTime();
-	
-		queryTimeline(endDate)
-		.then((parameters) =>  {
-			results = parameters[0];
-			newestItemDate = parameters[1];
-  			loadCounter -= 1;
-			processResults(results, loadCounter == 0);
-			setItem("endDateTimestamp", String(newestItemDate.getTime()));
-			let endTimestamp = (new Date()).getTime();
-			console.log(`finished timeline: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
-		})
-		.catch((requestError) => {
-			console.log(`error timeline`);
-			processError(requestError);
-		});
-	}
-	
-	if (includeMentions == "on") {
-		queryMentions()
-		.then((results) =>  {
-			loadCounter -= 1;
-			console.log(`finished mentions, loadCounter = ${loadCounter}`);
-			processResults(results, loadCounter == 0);
-		})
-		.catch((requestError) => {
-			loadCounter -= 1;
-			console.log(`error mentions, loadCounter = ${loadCounter}`);
-			processError(requestError);
-		});	
-	}
 }
 
 function postForItem(item) {

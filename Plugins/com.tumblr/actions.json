@@ -1,0 +1,14 @@
+{
+	"items": [
+		{
+			"id": "reblog",
+			"name": "Reblog",
+			"icon": "arrow.up.to.line.circle.fill",
+		},
+		{
+			"id": "unreblog",
+			"name": "Remove Reblog",
+			"icon": "arrow.down.to.line.circle",
+		},
+	],
+}
