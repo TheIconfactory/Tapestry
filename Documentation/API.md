@@ -610,6 +610,24 @@ Returns a `String` that was saved in local storage. If no value was stored, `nul
 
 All items in local storage are removed.
 
+### performAction(actionId, actionValue, item)
+
+Sends an action to the connector.
+
+  * actionId: A `String` with the action id
+  * actionValue: The `String` value that was assigned to the action.
+  * item: `Item` to be processed.
+  
+See section on `actions.json` for more information on how to perform actions.
+
+### actionComplete(item, error)
+
+Indicates that the action has been performed. Must be called.
+
+  * item: `Item` to be updated (can be null).
+  * error: `Error` which indicates what went wrong. Will be displayed in the user interface.
+
+See section on `actions.json` for more information on how to complete actions.
 
 ## Configuration
 
@@ -1231,14 +1249,14 @@ The `key` must be a top-level key in the JSON content. The example ensures that 
 
 ### actions.json
 
-This file defines actions that can affect items supplied by a connector.
+This file defines actions that can alter items supplied by a connector. An action is defined by its `id` that can be used in code with a `name` and `icon` that is used in the Tapestry user interface. The `name` can be any SF Symbol name.
 
 ```json
 {
 	"items": [
 		{
 			id: "favorite",
-			name: "Favorite",
+			name: "Add Favorite",
 			icon: "heart.fill",
 		},
 		{
@@ -1246,70 +1264,64 @@ This file defines actions that can affect items supplied by a connector.
 			name: "Remove Favorite",
 			icon: "heart",
 		},
-		{
-			id: "boost",
-			name: "Boost",
-			icon: "arrow.up.to.line.circle.fill",
-		},
-		{
-			id: "unboost",
-			name: "Remove Boost",
-			icon: "arrow.down.to.line.circle",
-		},
-		{
-			id: "reply",
-			name: "Reply",
-			icon: "tapestry.reply",
-			requires: [
-				"text"
-			]
-		},
-		{
-			id: "quote",
-			name: "Quote",
-			icon: "tapestry.quote",
-			requires: [
-				"text"
-			]
-		},
 	],
-	"tbd": [],
 }
 ```
 
-These actions can be specified by their `id` in an `Item` that's returned in `processResults()`. For example, a post on Mastodon might use the following JavaScript code:
+When returning an `Item` in `processResults()` you will specify a dictionary of actions that can be applied to the item. Each action has an `id` and a string value that will be passed to the action when it's performed.
+
+For example, an action that marks an item as a favorite, might need an identifier: 
 
 ```javascript
-	
-	item.actions = { favorite: "123456", boost: "123456", bookmark, "123456" ];
-
+	item.actions = { favorite: "123456" };
 ```
 
-An `Item` on Bluesky might use:
+It's also likely that structured data will be needed, so JSON can be used as an action value:
 
 ```javascript
-	
 	item.actions = { like: `{ "uri": "at:..." }`, repost: `{ "uri": "at:..." }` };
-
 ```
 
+When an item has one or more actions, a menu will be displayed in the app. When a user selects one of the actions the `performAction` function is called with the action `id`, `value`, and `item`.
 
-Tapestry will display a menu with these actions for every item in the timeline. When a user selects one of the actions the `performAction` function is called.
+It is the connector’s responsibility to mananage the list of actions as the state of the item changes. For example, if an action to "favorite" is performed, the action would be removed from the item and replaced with "unfavorite".
 
-### perform(id, value, item)
+The modified item is returned to Tapestry using `actionComplete`. If the action cannot be performed, an `Error` should be returned and will be displayed to the user.
 
-Sends an action to the connector.
+This example performs "favorite" and "unfavorite" on an item. Note that any part of the item can be modified: the body in this example, but it could be annotations or attachments as well. The example also shows how the state of the item is managed using `item.actions`:
 
-  * id: A `String` with the action id
-  * value: The `String` value that was assigned to the action.
-  * item: `Item` to be processed.
+```javascript
 
-### actionComplete(item, error)
+function performAction(actionId, actionValue, item) {
+	console.log(`actionId = ${actionId}`);
+	if (actionId == "favorite") {
+		let content = item.body;
+		content += "<p>Faved!</p>";
+		item.body = content;
+		
+		let actions = item.actions;
+		delete actions["favorite"];
+		actions["unfavorite"] = "boo";
+		item.actions = actions;
+		actionComplete(item, null);
+	}
+	else if (actionId == "unfavorite") {
+		let content = item.body;
+		content += "<p><strong>UNFAVED!</strong></p>";
+		item.body = content;
 
-Indicates that the action has been performed. Must be called.
+		let actions = item.actions;
+		delete actions["unfavorite"];
+		actions["favorite"] = "yay";
+		item.actions = actions;
+		actionComplete(item, null);
+	}
+	else if (actionId == "whoops") {
+		let error = new Error("That wasn't supposed to happen!")
+		actionComplete(null, error);
+	}
 
-  * item: `Item` to be updated (can be null).
-  * error: `Error` which indicates what went wrong. Will be displayed in the user interface.
+```
 
 ## HTML Content
 
