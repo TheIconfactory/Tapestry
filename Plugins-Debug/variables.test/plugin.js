@@ -4,6 +4,7 @@
 if (require('stuff.js') == false) {
 	console.log("failed to read stuff.js")
 }
+//const resourceName = 'sample.json';
 const resourceName = 'template.txt';
 //const resourceName = 'ONE MILLION.png';
 //const resourceName = 'SHIPPING LABLE.rtf';
