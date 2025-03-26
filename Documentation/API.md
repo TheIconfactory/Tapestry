@@ -629,6 +629,41 @@ Indicates that the action has been performed. Must be called.
 
 See section on `actions.json` for more information on how to complete actions.
 
+### require(resourceName) → Value | Object | String | false
+
+  * resourceName: `String` with the name of a text resource to load.
+  
+The connector folder can contain a folder named "resources". The files in that folder are loaded using this function.
+
+The resource’s file name extension determines what type of data is returned:
+
+  * **".js"** causes the contents of the file to be evaluated and any resulting value is returned. This can be used to define functions that are used by `plugin.js` and allow you to organize and share your code. Any errors during evaluation will throw an exception that’s displayed in the user interface.
+  * **".json"** parses the contents of the file and returns the resulting `Object`. If no object can be parsed, `false` is returned.
+  * Any other extension, including **".txt"** returns the contents of the file as a UTF-8 `String`.
+  * If the file contains any other kind of data, such as an image, `false` is returned.
+
+If you are loading functions, errors can be detected with a `false` return value:
+
+```javascript
+if (require('utility.js') === false) {
+	console.log("failed to read utility.js")
+}
+```
+
+This can be extended to ensure that `String` and `Object` are loaded correctly.
+
+```javascript
+let template = require('template.txt');
+if (template === false) {
+	console.log(`failed to load template`)
+}
+else {
+	console.log(`template = ${template}`)
+}
+```
+
+If you have used Node.js’s module loading, the approach above is very similar approach. Note that there is no need to export functions from the .js file that is being loaded: all functions and variables in the file are exported.
+
 ## Configuration
 
 Each connector is defined using the following files:
