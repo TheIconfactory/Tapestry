@@ -649,7 +649,8 @@ Recommended properties:
   * default\_color: `String` with a default color name for feeds created by the connector. Valid values are "purple", "gold", "blue", "coral", "slate", "orange", "green", "teal". If no value is specified, "gray" will be used.
   * item\_style: `String` with either "post" or "article" to define the content layout.
   * version: `Number` with an integer value that increments with newer versions of the connector. If no value is supplied, 1 is assumed.
- 	
+  * crosstalk: `String` with "inclusive", "exclusive", or "disabled". See the explanation of these modes below.
+  
 Optional properties:
 
   * needs\_verification: `Boolean` with true if verification is needed (by calling `verify()`)
@@ -684,21 +685,27 @@ Optional JWT properties:
 
 > **Note:** The oauth\_authorize, oauth\_token, jwt\_authorize, and jwt\_refresh endpoints can be relative or absolute URLs. Relative paths use the `site` variable above as a base (allowing a single connector to support multiple federated servers, like with Mastodon). Absolute paths allow different domains to be used for the initial authorize and token generation (as with Tumblr).
 
-The authorization\_header string provides a template for the API endpoints. The following items in the string will be replaced with values managed by the Tapestry app:
+The `authorization_header` string provides a template for the API endpoints. The following items in the string will be replaced with values managed by the Tapestry app:
 
   * `__ACCESS_TOKEN__` The access token returned when authenticating with OAuth or JWT.
   * `__CLIENT_ID__` The client ID used to identify the connector with the API.
   
-For example, you could set a string value of `OAuth oauth_consumer_key="__CLIENT_ID__", oauth_token="__ACCESS_TOKEN__"` and the following header would be generated:
+For example, a string value of `OAuth oauth_consumer_key="__CLIENT_ID__", oauth_token="__ACCESS_TOKEN__"` will generate the following header:
 
 	Authorization: OAuth oauth_consumer_key="dead-beef-1234" oauth_token="feed-face-5678"
 
-Any credentials collected by Tapestry is used automatically during a `sendRequest`. An authorization header will be added when the following are true:
+Any credentials collected by Tapestry are used automatically during a `sendRequest`. An authorization header will be added when the following are true:
 
   * URL scheme is HTTPS
   * Port is 443
   * The host is a domain or subdomain of the feed's URL. For example, if the feed originates at `example.com`, requests to `api.example.com` will get the header, but requests to `1337hacker.com` will not.
 
+Connectors can be configured for Tapestry’s Crosstalk feature using the `crosstalk` property. The options are:
+
+  * `inclusive`: Crosstalk checks items in this connector’s feeds and all items in other feeds where Crosstalk is enabled. This is the default behavior.
+  * `exclusive`: Crosstalk is only checked with items from other feeds that _do not_ use this connector. If two items are similar and use the same connector, they are _not marked_ as Crosstalk. This mode is used by the GoComics connector to prevent daily comics from being labeled as Crosstalk even though they have very similar content (FoxTrot and FoxTrot Classics, for example).
+  * `disabled`: Opts this connector entirely out of Crosstalk. Items from feeds using this connector will never be checked or labeled as Crosstalk even if they are similar to an item in another feed.
+  
 #### EXAMPLES
 
 The configuration for the Mastodon connector is:
