@@ -10,5 +10,5 @@
 	"needs_verification": true,
 	"provides_attachments": true,
 	"check_interval": 300,
-	"version": 1
+	"version": 2
 }
