@@ -1,7 +1,7 @@
 
 // variables.test
 
-if (require('stuff.js') == false) {
+if (require('stuff.js') === false) {
 	console.log("failed to read stuff.js")
 }
 //const resourceName = 'sample.json';
@@ -9,7 +9,7 @@ const resourceName = 'template.txt';
 //const resourceName = 'ONE MILLION.png';
 //const resourceName = 'SHIPPING LABLE.rtf';
 let result = require(resourceName);
-if (result == false) {
+if (result === false) {
 	console.log(`failed to read resource = ${resourceName}`)
 }
 else {

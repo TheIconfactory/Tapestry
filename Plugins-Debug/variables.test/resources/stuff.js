@@ -1,4 +1,1 @@
-
-function CHOCK(value) {
-	return value.toUpperCase();
-}
+../../Common/stuff.js
