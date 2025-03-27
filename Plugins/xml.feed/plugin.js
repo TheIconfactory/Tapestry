@@ -276,7 +276,16 @@ function load() {
 					}
 				}
 
-				const url = entryUrl;
+				let url = entryUrl;
+				if (true) { // NOTE: If this causes problems, we can put it behind a setting.
+					const urlClean = url.split("?").splice(0,1).join();
+					const urlParameters = url.split("?").splice(1).join("?");
+					if (urlParameters.includes("utm_id") || urlParameters.includes("utm_source") || urlParameters.includes("utm_medium") || urlParameters.includes("utm_campaign")) {
+						console.log(`removed parameters: ${urlParameters}`);
+						url = urlClean;
+					}
+				}
+
 				let date = null;
 				if (entry.published) {
 					date = new Date(entry.published);
@@ -403,7 +412,16 @@ function load() {
 				}
 				const date = (itemDate == null ? new Date() : new Date(itemDate));
 				
-				const url = item.link;
+				let url = item.link;
+				if (true) { // NOTE: If this causes problems, we can put it behind a setting.
+					const urlClean = url.split("?").splice(0,1).join();
+					const urlParameters = url.split("?").splice(1).join("?");
+					if (urlParameters.includes("utm_id") || urlParameters.includes("utm_source") || urlParameters.includes("utm_medium") || urlParameters.includes("utm_campaign")) {
+						console.log(`removed parameters: ${urlParameters}`);
+						url = urlClean;
+					}
+				}
+				
 				let title = extractString(item.title);
 				let content = extractString((item["content:encoded"] ?? item.description), true);
 
@@ -503,7 +521,17 @@ function load() {
 				if (item["dc:date"] == null) {
 					continue;
 				}
-				const url = item.link;
+				
+				let url = item.link;
+				if (true) { // NOTE: If this causes problems, we can put it behind a setting.
+					const urlClean = url.split("?").splice(0,1).join();
+					const urlParameters = url.split("?").splice(1).join("?");
+					if (urlParameters.includes("utm_id") || urlParameters.includes("utm_source") || urlParameters.includes("utm_medium") || urlParameters.includes("utm_campaign")) {
+						console.log(`removed parameters: ${urlParameters}`);
+						url = urlClean;
+					}
+				}
+
 				const date = new Date(item["dc:date"]);
 				let title = extractString(item.title);
 				let content = extractString(item.description, true);

@@ -87,7 +87,16 @@ function load() {
 		const items = jsonObject["items"];
 		var results = [];
 		for (const item of items) {
-			const url = item["url"];
+			let url = item["url"];
+			if (true) { // NOTE: If this causes problems, we can put it behind a setting.
+				const urlClean = url.split("?").splice(0,1).join();
+				const urlParameters = url.split("?").splice(1).join("?");
+				if (urlParameters.includes("utm_id") || urlParameters.includes("utm_source") || urlParameters.includes("utm_medium") || urlParameters.includes("utm_campaign")) {
+					console.log(`removed parameters: ${urlParameters}`);
+					url = urlClean;
+				}
+			}
+
 			const date = new Date(item["date_published"]); // could also be "date_modified"
 			const title = item['title'];
 			let content = ""
