@@ -673,6 +673,8 @@ Each connector is defined using the following files:
   * `ui-config.json` (Optional)
   * `README.md` (Recommended)
   * `suggestions.json` (Optional)
+  * `discovery.json` (Optional)
+  * `actions.json` (Optional)
   
 The contents of each of these files is discussed below.
 
