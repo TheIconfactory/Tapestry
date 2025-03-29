@@ -76,7 +76,7 @@ if (myContent != null) {
 
 ```javascript
 const uri = "https://example.com/unique/path/to/content";
-const date = Date();
+const date = new Date();
 const item = Item.createWithUriDate(uri, date);
 item.title = "Hello.";
 item.body = "<p>This is <em>a contrived</em> example, but <b>so what?</b></p>";
