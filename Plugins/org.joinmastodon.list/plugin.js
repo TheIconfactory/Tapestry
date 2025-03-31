@@ -16,10 +16,11 @@ function verify() {
 		.then((text) => {
 			const jsonObject = JSON.parse(text);
 		
+			const verifyList = normalizeList(list)
 			let found = false;
 			let displayName = userName;
 			for (const listItem of jsonObject) {
-				if (listItem.id == list || listItem.title == list) {
+				if (listItem.id == verifyList || listItem.title == verifyList) {
 					setItem("listId", listItem.id);
 					displayName = `${listItem.title} - ${userName}`;
 					found = true;
@@ -65,9 +66,10 @@ function load() {
 		.then((text) => {
 			const jsonObject = JSON.parse(text);
 		
+			const loadList = normalizeList(list)
 			let found = false;
 			for (const listItem of jsonObject) {
-				if (listItem.id == list || listItem.title == list) {
+				if (listItem.id == loadList || listItem.title == loadList) {
 					setItem("listId", listItem.id);
 					listId = listItem.id;
 					found = true;
@@ -93,6 +95,10 @@ function load() {
 			processError(requestError);
 		});
 	}
+}
+
+function normalizeList(list) {
+	return list.trim();
 }
 
 function queryStatusesForList(listId) {
