@@ -2,13 +2,14 @@
 // org.joinmastodon.tag
 
 function verify() {
-	const url = `${site}/api/v1/timelines/tag/${tag}`;
+	const verifyTag = normalizeTag(tag);
+	const url = `${site}/api/v1/timelines/tag/${verifyTag}`;
 	sendRequest(url)
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		
 		if (jsonObject.length > 0) {
-			const displayName = "#" + tag;
+			const displayName = "#" + verifyTag;
 			processVerification(displayName);
 		}
 		else {
@@ -21,7 +22,8 @@ function verify() {
 }
 
 function load() {
-	queryStatusesForTag(tag)
+	const loadTag = normalizeTag(tag);
+	queryStatusesForTag(loadTag)
 	.then((results) =>  {
 		console.log(`finished (cached) feed`);
 		processResults(results, true);
@@ -30,6 +32,18 @@ function load() {
 		console.log(`error (cached) feed`);
 		processError(requestError);
 	});	
+}
+
+const firstTagRegex = /(\w+)/
+
+function normalizeTag(tag) {
+	const result = tag.match(firstTagRegex);
+	if (result != null && result.length == 2) {
+		return result[1];
+	}
+	else {
+		return tag;
+	}
 }
 
 function queryStatusesForTag(tag) {

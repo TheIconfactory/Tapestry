@@ -2,7 +2,8 @@
 // org.joinmastodon.account
 
 function verify() {
-	const url = `${site}/api/v1/accounts/lookup?acct=${account}`
+	const verifyAccount = normalizeAccount(account);
+	const url = `${site}/api/v1/accounts/lookup?acct=${verifyAccount}`
 	sendRequest(url)
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
@@ -50,7 +51,8 @@ function load() {
 		});	
 	}
 	else {
-		const url = `${site}/api/v1/accounts/lookup?acct=${account}`
+		const loadAccount = normalizeAccount(account);
+		const url = `${site}/api/v1/accounts/lookup?acct=${loadAccount}`
 		sendRequest(url)
 		.then((text) => {
 			const jsonObject = JSON.parse(text);
@@ -71,6 +73,18 @@ function load() {
 		.catch((requestError) => {
 			processError(requestError);
 		});
+	}
+}
+
+const firstAccountRegex = /(\w+)/
+
+function normalizeAccount(account) {
+	const result = account.match(firstAccountRegex);
+	if (result != null && result.length == 2) {
+		return result[1];
+	}
+	else {
+		return account;
 	}
 }
 
