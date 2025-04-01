@@ -34,16 +34,12 @@ function load() {
 	});	
 }
 
-const firstTagRegex = /(\w+)/
-
 function normalizeTag(tag) {
-	const result = tag.match(firstTagRegex);
-	if (result != null && result.length == 2) {
-		return result[1];
+	let result = tag.trim();
+	if (result.length > 1 && result.startsWith("#")) {
+		result = result.slice(1);
 	}
-	else {
-		return tag;
-	}
+	return result;
 }
 
 function queryStatusesForTag(tag) {

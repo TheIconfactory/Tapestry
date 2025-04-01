@@ -81,16 +81,12 @@ function load() {
 	}
 }
 
-const firstAccountRegex = /([.\w]+)/
-
 function normalizeAccount(account) {
-	const result = account.match(firstAccountRegex);
-	if (result != null && result.length == 2) {
-		return result[1];
+	let result = account.trim();
+	if (result.length > 1 && result.startsWith("@")) {
+		result = result.slice(1);
 	}
-	else {
-		return account;
-	}
+	return result;
 }
 
 function queryFeedForUser(did) {
