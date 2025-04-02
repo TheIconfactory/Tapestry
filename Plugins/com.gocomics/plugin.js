@@ -80,6 +80,14 @@ function load() {
 		const now = new Date();
 		const today = Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric" }).format(now);
 		
+		const year = now.getFullYear();
+		const month = now.getMonth() + 1;
+		const day = now.getDate();
+		const timestamp = String(year) + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
+
+		const contentUrl = `${site}/${comicId.trim()}/${timestamp}`;
+		console.log(`contentUrl = ${contentUrl}`);
+	
 		let imageUrl = null;
 		let description = null;
 		let author = null;
@@ -126,7 +134,7 @@ function load() {
 			const publishedDate = new Date(today);
 			const content = `<p>Published on ${publishedDate.toLocaleDateString()} at <a href="${url}">${creator}</a></p>`;
 				
-			const item = Item.createWithUriDate(url, publishedDate);
+			const item = Item.createWithUriDate(contentUrl, publishedDate);
 			item.body = content;
 			item.attachments = [attachment];
 	
