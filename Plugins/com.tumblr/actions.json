@@ -3,12 +3,22 @@
 		{
 			"id": "reblog",
 			"name": "Reblog",
-			"icon": "arrow.up.to.line.circle.fill",
+			"icon": "arrow.up.to.line.circle",
 		},
 		{
 			"id": "unreblog",
 			"name": "Remove Reblog",
-			"icon": "arrow.down.to.line.circle",
+			"icon": "arrow.down.to.line.circle.fill",
+		},
+		{
+			"id": "like",
+			"name": "Like",
+			"icon": "heart",
+		},
+		{
+			"id": "unlike",
+			"name": "Remove Like",
+			"icon": "heart.fill",
 		},
 	],
 }
