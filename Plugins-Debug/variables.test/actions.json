@@ -1,0 +1,30 @@
+{
+	"items": [
+		{
+			"id": "favorite",
+			"name": "Add Favorite",
+			"icon": "heart.fill",
+		},
+		{
+			"id": "unfavorite",
+			"name": "Remove Favorite",
+			"icon": "heart",
+		},
+		{
+			"id": "boost",
+			"name": "Add Boost",
+			"icon": "arrow.up.to.line.circle.fill",
+		},
+		{
+			"id": "unboost",
+			"name": "Remove Boost",
+			"icon": "arrow.down.to.line.circle",
+		},
+		{
+			"id": "reply",
+			"name": "Reply",
+			"icon": "paperplane",
+		}
+	],
+	"tbd": [],
+}

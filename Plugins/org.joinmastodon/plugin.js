@@ -24,6 +24,198 @@ function verify() {
 	});
 }
 
+var userId = getItem("userId");
+
+// NOTE: This reference counter tracks loading so we can let the app know when all async loading work is complete.
+var loadCounter = 0;
+
+function load() {
+	// NOTE: The home timeline will be filled up to the endDate, if possible.
+	let endDate = null;
+	let endDateTimestamp = getItem("endDateTimestamp");
+	if (endDateTimestamp != null) {
+		endDate = new Date(parseInt(endDateTimestamp));
+	}
+	
+	loadCounter = 0;
+	if (includeHome == "on") {
+		loadCounter += 1;
+	}
+	if (includeMentions == "on") {
+		loadCounter += 1;
+	}
+	if (includeStatuses == "on") {
+		loadCounter += 1;
+	}
+	if (loadCounter == 0) {
+		processResults([]);
+		return;
+	}
+				
+	if (includeHome == "on") {
+		let startTimestamp = (new Date()).getTime();
+
+		queryHomeTimeline(endDate)
+  		.then((parameters) =>  {
+  			results = parameters[0];
+  			newestItemDate = parameters[1];
+  			loadCounter -= 1;
+			processResults(results, loadCounter == 0);
+			setItem("endDateTimestamp", String(newestItemDate.getTime()));
+			let endTimestamp = (new Date()).getTime();
+ 			console.log(`finished home timeline, loadCounter = ${loadCounter}: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
+		})
+		.catch((requestError) => {
+  			loadCounter -= 1;
+  			console.log(`error home timeline, loadCounter = ${loadCounter}`);
+			processError(requestError);
+		});	
+	}
+	
+	if (includeMentions == "on") {
+		queryMentions()
+		.then((results) =>  {
+			loadCounter -= 1;
+			console.log(`finished mentions, loadCounter = ${loadCounter}`);
+			processResults(results, loadCounter == 0);
+		})
+		.catch((requestError) => {
+			loadCounter -= 1;
+			console.log(`error mentions, loadCounter = ${loadCounter}`);
+			processError(requestError);
+		});	
+	}
+
+	if (includeStatuses == "on") {
+		if (userId != null) {
+			queryStatusesForUser(userId)
+			.then((results) =>  {
+				loadCounter -= 1;
+  				console.log(`finished (cached) user statuses, loadCounter = ${loadCounter}`);
+				processResults(results, loadCounter == 0);
+			})
+			.catch((requestError) => {
+  				loadCounter -= 1;
+  				console.log(`error (cached) user statuses, loadCounter = ${loadCounter}`);
+				processError(requestError);
+			});	
+		}
+		else {
+			sendRequest(site + "/api/v1/accounts/verify_credentials")
+			.then((text) => {
+				const jsonObject = JSON.parse(text);
+				
+				userId = jsonObject["id"];
+				setItem("userId", userId);
+
+				queryStatusesForUser(userId)
+				.then((results) =>  {
+					loadCounter -= 1;
+	  				console.log(`finished user statuses, loadCounter = ${loadCounter}`);
+					processResults(results, loadCounter == 0);
+				})
+				.catch((requestError) => {
+					loadCounter -= 1;
+  					console.log(`error user statuses, loadCounter = ${loadCounter}`);
+					processError(requestError);
+				});	
+			})
+			.catch((requestError) => {
+				processError(requestError);
+			});
+		}
+	}
+}
+
+function performAction(actionId, actionValue, item) {
+	let actions = item.actions;
+	
+	if (actionId == "favorite") {
+		const url = `${site}/api/v1/statuses/${actionValue}/favourite`;
+		sendRequest(url, "POST")
+		.then((text) => {
+			const jsonObject = JSON.parse(text);
+			
+			delete actions["favorite"];
+			actions["unfavorite"] = actionValue;
+			item.actions = actions;
+			actionComplete(item, null);
+		})
+		.catch((requestError) => {
+			actionComplete(null, requestError);
+		});	
+	}
+	else if (actionId == "unfavorite") {
+		const url = `${site}/api/v1/statuses/${actionValue}/unfavourite`;
+		sendRequest(url, "POST")
+		.then((text) => {
+			delete actions["unfavorite"];
+			actions["favorite"] = actionValue;
+			item.actions = actions;
+			actionComplete(item, null);
+		})
+		.catch((requestError) => {
+			actionComplete(null, requestError);
+		});	
+	}
+	else if (actionId == "boost") {
+		const url = `${site}/api/v1/statuses/${actionValue}/reblog`;
+		sendRequest(url, "POST")
+		.then((text) => {
+			delete actions["boost"];
+			actions["unboost"] = actionValue;
+			item.actions = actions;
+			actionComplete(item, null);
+		})
+		.catch((requestError) => {
+			actionComplete(null, requestError);
+		});	
+	}
+	else if (actionId == "unboost") {
+		const url = `${site}/api/v1/statuses/${actionValue}/unreblog`;
+		sendRequest(url, "POST")
+		.then((text) => {
+			delete actions["unboost"];
+			actions["boost"] = actionValue;
+			item.actions = actions;
+			actionComplete(item, null);
+		})
+		.catch((requestError) => {
+			actionComplete(null, requestError);
+		});	
+	}
+	else if (actionId == "bookmark") {
+		const url = `${site}/api/v1/statuses/${actionValue}/bookmark`;
+		sendRequest(url, "POST")
+		.then((text) => {
+			delete actions["bookmark"];
+			actions["unbookmark"] = actionValue;
+			item.actions = actions;
+			actionComplete(item, null);
+		})
+		.catch((requestError) => {
+			actionComplete(null, requestError);
+		});	
+	}
+	else if (actionId == "unbookmark") {
+		const url = `${site}/api/v1/statuses/${actionValue}/unbookmark`;
+		sendRequest(url, "POST")
+		.then((text) => {
+			delete actions["unbookmark"];
+			actions["bookmark"] = actionValue;
+			item.actions = actions;
+			actionComplete(item, null);
+		})
+		.catch((requestError) => {
+			actionComplete(null, requestError);
+		});	
+	}
+	else {
+		let error = new Error(`actionId "${actionId}" not implemented`);
+		actionComplete(null, error);
+	}
+}
+
 function postForItem(item, date = null, shortcodes = {}) {
 	const account = item["account"];
 	const displayName = account["display_name"];
@@ -66,6 +258,27 @@ function postForItem(item, date = null, shortcodes = {}) {
 
 	post.author = identity;
 	post.body = content;
+
+	let actions = {};
+	if (item?.favourited) {
+		actions["unfavorite"] = item.id;
+	}
+	else {
+		actions["favorite"] = item.id;
+	}
+	if (item?.reblogged) {
+		actions["unboost"] = item.id;
+	}
+	else {
+		actions["boost"] = item.id;
+	}
+	if (item?.bookmarked) {
+		actions["unbookmark"] = item.id;
+	}
+	else {
+		actions["bookmark"] = item.id;
+	}
+	post.actions = actions;
 
 	if (contentWarning != null) {
 		post.contentWarning = contentWarning;
@@ -423,106 +636,4 @@ function queryStatusesForUser(id) {
 	
 }
 
-var userId = getItem("userId");
-
-// NOTE: This reference counter tracks loading so we can let the app know when all async loading work is complete.
-var loadCounter = 0;
-
-function load() {
-	// NOTE: The home timeline will be filled up to the endDate, if possible.
-	let endDate = null;
-	let endDateTimestamp = getItem("endDateTimestamp");
-	if (endDateTimestamp != null) {
-		endDate = new Date(parseInt(endDateTimestamp));
-	}
-	
-	loadCounter = 0;
-	if (includeHome == "on") {
-		loadCounter += 1;
-	}
-	if (includeMentions == "on") {
-		loadCounter += 1;
-	}
-	if (includeStatuses == "on") {
-		loadCounter += 1;
-	}
-	if (loadCounter == 0) {
-		processResults([]);
-		return;
-	}
-				
-	if (includeHome == "on") {
-		let startTimestamp = (new Date()).getTime();
-
-		queryHomeTimeline(endDate)
-  		.then((parameters) =>  {
-  			results = parameters[0];
-  			newestItemDate = parameters[1];
-  			loadCounter -= 1;
-			processResults(results, loadCounter == 0);
-			setItem("endDateTimestamp", String(newestItemDate.getTime()));
-			let endTimestamp = (new Date()).getTime();
- 			console.log(`finished home timeline, loadCounter = ${loadCounter}: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
-		})
-		.catch((requestError) => {
-  			loadCounter -= 1;
-  			console.log(`error home timeline, loadCounter = ${loadCounter}`);
-			processError(requestError);
-		});	
-	}
-	
-	if (includeMentions == "on") {
-		queryMentions()
-		.then((results) =>  {
-			loadCounter -= 1;
-			console.log(`finished mentions, loadCounter = ${loadCounter}`);
-			processResults(results, loadCounter == 0);
-		})
-		.catch((requestError) => {
-			loadCounter -= 1;
-			console.log(`error mentions, loadCounter = ${loadCounter}`);
-			processError(requestError);
-		});	
-	}
-
-	if (includeStatuses == "on") {
-		if (userId != null) {
-			queryStatusesForUser(userId)
-			.then((results) =>  {
-				loadCounter -= 1;
-  				console.log(`finished (cached) user statuses, loadCounter = ${loadCounter}`);
-				processResults(results, loadCounter == 0);
-			})
-			.catch((requestError) => {
-  				loadCounter -= 1;
-  				console.log(`error (cached) user statuses, loadCounter = ${loadCounter}`);
-				processError(requestError);
-			});	
-		}
-		else {
-			sendRequest(site + "/api/v1/accounts/verify_credentials")
-			.then((text) => {
-				const jsonObject = JSON.parse(text);
-				
-				userId = jsonObject["id"];
-				setItem("userId", userId);
-
-				queryStatusesForUser(userId)
-				.then((results) =>  {
-					loadCounter -= 1;
-	  				console.log(`finished user statuses, loadCounter = ${loadCounter}`);
-					processResults(results, loadCounter == 0);
-				})
-				.catch((requestError) => {
-					loadCounter -= 1;
-  					console.log(`error user statuses, loadCounter = ${loadCounter}`);
-					processError(requestError);
-				});	
-			})
-			.catch((requestError) => {
-				processError(requestError);
-			});
-		}
-	}
-}
 

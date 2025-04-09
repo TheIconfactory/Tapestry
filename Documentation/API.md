@@ -610,6 +610,59 @@ Returns a `String` that was saved in local storage. If no value was stored, `nul
 
 All items in local storage are removed.
 
+### performAction(actionId, actionValue, item)
+
+Sends an action to the connector.
+
+  * actionId: A `String` with the action id
+  * actionValue: The `String` value that was assigned to the action.
+  * item: `Item` to be processed.
+  
+See section on `actions.json` for more information on how to perform actions.
+
+### actionComplete(item, error)
+
+Indicates that the action has been performed. Must be called.
+
+  * item: `Item` to be updated (can be null).
+  * error: `Error` which indicates what went wrong. Will be displayed in the user interface.
+
+See section on `actions.json` for more information on how to complete actions.
+
+### require(resourceName) → Value | Object | String | false
+
+  * resourceName: `String` with the name of a text resource to load.
+  
+The connector folder can contain a folder named "resources". The files in that folder are loaded using this function.
+
+The resource’s file name extension determines what type of data is returned:
+
+  * **".js"** causes the contents of the file to be evaluated and any resulting value is returned. This can be used to define functions that are used by `plugin.js` and allow you to organize and share your code. Any errors during evaluation will throw an exception that’s displayed in the user interface.
+  * **".json"** parses the contents of the file and returns the resulting `Object`. If no object can be parsed, `false` is returned.
+  * Any other extension, including **".txt"** returns the contents of the file as a UTF-8 `String`.
+  * If the file contains any other kind of data, such as an image, `false` is returned.
+
+If you are loading functions, errors can be detected with a `false` return value:
+
+```javascript
+if (require('utility.js') === false) {
+	console.log("failed to read utility.js")
+}
+```
+
+This can be extended to ensure that `String` and `Object` are loaded correctly.
+
+```javascript
+let template = require('template.txt');
+if (template === false) {
+	console.log(`failed to load template`)
+}
+else {
+	console.log(`template = ${template}`)
+}
+```
+
+If you have used Node.js’s module loading, the approach above is very similar approach. Note that there is no need to export functions from the .js file that is being loaded: all functions and variables in the file are exported.
 
 ## Configuration
 
@@ -620,6 +673,8 @@ Each connector is defined using the following files:
   * `ui-config.json` (Optional)
   * `README.md` (Recommended)
   * `suggestions.json` (Optional)
+  * `discovery.json` (Optional)
+  * `actions.json` (Optional)
   
 The contents of each of these files is discussed below.
 
@@ -1062,7 +1117,7 @@ The rules for the user’s URL consist of two parts:
 
 If the `extract` pattern is empty it's considered a match and the full URL will be passed to the variable (this will likely be the `site`). The following example sets the `site` variable with the URL entered by the user.
 
-``` json
+```json
 	"url": [
 		{
 			"extract": "",
@@ -1079,7 +1134,7 @@ If necessary, non-capturing groups like "(?:foo|bar)" can be used in the regular
 
 This example extracts the "aww" from `http://reddit.com/r/aww/whatever` and puts it in a "subreddit" variable:
 
-``` json
+```json
 	"url": [
 		{
 			"extract": "/reddit.com/r/([^/]+)/",
@@ -1090,7 +1145,7 @@ This example extracts the "aww" from `http://reddit.com/r/aww/whatever` and puts
 
 This example extracts two capture groups from `https://mastodon.social/tags/TapestryApp`. The first one sets `site` to "https://mastodon.social" and the second puts "TapestryApp" in a "tag" variable:
 
-``` json
+```json
 	"url": [
 		{
 			"extract": "/(https://[^:/\\s]+)/tags/([a-zA-Z0-9_]+.*)/",
@@ -1105,7 +1160,7 @@ The content at the URL provided by the user can also be checked. The strategy is
 
 This approach allows your connector to check things like `<link>` or `<meta>` tags for things that it needs. For example, a page that has the following HTML markup can be used with a connector that handles RSS feeds:
 
-``` html
+```html
 <link rel="alternate" type="application/atom+xml" href="/feeds/main" />
 ```
 
@@ -1235,6 +1290,82 @@ If none of the rules above apply, the content can be checked for JSON keys. Ther
 ```
 
 The `key` must be a top-level key in the JSON content. The example ensures that the JSON dictionary has a `version` key with the correct `value`.
+
+### actions.json
+
+This file defines actions that can alter items supplied by a connector. An action is defined by its `id` that can be used in code with a `name` and `icon` that is used in the Tapestry user interface. The `name` can be any SF Symbol name.
+
+```json
+{
+	"items": [
+		{
+			id: "favorite",
+			name: "Add Favorite",
+			icon: "heart.fill",
+		},
+		{
+			id: "unfavorite",
+			name: "Remove Favorite",
+			icon: "heart",
+		},
+	],
+}
+```
+
+When returning an `Item` in `processResults()` you will specify a dictionary of actions that can be applied to the item. Each action has an `id` and a string value that will be passed to the action when it's performed.
+
+For example, an action that marks an item as a favorite, might need an identifier: 
+
+```javascript
+	item.actions = { favorite: "123456" };
+```
+
+It's also likely that structured data will be needed, so JSON can be used as an action value:
+
+```javascript
+	item.actions = { like: `{ "uri": "at:..." }`, repost: `{ "uri": "at:..." }` };
+```
+
+When an item has one or more actions, a menu will be displayed in the app. When a user selects one of the actions the `performAction` function is called with the action `id`, `value`, and `item`.
+
+It is the connector’s responsibility to manage the list of actions as the state of the item changes. For example, if an action to "favorite" is performed, the action would be removed from the item and replaced with "unfavorite".
+
+The modified item is returned to Tapestry using `actionComplete`. If the action cannot be performed, an `Error` should be returned and will be displayed to the user.
+
+This example performs "favorite" and "unfavorite" on an item. Note that any part of the item can be modified: the body in this example, but it could be annotations or attachments as well. The example also shows how the state of the item is managed using `item.actions`:
+
+```javascript
+
+function performAction(actionId, actionValue, item) {
+	console.log(`actionId = ${actionId}`);
+	if (actionId == "favorite") {
+		let content = item.body;
+		content += "<p>Faved!</p>";
+		item.body = content;
+		
+		let actions = item.actions;
+		delete actions["favorite"];
+		actions["unfavorite"] = "boo";
+		item.actions = actions;
+		actionComplete(item, null);
+	}
+	else if (actionId == "unfavorite") {
+		let content = item.body;
+		content += "<p><strong>UNFAVED!</strong></p>";
+		item.body = content;
+
+		let actions = item.actions;
+		delete actions["unfavorite"];
+		actions["favorite"] = "yay";
+		item.actions = actions;
+		actionComplete(item, null);
+	}
+	else if (actionId == "whoops") {
+		let error = new Error("That wasn't supposed to happen!")
+		actionComplete(null, error);
+	}
+
+```
 
 ## HTML Content
 

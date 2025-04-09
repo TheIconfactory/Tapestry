@@ -1,0 +1,34 @@
+{
+	"items": [
+		{
+			"id": "favorite",
+			"name": "Favorite",
+			"icon": "star",
+		},
+		{
+			"id": "unfavorite",
+			"name": "Remove Favorite",
+			"icon": "star.fill",
+		},
+		{
+			"id": "boost",
+			"name": "Boost",
+			"icon": "arrow.up.to.line.circle",
+		},
+		{
+			"id": "unboost",
+			"name": "Remove Boost",
+			"icon": "arrow.down.to.line.circle.fill",
+		},
+		{
+			"id": "bookmark",
+			"name": "Bookmark",
+			"icon": "bookmark",
+		},
+		{
+			"id": "unbookmark",
+			"name": "Remove Bookmark",
+			"icon": "bookmark.fill",
+		},
+	],
+}
