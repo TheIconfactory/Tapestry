@@ -156,6 +156,62 @@ function performAction(actionId, actionValue, item) {
 				actionComplete(null, requestError);
 			});	
 		}
+		else if (actionId == "repost") {
+			const body = {
+				collection: "app.bsky.feed.repost",
+				repo: did,
+				record : {
+					"$type": "app.bsky.feed.repost",
+					subject: {
+						uri: actionValues["uri"],
+						cid: actionValues["cid"]
+					},
+					createdAt: date,
+				}
+			};
+			
+			const url = `${site}/xrpc/com.atproto.repo.createRecord`;
+			const parameters = JSON.stringify(body);
+			const extraHeaders = { "content-type": "application/json" };
+			sendRequest(url, "POST", parameters, extraHeaders)
+			.then((text) => {
+				const jsonObject = JSON.parse(text);
+				const rkey = jsonObject.uri.split("/").pop();
+				
+				delete actions["repost"];
+				const values = { uri: actionValues["uri"], cid: actionValues["cid"], rkey: rkey };
+				actions["unrepost"] = JSON.stringify(values);
+				item.actions = actions;
+				actionComplete(item, null);
+			})
+			.catch((requestError) => {
+				actionComplete(null, requestError);
+			});	
+		}
+		else if (actionId == "unrepost") {
+			const body = {
+				collection: "app.bsky.feed.repost",
+				repo: did,
+				rkey: actionValues["rkey"]
+			};
+			
+			const url = `${site}/xrpc/com.atproto.repo.deleteRecord`;
+			const parameters = JSON.stringify(body);
+			const extraHeaders = { "content-type": "application/json" };
+			sendRequest(url, "POST", parameters, extraHeaders)
+			.then((text) => {
+				const jsonObject = JSON.parse(text);
+	
+	 			delete actions["like"];
+	 			const values = { uri: actionValues["uri"], cid: actionValues["cid"] };
+				actions["unlike"] = JSON.stringify(values);
+	 			item.actions = actions;
+	 			actionComplete(item, null);
+			})
+			.catch((requestError) => {
+				actionComplete(null, requestError);
+			});	
+		}
 		else {
 			let error = new Error(`actionId "${actionId}" not implemented`);
 			actionComplete(null, error);
@@ -331,13 +387,15 @@ function postForItem(item) {
 		const values = { uri: item.post.uri, cid: item.post.cid };
 		actions["like"] = JSON.stringify(values);
 	}
-// 	if (item?.viewer?.repost) {
-// 		actions["unrepost"] = item.id;
-// 	}
-// 	else {
-// 		actions["repost"] = item.id;
-// 	}
-//	post.actions = actions;
+	if (item.post.viewer?.repost != null) {
+		const rkey = item.post.viewer.repost.split("/").pop();
+		const values = { uri: item.post.uri, cid: item.post.cid, rkey: rkey };
+		actions["unrepost"] = JSON.stringify(values);
+	}
+	else {
+		const values = { uri: item.post.uri, cid: item.post.cid };
+		actions["repost"] = JSON.stringify(values);
+	}
 
 	let contentWarning = null;
 	if (item.post.labels != null && item.post.labels.length > 0) {
