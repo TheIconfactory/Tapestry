@@ -202,9 +202,9 @@ function performAction(actionId, actionValue, item) {
 			.then((text) => {
 				const jsonObject = JSON.parse(text);
 	
-	 			delete actions["like"];
+	 			delete actions["unrepost"];
 	 			const values = { uri: actionValues["uri"], cid: actionValues["cid"] };
-				actions["unlike"] = JSON.stringify(values);
+				actions["repost"] = JSON.stringify(values);
 	 			item.actions = actions;
 	 			actionComplete(item, null);
 			})
