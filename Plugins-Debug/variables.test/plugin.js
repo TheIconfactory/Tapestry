@@ -53,7 +53,7 @@ function load() {
 		}
 		status += ` at level ${value}`;
 		status = status.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-		let content = `<p>Test content for ${site} & ${title}</p><p>${status}</p><blockquote><p>For dessert, you'll be having ${dessert_choice}. Enjoy!</p></blockquote><p><a href="https://streamer.iconfactory.net">Check user agent in logs</a></p>`
+		let content = `<p>Test content for ${site} & ${title}</p><p>${status}</p><blockquote><p>For dessert, you'll be having ${dessert_choice}. Enjoy!</p></blockquote><p><a href="https://streamer.iconfactory.net">Check user agent in logs</a><img src="https://iconfactory.com/images-v8/if_logo.png" width="188" height="43" alt="IF logo"></p>`
 		
 		const resultItem = Item.createWithUriDate(uri, date);
 		resultItem.body = content;
