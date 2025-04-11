@@ -7,6 +7,8 @@ function verify() {
 		const jsonObject = JSON.parse(text);
 		const displayName = "@" + jsonObject.handle;
 		const did = jsonObject.did;
+
+		setItem("did", did);
 		
 		sendRequest(site + `/xrpc/app.bsky.actor.getProfile?actor=${did}`)
 		.then((text) => {
@@ -90,15 +92,17 @@ function load() {
 	}
 }
 
-function performAction(actionId, actionValue, item) {
+async function performAction(actionId, actionValue, item) {
 	let actions = item.actions;
 	let actionValues = JSON.parse(actionValue);
 	
-	sendRequest(site + "/xrpc/com.atproto.server.getSession")
-	.then((text) => {
-		const jsonObject = JSON.parse(text);
-		const did = jsonObject.did;
-		
+	try {
+		let did = getItem("did");
+		if (did == null) {
+			did = await getDid();
+			setItem("did", did);
+		}
+
 		let date = new Date().toISOString();
 		if (actionId == "like") {
 			const body = {
@@ -117,20 +121,15 @@ function performAction(actionId, actionValue, item) {
 			const url = `${site}/xrpc/com.atproto.repo.createRecord`;
 			const parameters = JSON.stringify(body);
 			const extraHeaders = { "content-type": "application/json" };
-			sendRequest(url, "POST", parameters, extraHeaders)
-			.then((text) => {
-				const jsonObject = JSON.parse(text);
-				const rkey = jsonObject.uri.split("/").pop();
-				
-				delete actions["like"];
-				const values = { uri: actionValues["uri"], cid: actionValues["cid"], rkey: rkey };
-				actions["unlike"] = JSON.stringify(values);
-				item.actions = actions;
-				actionComplete(item, null);
-			})
-			.catch((requestError) => {
-				actionComplete(null, requestError);
-			});	
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			const jsonObject = JSON.parse(text);
+			const rkey = jsonObject.uri.split("/").pop();
+			
+			delete actions["like"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"], rkey: rkey };
+			actions["unlike"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item, null);
 		}
 		else if (actionId == "unlike") {
 			const body = {
@@ -142,19 +141,14 @@ function performAction(actionId, actionValue, item) {
 			const url = `${site}/xrpc/com.atproto.repo.deleteRecord`;
 			const parameters = JSON.stringify(body);
 			const extraHeaders = { "content-type": "application/json" };
-			sendRequest(url, "POST", parameters, extraHeaders)
-			.then((text) => {
-				const jsonObject = JSON.parse(text);
-	
-	 			delete actions["unlike"];
-	 			const values = { uri: actionValues["uri"], cid: actionValues["cid"] };
-				actions["like"] = JSON.stringify(values);
-	 			item.actions = actions;
-	 			actionComplete(item, null);
-			})
-			.catch((requestError) => {
-				actionComplete(null, requestError);
-			});	
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			const jsonObject = JSON.parse(text);
+
+			delete actions["unlike"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"] };
+			actions["like"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item, null);
 		}
 		else if (actionId == "repost") {
 			const body = {
@@ -173,20 +167,15 @@ function performAction(actionId, actionValue, item) {
 			const url = `${site}/xrpc/com.atproto.repo.createRecord`;
 			const parameters = JSON.stringify(body);
 			const extraHeaders = { "content-type": "application/json" };
-			sendRequest(url, "POST", parameters, extraHeaders)
-			.then((text) => {
-				const jsonObject = JSON.parse(text);
-				const rkey = jsonObject.uri.split("/").pop();
-				
-				delete actions["repost"];
-				const values = { uri: actionValues["uri"], cid: actionValues["cid"], rkey: rkey };
-				actions["unrepost"] = JSON.stringify(values);
-				item.actions = actions;
-				actionComplete(item, null);
-			})
-			.catch((requestError) => {
-				actionComplete(null, requestError);
-			});	
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			const jsonObject = JSON.parse(text);
+			const rkey = jsonObject.uri.split("/").pop();
+			
+			delete actions["repost"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"], rkey: rkey };
+			actions["unrepost"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item, null);
 		}
 		else if (actionId == "unrepost") {
 			const body = {
@@ -198,33 +187,35 @@ function performAction(actionId, actionValue, item) {
 			const url = `${site}/xrpc/com.atproto.repo.deleteRecord`;
 			const parameters = JSON.stringify(body);
 			const extraHeaders = { "content-type": "application/json" };
-			sendRequest(url, "POST", parameters, extraHeaders)
-			.then((text) => {
-				const jsonObject = JSON.parse(text);
-	
-	 			delete actions["unrepost"];
-	 			const values = { uri: actionValues["uri"], cid: actionValues["cid"] };
-				actions["repost"] = JSON.stringify(values);
-	 			item.actions = actions;
-	 			actionComplete(item, null);
-			})
-			.catch((requestError) => {
-				actionComplete(null, requestError);
-			});	
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			const jsonObject = JSON.parse(text);
+			
+			delete actions["unrepost"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"] };
+			actions["repost"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item, null);
 		}
 		else {
 			let error = new Error(`actionId "${actionId}" not implemented`);
 			actionComplete(null, error);
 		}
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
+	}
+	catch (error) {
+		actionComplete(null, error);
+	}
 }
 
 const uriPrefix = "https://bsky.app";
 const uriPrefixContent = "https://cdn.bsky.app";
 const uriPrefixVideo = "https://video.bsky.app";
+
+async function getDid() {
+	const text = await sendRequest(site + "/xrpc/com.atproto.server.getSession");
+	const jsonObject = JSON.parse(text);
+	const did = jsonObject.did;
+	return did;
+}
 
 function queryTimeline(endDate) {
 

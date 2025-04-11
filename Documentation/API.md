@@ -1293,7 +1293,7 @@ The `key` must be a top-level key in the JSON content. The example ensures that 
 
 ### actions.json
 
-This file defines actions that can alter items supplied by a connector. An action is defined by its `id` that can be used in code with a `name` and `icon` that is used in the Tapestry user interface. The `name` can be any SF Symbol name.
+This file defines actions that can alter items supplied by a connector. An action is defined by its `id` that can be used in code with a `name` and `icon` that is used in the Tapestry user interface. The `name` can be any SF Symbol name or one of Tapestry's built-in symbols (listed below).
 
 ```json
 {
@@ -1366,6 +1366,41 @@ function performAction(actionId, actionValue, item) {
 	}
 
 ```
+
+#### Built-in Symbols
+
+The following names can be used for the `icon` of an action:
+
+tapestry.arrow.right.circle.fill
+tapestry.bluesky
+tapestry.bookmark.fill
+tapestry.bookmark
+tapestry.boost.fill
+tapestry.boost
+tapestry.counter.arrow
+tapestry.crosstalk
+tapestry.hashtag
+tapestry.jump.back
+tapestry.jump.to.marker
+tapestry.jump.to.top
+tapestry.mark.fill
+tapestry.mark
+tapestry.mastodon
+tapestry.microblog
+tapestry.muffled
+tapestry.open.original
+tapestry.person.2
+tapestry.person
+tapestry.reddit
+tapestry.sparkles.premium
+tapestry.star.fill
+tapestry.star
+tapestry.timeline.collapsed
+tapestry.timeline.expanded
+tapestry.timeline.mini
+tapestry.tumblr
+tapestry.view.details
+tapestry.youtube
 
 ## HTML Content
 

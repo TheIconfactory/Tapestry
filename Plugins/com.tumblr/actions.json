@@ -3,12 +3,12 @@
 		{
 			"id": "reblog",
 			"name": "Reblog",
-			"icon": "arrow.up.to.line.circle",
+			"icon": "tapestry.boost",
 		},
 		{
 			"id": "unreblog",
 			"name": "Remove Reblog",
-			"icon": "arrow.down.to.line.circle.fill",
+			"icon": "tapestry.boost.fill",
 		},
 		{
 			"id": "like",
