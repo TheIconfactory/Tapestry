@@ -16,5 +16,5 @@
 	"fail_status_code": 401,
 	"provides_attachments": true,
 	"check_interval": 300,
-	"version": 1
+	"version": 2
 }
