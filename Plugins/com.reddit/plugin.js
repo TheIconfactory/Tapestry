@@ -3,20 +3,36 @@
 
 function verify() {
 	const type = feedType.toLowerCase();
-	sendRequest(`${site}/r/${subreddit}/${type}.json?raw_json=1`, "HEAD")
-	.then((dictionary) => {
-		const jsonObject = JSON.parse(dictionary);
-		
-		if (jsonObject.status == 200) {
-			const verification = {
-				displayName: "/r/" + subreddit,
-				icon: "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png"
-			};	
-			processVerification(verification);
-		}
-		else {
+	const url = `${site}/r/${subreddit}/about.json?raw_json=1`;
+	sendRequest(url, "GET", null, null, true)
+	.then((text) => {
+		const response = JSON.parse(text);
+		console.log(`response.status = ${response.status}`);
+
+		if (response.status != 200) {
 			processError(Error("Invalid Subreddit"));
+			return;
 		}
+				
+		const jsonObject = JSON.parse(response.body);
+		
+		if (jsonObject?.kind == "Listing") {
+			processError(Error("Invalid Subreddit"));
+			return;
+		}
+		
+		let icon = "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png";
+		if (jsonObject?.data?.community_icon?.length > 0) {
+			icon = jsonObject?.data?.community_icon;
+		}		
+		else if (jsonObject?.data?.icon_img?.length > 0) {
+			icon = jsonObject?.data?.icon_img;
+		}
+		const verification = {
+			displayName: "/r/" + subreddit,
+			icon: icon
+		};	
+		processVerification(verification);
 	})
 	.catch((requestError) => {
 		processError(requestError);
