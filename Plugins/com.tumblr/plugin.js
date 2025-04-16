@@ -23,36 +23,53 @@ function verify() {
 	});
 }
 
-function load() {
+async function load() {
 	let nowTimestamp = (new Date()).getTime();
 
-	// NOTE: The dashboard will be filled up to the endDate, if possible.
-	let endDate = null;
-	let endDateTimestamp = getItem("endDateTimestamp");
-	if (endDateTimestamp != null) {
-		endDate = new Date(parseInt(endDateTimestamp));
-	}
-
-	let startTimestamp = (new Date()).getTime();
+	try {
+		let blogName = getItem("blogName");
+		if (blogName == null) {
+			blogName = await getBlogName();
+			setItem("blogName", blogName);
+		}
 	
-	queryDashboard(endDate)
-	.then((parameters) =>  {
-		results = parameters[0];
-		newestItemDate = parameters[1];
-		processResults(results, true);
-		setItem("endDateTimestamp", String(newestItemDate.getTime()));
-		let endTimestamp = (new Date()).getTime();
-		console.log(`finished dashboard: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
-	})
-	.catch((requestError) => {
+		// NOTE: The dashboard will be filled up to the endDate, if possible.
+		let endDate = null;
+		let endDateTimestamp = getItem("endDateTimestamp");
+		if (endDateTimestamp != null) {
+			endDate = new Date(parseInt(endDateTimestamp));
+		}
+	
+		let startTimestamp = (new Date()).getTime();
+		
+		queryDashboard(endDate)
+		.then((parameters) =>  {
+			results = parameters[0];
+			newestItemDate = parameters[1];
+			processResults(results, true);
+			setItem("endDateTimestamp", String(newestItemDate.getTime()));
+			let endTimestamp = (new Date()).getTime();
+			console.log(`finished dashboard: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
+		})
+	}
+	catch (error) {
 		console.log(`error dashboard`);
 		processError(requestError);
-	});
+	}
 }
 
 function performAction(actionId, actionValue, item) {
 	let error = new Error(`actionId "${actionId}" not implemented`);
 	actionComplete(null, error);
+}
+
+async function getBlogName() {
+	const text = await sendRequest(site + "/v2/user/info");
+	const jsonObject = JSON.parse(text);
+	const blogs = jsonObject.response.user.blogs;
+	const blog = blogs[0];
+		
+	return blog.name;
 }
 
 function postForItem(item) {
@@ -68,6 +85,8 @@ function postForItem(item) {
 		return null;
 	}
 	
+	const blogName = getItem("blogName");
+
 	const date = new Date(item.timestamp * 1000); // timestamp is seconds since the epoch, convert to milliseconds
 
 	let contentUrl = item.post_url;
@@ -75,21 +94,34 @@ function postForItem(item) {
 	let contentBlocks = contentItem.content;
 	let contentLayouts = contentItem.layout;
 	
+	let isReblogged = false;
+	let isLiked = item.liked;
+	
 	let annotation = null;
 	if (isReblog) {
 		if (item.trail != null && item.trail.length > 0) {
 			let trailOrigin = item.trail[0];
 			
 			const itemBlog = item.blog;
-			const userName = itemBlog.name;
-			const text = "Reblogged by " + userName;
-			annotation = Annotation.createWithText(text);
-			annotation.icon = "https://api.tumblr.com/v2/blog/" + itemBlog.name + "/avatar/96";
-			annotation.uri = item.post_url;
+			const itemBlogName = itemBlog.name;
+
+			if (itemBlogName == blogName) {
+				isReblogged = true;
+			}
+			else {
+				const text = "Reblogged by " + itemBlogName;
+				annotation = Annotation.createWithText(text);
+				annotation.icon = "https://api.tumblr.com/v2/blog/" + itemBlog.name + "/avatar/96";
+				annotation.uri = item.post_url;
+			}
 			
 			contentItem = trailOrigin;
 			contentBlocks = contentItem.content;
 			contentLayouts = contentItem.layout;
+			
+			if (itemBlog.name == blogName) {
+				isReblog = true;
+			}
 			
 // 			if (contentItem.blog.url != null && contentItem.post.id != null) {
 // 				contentUrl = contentItem.blog.url + "/" + contentItem.post.id;
@@ -275,6 +307,25 @@ function postForItem(item) {
 	if (annotation != null) {
 		post.annotations = [annotation];
 	}
+	
+	
+	values = JSON.stringify({ id: item.id_string, reblog_key: item.reblog_key });
+
+	let actions = {};
+	if (isReblogged) {
+		actions["unreblog"] = values;
+	}
+	else {
+		actions["reblog"] = values;
+	}
+	if (isLiked) {
+		actions["unlike"] = values;
+	}
+	else {
+		actions["like"] = values;
+	}
+	post.actions = actions;
+
 	return post;
 }
 
