@@ -1,26 +1,23 @@
 
 // com.tumblr
 
-function verify() {
-	sendRequest(site + "/v2/user/info")
-	.then((text) => {
-		const jsonObject = JSON.parse(text);
+async function verify() {
+	try {
+		const blogName = await getBlogName();
+		setItem("blogName", blogName);
 		
-		const blogs = jsonObject.response.user.blogs;
-		const blog = blogs[0];
-		
-		const displayName = blog.name;
-		const icon = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
+		const displayName = blogName;
+		const icon = "https://api.tumblr.com/v2/blog/" + blogName + "/avatar/96";
 
 		const verification = {
 			displayName: displayName,
 			icon: icon
 		};
 		processVerification(verification);
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
+	}
+	catch (error) {
+		processError(error);
+	}
 }
 
 async function load() {
@@ -42,25 +39,67 @@ async function load() {
 	
 		let startTimestamp = (new Date()).getTime();
 		
-		queryDashboard(endDate)
-		.then((parameters) =>  {
-			results = parameters[0];
-			newestItemDate = parameters[1];
-			processResults(results, true);
-			setItem("endDateTimestamp", String(newestItemDate.getTime()));
-			let endTimestamp = (new Date()).getTime();
-			console.log(`finished dashboard: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
-		})
+		const parameters = await queryDashboard(endDate);
+		const results = parameters[0];
+		const newestItemDate = parameters[1];
+		processResults(results, true);
+		setItem("endDateTimestamp", String(newestItemDate.getTime()));
+		let endTimestamp = (new Date()).getTime();
+		console.log(`finished dashboard: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
 	}
 	catch (error) {
 		console.log(`error dashboard`);
-		processError(requestError);
+		processError(error);
 	}
 }
 
-function performAction(actionId, actionValue, item) {
-	let error = new Error(`actionId "${actionId}" not implemented`);
-	actionComplete(null, error);
+async function performAction(actionId, actionValue, item) {
+	let actions = item.actions;
+	let actionValues = JSON.parse(actionValue);
+
+	try {
+		let blogName = getItem("blogName");
+		if (blogName == null) {
+			blogName = await getBlogName();
+			setItem("blogName", blogName);
+		}
+
+		let date = new Date().toISOString();
+		if (actionId == "like") {
+			const url = `${site}/v2/user/like`;
+			//const url = "https://www.tumblr.com/api/v2/user/like";
+			const parameters = JSON.stringify(actionValues);
+			const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			const jsonObject = JSON.parse(text);
+
+			if (jsonObject?.meta?.status == 200) {			
+				delete actions["like"];
+				const values = { id: actionValues["id"], reblog_key: actionValues["reblog_key"] };
+				actions["unlike"] = actionValue;
+				item.actions = actions;
+				actionComplete(item, null);
+			}
+			else {
+				let error = new Error(`Like failed with ${jsonObject?.meta?.status}`);
+				actionComplete(null, error);
+			}
+		}
+		else {
+			let error = new Error(`actionId "${actionId}" not implemented`);
+			actionComplete(null, error);
+		}
+	}
+	catch (error) {
+		if (error.message == "401 response is invalid") {
+			const result = resetAuthorization()
+			const readableError = new Error("Tumblr authorization needs update, check feed settings");
+			actionComplete(null, readableError);
+		}
+		else {
+			actionComplete(null, error);
+		}
+	}
 }
 
 async function getBlogName() {
@@ -329,7 +368,7 @@ function postForItem(item) {
 	return post;
 }
 
-function queryDashboard(endDate) {
+async function queryDashboard(endDate) {
 
 	// NOTE: These constants are related to the feed limits within Tapestry - it doesn't store more than
 	// 3,000 items or things older than 30 days.
