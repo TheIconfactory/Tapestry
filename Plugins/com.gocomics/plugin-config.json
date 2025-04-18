@@ -8,5 +8,5 @@
 	"provides_attachments": true,
 	"check_interval": 300,
 	"crosstalk": "exclusive",
-	"version": 4
+	"version": 5
 }

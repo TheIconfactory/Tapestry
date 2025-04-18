@@ -65,7 +65,7 @@ function verify() {
 	});
 }
 
-const schemaRegex = /<script type="application\/ld\+json" data-sentry-component="Schema" data-sentry-source-file="Schema\.jsx">(.+?)<\/script>/g;
+const schemaRegex = /<script type="application\/ld\+json">(.+?)<\/script>/g;
 
 function load() {
 	const url = `${site}/${comicId.trim()}`;
