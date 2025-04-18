@@ -67,15 +67,12 @@ async function performAction(actionId, actionValue, item) {
 		let date = new Date().toISOString();
 		if (actionId == "like") {
 			const url = `${site}/v2/user/like`;
-			//const url = "https://www.tumblr.com/api/v2/user/like";
-			const parameters = JSON.stringify(actionValues);
 			const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
-			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			const text = await sendRequest(url, "POST", actionValue, extraHeaders);
 			const jsonObject = JSON.parse(text);
 
 			if (jsonObject?.meta?.status == 200) {			
 				delete actions["like"];
-				const values = { id: actionValues["id"], reblog_key: actionValues["reblog_key"] };
 				actions["unlike"] = actionValue;
 				item.actions = actions;
 				actionComplete(item, null);
@@ -85,6 +82,64 @@ async function performAction(actionId, actionValue, item) {
 				actionComplete(null, error);
 			}
 		}
+		else if (actionId == "unlike") {
+			const url = `${site}/v2/user/unlike`;
+			const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
+			const text = await sendRequest(url, "POST", actionValue, extraHeaders);
+			const jsonObject = JSON.parse(text);
+
+			if (jsonObject?.meta?.status == 200) {			
+				delete actions["unlike"];
+				actions["like"] = actionValue;
+				item.actions = actions;
+				actionComplete(item, null);
+			}
+			else {
+				let error = new Error(`Unlike failed with ${jsonObject?.meta?.status}`);
+				actionComplete(null, error);
+			}
+		}
+		else if (actionId == "reblog") {
+			const url = `${site}/v2/blog/${blogName}/post/reblog`;
+			const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
+			const text = await sendRequest(url, "POST", actionValue, extraHeaders);
+			const jsonObject = JSON.parse(text);
+
+			if (jsonObject?.meta?.status == 201) {
+				delete actions["reblog"];
+				actions["unreblog"] = actionValue;
+				item.actions = actions;
+				actionComplete(item, null);
+			}
+			else {
+				let error = new Error(`Reblog failed with ${jsonObject?.meta?.status}`);
+				actionComplete(null, error);
+			}
+		}
+ 		else if (actionId == "unreblog") {
+			let error = new Error(`Use Tumblr to remove the reblog.`);
+			actionComplete(null, error);
+ 		}
+// 		else if (actionId == "unreblog") {
+// 			const url = `${site}/v2/blog/${blogName}/post/delete`;
+// 			const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
+// 			const text = await sendRequest(url, "POST", actionValue, extraHeaders);
+// 			const jsonObject = JSON.parse(text);
+// 
+// 			if (jsonObject?.meta?.status == 200) {
+// 				delete actions["unreblog"];
+// 
+// 				let actionValues = JSON.parse(actionValue);
+// 				actionValues["id"] = actionValues["id_original"];
+// 				actions["reblog"] = JSON.stringify(actionValues);
+// 				item.actions = actions;
+// 				actionComplete(item, null);
+// 			}
+// 			else {
+// 				let error = new Error(`Unreblog failed with ${jsonObject?.meta?.status}`);
+// 				actionComplete(null, error);
+// 			}
+// 		}
 		else {
 			let error = new Error(`actionId "${actionId}" not implemented`);
 			actionComplete(null, error);
@@ -145,6 +200,10 @@ function postForItem(item) {
 			const itemBlogName = itemBlog.name;
 
 			if (itemBlogName == blogName) {
+				const text = "Reblogged by you";
+				annotation = Annotation.createWithText(text);
+				annotation.icon = "https://api.tumblr.com/v2/blog/" + blogName + "/avatar/96";
+
 				isReblogged = true;
 			}
 			else {
@@ -347,21 +406,17 @@ function postForItem(item) {
 		post.annotations = [annotation];
 	}
 	
-	
-	values = JSON.stringify({ id: item.id_string, reblog_key: item.reblog_key });
+	let actionValues = { id: item.id_string, reblog_key: item.reblog_key };
 
 	let actions = {};
-	if (isReblogged) {
-		actions["unreblog"] = values;
-	}
-	else {
-		actions["reblog"] = values;
+	if (!isReblogged) {
+		actions["reblog"] = JSON.stringify(actionValues);
 	}
 	if (isLiked) {
-		actions["unlike"] = values;
+		actions["unlike"] = JSON.stringify(actionValues);
 	}
 	else {
-		actions["like"] = values;
+		actions["like"] = JSON.stringify(actionValues);
 	}
 	post.actions = actions;
 

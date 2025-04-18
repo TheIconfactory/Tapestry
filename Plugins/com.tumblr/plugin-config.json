@@ -10,11 +10,11 @@
 	"oauth_token": "https://api.tumblr.com/v2/oauth2/token",
 	"oauth_type": "code",
 	"oauth_code_key": "code",
-	"oauth_scope": "basic+offline_access",
+	"oauth_scope": "write+offline_access",
 	"oauth_grant_type": "authorization_code",
 	"oauth_http_redirect": true,
 	"fail_status_code": 401,
 	"provides_attachments": true,
 	"check_interval": 300,
-	"version": 2
+	"version": 3
 }

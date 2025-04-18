@@ -7,7 +7,7 @@
 		},
 		{
 			"id": "unreblog",
-			"name": "Remove Reblog",
+			"name": "Reblogged",
 			"icon": "tapestry.boost.fill",
 		},
 		{
