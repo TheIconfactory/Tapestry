@@ -1,6 +1,10 @@
 
 // org.joinmastodon.tag
 
+if (require('mastodon-shared.js') === false) {
+	throw new Error("Failed to load mastodon-shared.js");
+}
+
 function verify() {
 	const verifyTag = normalizeTag(tag);
 	const url = `${site}/api/v1/timelines/tag/${verifyTag}`;
@@ -34,6 +38,7 @@ function load() {
 	});	
 }
 
+/*
 function normalizeTag(tag) {
 	let result = tag.trim();
 	if (result.length > 1 && result.startsWith("#")) {
@@ -41,6 +46,7 @@ function normalizeTag(tag) {
 	}
 	return result;
 }
+*/
 
 function queryStatusesForTag(tag) {
 
@@ -69,6 +75,7 @@ function queryStatusesForTag(tag) {
 	
 }
 
+/*
 function postForItem(item, date = null, shortcodes = {}) {
 	const account = item["account"];
 	const displayName = account["display_name"];
@@ -232,3 +239,4 @@ function postForItem(item, date = null, shortcodes = {}) {
 	
 	return post;
 }
+*/

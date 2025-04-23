@@ -1,5 +1,9 @@
 
-// org.joinmastodon
+// org.joinmastodon.list
+
+if (require('mastodon-shared.js') === false) {
+	throw new Error("Failed to load mastodon-shared.js");
+}
 
 function verify() {
 	sendRequest(site + "/api/v1/accounts/verify_credentials")
@@ -97,9 +101,11 @@ function load() {
 	}
 }
 
+/*
 function normalizeList(list) {
 	return list.trim();
 }
+*/
 
 function queryStatusesForList(listId) {
 
@@ -221,6 +227,7 @@ function queryStatusesForList(listId) {
 	
 }
 
+/*
 function postForItem(item, date = null, shortcodes = {}) {
 	const account = item["account"];
 	const displayName = account["display_name"];
@@ -384,3 +391,5 @@ function postForItem(item, date = null, shortcodes = {}) {
 	
 	return post;
 }
+
+*/

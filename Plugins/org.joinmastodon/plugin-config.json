@@ -18,5 +18,5 @@
 	"provides_attachments": true,
 	"canPost": true,
 	"check_interval": 300,
-	"version": 5
+	"version": 6
 }

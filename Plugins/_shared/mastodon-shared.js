@@ -1,86 +1,6 @@
 
-// org.joinmastodon.account
+// org.joinmastodon - shared
 
-if (require('mastodon-shared.js') === false) {
-	throw new Error("Failed to load mastodon-shared.js");
-}
-
-function verify() {
-	const verifyAccount = normalizeAccount(account);
-	const url = `${site}/api/v1/accounts/lookup?acct=${verifyAccount}`
-	sendRequest(url)
-	.then((text) => {
-		const jsonObject = JSON.parse(text);
-		
-		let displayName = "";
-		if (jsonObject.display_name != null && jsonObject.display_name.length > 0) {
-			displayName = jsonObject.display_name;
-		}
-		else {
-			displayName = "@" + jsonObject.username;
-		}
-
-		const id = jsonObject.id;
-		setItem("id", id);
-		
-		if (jsonObject.avatar != null) {
-			const icon = jsonObject.avatar
-			const verification = {
-				displayName: displayName,
-				icon: icon
-			};
-			processVerification(verification);
-		}
-		else {
-			processVerification(displayName);
-		}
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
-}
-
-function load() {
-	var id = getItem("id");
-
-	if (id != null) {
-		queryStatusesForUser(id)
-		.then((results) =>  {
-			console.log(`finished (cached) feed`);
-			processResults(results, true);
-		})
-		.catch((requestError) => {
-			console.log(`error (cached) feed`);
-			processError(requestError);
-		});	
-	}
-	else {
-		const loadAccount = normalizeAccount(account);
-		const url = `${site}/api/v1/accounts/lookup?acct=${loadAccount}`
-		sendRequest(url)
-		.then((text) => {
-			const jsonObject = JSON.parse(text);
-		
-			const id = jsonObject.id;
-			setItem("id", id);
-		
-			queryStatusesForUser(id)
-			.then((results) =>  {
-				console.log(`finished feed`);
-				processResults(results, true);
-			})
-			.catch((requestError) => {
-				console.log(`error feed`);
-				processError(requestError);
-			});	
-		})
-		.catch((requestError) => {
-			processError(requestError);
-		});
-	}
-}
-
-/*
 function normalizeAccount(account) {
 	let result = account.trim();
 	if (result.length > 1 && result.startsWith("@")) {
@@ -88,60 +8,20 @@ function normalizeAccount(account) {
 	}
 	return result;
 }
-*/
 
-function queryStatusesForUser(id) {
-
-	return new Promise((resolve, reject) => {
-		sendRequest(site + "/api/v1/accounts/" + id + "/statuses?limit=40")
-		.then((text) => {
-			const jsonObject = JSON.parse(text);
-			let results = [];
-			for (const item of jsonObject) {
-				let showItem = true;
-
-				let post = null;
-				let annotation = null;
-
-				if (item.reblog != null) {
-					if (includeBoosts == "on") {
-						post = postForItem(item.reblog);
-						
-						annotation = Annotation.createWithText("BOOSTED");
-						annotation.uri = item.account["url"];
-					}
-				}
-				else if (item.in_reply_to_account_id != null) {
-					if (includeReplies == "on") {
-						post = postForItem(item);
-
-						annotation = Annotation.createWithText("REPLY");
-						annotation.uri = item.account["url"];
-					}
-				}
-				else {
-					post = postForItem(item);
-				}
-
-				if (post != null) {
-					if (annotation != null) {
-						post.annotations = [annotation];
-					}
-	
-					results.push(post);
-				}
-			}
-			resolve(results);
-		})
-		.catch((error) => {
-			reject(error);
-		});
-	});
-	
+function normalizeList(list) {
+	return list.trim();
 }
 
-/*
-function postForItem(item, date = null, shortcodes = {}) {
+function normalizeTag(tag) {
+	let result = tag.trim();
+	if (result.length > 1 && result.startsWith("#")) {
+		result = result.slice(1);
+	}
+	return result;
+}
+
+function postForItem(item, includeActions = false, date = null, shortcodes = {}) {
 	const account = item["account"];
 	const displayName = account["display_name"];
 	const userName = account["username"];
@@ -184,6 +64,29 @@ function postForItem(item, date = null, shortcodes = {}) {
 	post.author = identity;
 	post.body = content;
 
+	if (includeActions) {
+		let actions = {};
+		if (item?.favourited) {
+			actions["unfavorite"] = item.id;
+		}
+		else {
+			actions["favorite"] = item.id;
+		}
+		if (item?.reblogged) {
+			actions["unboost"] = item.id;
+		}
+		else {
+			actions["boost"] = item.id;
+		}
+		if (item?.bookmarked) {
+			actions["unbookmark"] = item.id;
+		}
+		else {
+			actions["bookmark"] = item.id;
+		}
+		post.actions = actions;
+	}
+	
 	if (contentWarning != null) {
 		post.contentWarning = contentWarning;
 	}
@@ -304,5 +207,3 @@ function postForItem(item, date = null, shortcodes = {}) {
 	
 	return post;
 }
-
-*/

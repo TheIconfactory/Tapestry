@@ -1,6 +1,10 @@
 
 // org.joinmastodon
 
+if (require('mastodon-shared.js') === false) {
+	throw new Error("Failed to load mastodon-shared.js");
+}
+
 function verify() {
 	sendRequest(site + "/api/v1/accounts/verify_credentials")
 	.then((text) => {
@@ -216,6 +220,7 @@ function performAction(actionId, actionValue, item) {
 	}
 }
 
+/*
 function postForItem(item, date = null, shortcodes = {}) {
 	const account = item["account"];
 	const displayName = account["display_name"];
@@ -400,6 +405,7 @@ function postForItem(item, date = null, shortcodes = {}) {
 	
 	return post;
 }
+*/
 
 function queryHomeTimeline(endDate) {
 
@@ -481,7 +487,7 @@ function queryHomeTimeline(endDate) {
 						endUpdate = true;
 					}
 					
-					const post = postForItem(postItem, date, shortcodes);
+					const post = postForItem(postItem, true, date, shortcodes);
 					if (annotation != null) {
 						post.annotations = [annotation];
 					}
@@ -574,7 +580,7 @@ function queryMentions() {
 					annotation = Annotation.createWithText(`PRIVATE MENTION`);
 				}	
 	
-				const post = postForItem(postItem, null, shortcodes);
+				const post = postForItem(postItem, true, null, shortcodes);
 				if (annotation != null) {
 					post.annotations = [annotation];
 				}
@@ -603,12 +609,12 @@ function queryStatusesForUser(id) {
 				let post = null;
 				if (item.reblog != null) {
 					const date = new Date(item["created_at"]);
-					post = postForItem(item.reblog, date);
+					post = postForItem(item.reblog, true, date);
 					annotation = Annotation.createWithText("Boosted by you");
 					annotation.uri = item.account["url"];
 				}
 				else {
-					post = postForItem(item);
+					post = postForItem(item, true);
 				}
 
 				if (annotation == null) {
