@@ -642,11 +642,13 @@ The resource’s file name extension determines what type of data is returned:
   * Any other extension, including **".txt"** returns the contents of the file as a UTF-8 `String`.
   * If the file contains any other kind of data, such as an image, `false` is returned.
 
+Files in resources folder can be symbolic links (not aliases) to other files in the folder that contains the connectors. This way the connectors "com.example.one" and "com.example.two" can share common code in a single file. When you save a connector, the symbolic links are resolved and stored individually in the resulting .tapestry file.
+
 If you are loading functions, errors can be detected with a `false` return value:
 
 ```javascript
 if (require('utility.js') === false) {
-	console.log("failed to read utility.js")
+	throw new Error("Failed to load utility.js");
 }
 ```
 
@@ -655,7 +657,7 @@ This can be extended to ensure that `String` and `Object` are loaded correctly.
 ```javascript
 let template = require('template.txt');
 if (template === false) {
-	console.log(`failed to load template`)
+	throw new Error("Failed to load template")
 }
 else {
 	console.log(`template = ${template}`)
@@ -663,6 +665,12 @@ else {
 ```
 
 If you have used Node.js’s module loading, the approach above is very similar approach. Note that there is no need to export functions from the .js file that is being loaded: all functions and variables in the file are exported.
+
+### TBD resetAuthorization()
+
+Any authorization associated with the feed using the connector will be removed. This should be used when an unrecoverable error is detected.
+
+It’s an indicator that something is very broken and we need to power cycle the account behind the feed. The user will be prompted to reauthorize the feed.
 
 ## Configuration
 
