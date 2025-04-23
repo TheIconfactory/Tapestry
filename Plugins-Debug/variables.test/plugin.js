@@ -32,6 +32,8 @@ function load() {
 	bogusItem.body = "Back to the future.";
 	processResults([bogusItem], false);
 	
+	//boom();
+	
 	headers = {
 		"X-CLIENT-ID": "My __CLIENT_ID__",
 		"X-ACCESS_TOKEN": "__ACCESS_TOKEN__"
