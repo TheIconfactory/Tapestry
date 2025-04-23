@@ -4,13 +4,13 @@
 			"name": "account",
 			"type": "text",
 			"prompt": "Account",
-			"placeholder": "gnitsetgnitset",
+			"placeholder": "iconfactory.com",
 		},
 		{
 			"name": "listId",
 			"type": "text",
 			"prompt": "List Identifier",
-			"placeholder": "NICE HANDS",
+			"placeholder": "3lng6ryhigk2a",
 		},
 	]
 }

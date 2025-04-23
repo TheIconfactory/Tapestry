@@ -1,25 +1,14 @@
 {
 	"variables": [
 		{
-			"title": "Artists: Trending",
+			"title": "Iconfactory Workers",
 			"names": [
 				"account",
-				"feedId",
+				"listId",
 			],
 			"values": [
-				"bsky.arg",
-				"art-new",
-			],
-		},
-		{
-			"title": "Science",
-			"names": [
-				"account",
-				"feedId",
-			],
-			"values": [
-				"bossett.social",
-				"for-science",
+				"iconfactory.com",
+				"3lng6ryhigk2a",
 			],
 		},
 	]
