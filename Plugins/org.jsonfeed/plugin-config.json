@@ -3,6 +3,7 @@
 	"display_name": "Blog Feed (JSON)",
 	"service_name": "Blog",
 	"default_color": "purple",
+	"default_service_name_visibility": "hidden",
 	"icon": "https://usetapestry.com/icons/jsonfeed.png",
 	"site_prompt": "Feed URL",
 	"site_placeholder": "https://foo.com/feed.json",
