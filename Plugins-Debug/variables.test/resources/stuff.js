@@ -1,1 +1,1 @@
-../../Common/stuff.js
+../../_shared/stuff.js

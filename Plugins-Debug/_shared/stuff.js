@@ -1,4 +1,3 @@
-
 function CHOCK(value) {
 	return value.toUpperCase();
 }
@@ -9,7 +8,9 @@ function other() {
 
 function boom() {
 	// WHAT DID YOU EXPECT
-	throw new Error("BOOM");
+	let error = new Error("BOOM");
+	error.cause = "BECAUSE";
+	throw error;
 }
 
 /* 

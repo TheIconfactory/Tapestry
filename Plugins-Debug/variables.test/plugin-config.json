@@ -4,8 +4,8 @@
 	"icon": "https://iconfactory.com/favicon.ico",
 	"site": "https://example.com",
 	"xxx_oauth_authorize": "https://example.com/oauth/authorize",
-	"needs_verification": true,
 	"xxx_needs_api_keys": true,
+	"needs_verification": true,
 	"verify_variables": true,
 	"check_interval": 300
 }

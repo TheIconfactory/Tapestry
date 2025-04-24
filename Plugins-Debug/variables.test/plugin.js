@@ -36,11 +36,12 @@ function load() {
 	
 	headers = {
 		"X-CLIENT-ID": "My __CLIENT_ID__",
-		"X-ACCESS_TOKEN": "__ACCESS_TOKEN__"
+		"Authorization": "Bearer __ACCESS_TOKEN__",
+		"X-wth": "__CHOCK_MODE__ 696969696969",
 	};
-// 	sendRequest("https://example.com", "GET", "client_id=__CLIENT_ID__&access_token=__ACCESS_TOKEN__", headers)
-// 	.then((text) => {
-// 		console.log("got response");
+ 	sendRequest("http://usetapestry.com.local/samples/ping", "POST", "client_id=__CLIENT_ID__&access_token=__ACCESS_TOKEN__", headers)
+ 	.then((text) => {
+ 		console.log(text);
 		let uri = "custom://variables.test";
 		let date = new Date();
 		let status = ""
@@ -65,10 +66,10 @@ function load() {
 		resultItem.shortcodes = { "ONE": "https://example.com/one.jpg", "CHOCK": "http://chocklock.com/favicon.ico" };
 		resultItem.annotations = [Annotation.createWithText("Test")];
 		processResults([resultItem]);
-// 	})
-// 	.catch((error) => {
-// 		processError(error);
-// 	});
+ 	})
+ 	.catch((error) => {
+ 		processError(error);
+ 	});
 }
 
 function performAction(actionId, actionValue, item) {
