@@ -67,94 +67,84 @@ async function performAction(actionId, actionValue, item) {
 		let date = new Date().toISOString();
 		if (actionId == "like") {
 			const url = `${site}/v2/user/like`;
-			const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
-			const text = await sendRequest(url, "POST", actionValue, extraHeaders);
-			const jsonObject = JSON.parse(text);
-
-			if (jsonObject?.meta?.status == 200) {			
-				delete actions["like"];
-				actions["unlike"] = actionValue;
-				item.actions = actions;
-				actionComplete(item, null);
-			}
-			else {
-				let error = new Error(`Like failed with ${jsonObject?.meta?.status}`);
-				actionComplete(null, error);
+			const jsonObject = await sendAction(url, actionValue);
+			if (jsonObject != null) {
+				if (jsonObject?.meta?.status == 200) {			
+					delete actions["like"];
+					actions["unlike"] = actionValue;
+					item.actions = actions;
+					actionComplete(item, null);
+				}
+				else {
+					let error = new Error(`Like failed with ${jsonObject?.meta?.status}`);
+					actionComplete(null, error);
+				}
 			}
 		}
 		else if (actionId == "unlike") {
 			const url = `${site}/v2/user/unlike`;
-			const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
-			const text = await sendRequest(url, "POST", actionValue, extraHeaders);
-			const jsonObject = JSON.parse(text);
-
-			if (jsonObject?.meta?.status == 200) {			
-				delete actions["unlike"];
-				actions["like"] = actionValue;
-				item.actions = actions;
-				actionComplete(item, null);
-			}
-			else {
-				let error = new Error(`Unlike failed with ${jsonObject?.meta?.status}`);
-				actionComplete(null, error);
+			const jsonObject = await sendAction(url, actionValue);
+			if (jsonObject != null) {
+				if (jsonObject?.meta?.status == 200) {			
+					delete actions["unlike"];
+					actions["like"] = actionValue;
+					item.actions = actions;
+					actionComplete(item, null);
+				}
+				else {
+					let error = new Error(`Unlike failed with ${jsonObject?.meta?.status}`);
+					actionComplete(null, error);
+				}
 			}
 		}
 		else if (actionId == "reblog") {
 			const url = `${site}/v2/blog/${blogName}/post/reblog`;
-			const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
-			const text = await sendRequest(url, "POST", actionValue, extraHeaders);
-			const jsonObject = JSON.parse(text);
-
-			if (jsonObject?.meta?.status == 201) {
-				delete actions["reblog"];
-				actions["unreblog"] = actionValue;
-				item.actions = actions;
-				actionComplete(item, null);
-			}
-			else {
-				let error = new Error(`Reblog failed with ${jsonObject?.meta?.status}`);
-				actionComplete(null, error);
+			const jsonObject = await sendAction(url, actionValue);
+			if (jsonObject != null) {
+				if (jsonObject?.meta?.status == 201) {
+					delete actions["reblog"];
+					actions["unreblog"] = actionValue;
+					item.actions = actions;
+					actionComplete(item, null);
+				}
+				else {
+					let error = new Error(`Reblog failed with ${jsonObject?.meta?.status}`);
+					actionComplete(null, error);
+				}
 			}
 		}
  		else if (actionId == "unreblog") {
-			let error = new Error(`Use Tumblr to remove the reblog.`);
-			actionComplete(null, error);
+ 			// the unreblog action is ignored (the post needs to be removed on the Tumblr site)
+			actionComplete(null, null);
  		}
-// 		else if (actionId == "unreblog") {
-// 			const url = `${site}/v2/blog/${blogName}/post/delete`;
-// 			const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
-// 			const text = await sendRequest(url, "POST", actionValue, extraHeaders);
-// 			const jsonObject = JSON.parse(text);
-// 
-// 			if (jsonObject?.meta?.status == 200) {
-// 				delete actions["unreblog"];
-// 
-// 				let actionValues = JSON.parse(actionValue);
-// 				actionValues["id"] = actionValues["id_original"];
-// 				actions["reblog"] = JSON.stringify(actionValues);
-// 				item.actions = actions;
-// 				actionComplete(item, null);
-// 			}
-// 			else {
-// 				let error = new Error(`Unreblog failed with ${jsonObject?.meta?.status}`);
-// 				actionComplete(null, error);
-// 			}
-// 		}
 		else {
 			let error = new Error(`actionId "${actionId}" not implemented`);
 			actionComplete(null, error);
 		}
 	}
 	catch (error) {
-		if (error.message == "401 response is invalid") {
-			const result = resetAuthorization()
-			const readableError = new Error("Tumblr authorization needs update, check feed settings");
-			actionComplete(null, readableError);
-		}
-		else {
-			actionComplete(null, error);
-		}
+		actionComplete(null, error);
 	}
+}
+
+async function sendAction(url, parameters) {
+	const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
+	const text = await sendRequest(url, "POST", parameters, extraHeaders, true);
+	const response = JSON.parse(text);
+	if (response.status == 401) {
+		raiseAuthorizationUpdate();
+		const authorizationError = new Error("Tumblr authorization is invalid");
+		actionComplete(null, authorizationError);
+		return null;
+	}
+	else {
+		return JSON.parse(response.body);
+	}
+}
+
+function raiseAuthorizationUpdate() {
+		const blogName = getItem("blogName");
+		raiseCondition("authorize", "Authorization needs update", `Tumblr feed **${blogName}** needs to be reauthorized to use actions.`)
 }
 
 async function getBlogName() {

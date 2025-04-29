@@ -624,8 +624,8 @@ See section on `actions.json` for more information on how to perform actions.
 
 Indicates that the action has been performed. Must be called.
 
-  * item: `Item` to be updated (can be null).
-  * error: `Error` which indicates what went wrong. Will be displayed in the user interface.
+  * item: `Item` to be updated. A null value indicates that the item was not changed.
+  * error: If not null, the `Error` indicates what went wrong and will be displayed in the user interface.
 
 See section on `actions.json` for more information on how to complete actions.
 
@@ -666,11 +666,19 @@ else {
 
 If you have used Node.js’s module loading, the approach above is very similar approach. Note that there is no need to export functions from the .js file that is being loaded: all functions and variables in the file are exported.
 
-### TBD resetAuthorization()
+### raiseCondition(condition, title, description)
 
-Any authorization associated with the feed using the connector will be removed. This should be used when an unrecoverable error is detected.
+Raises an persistent error condition that will be presented as a fatal error to the user:
 
-It’s an indicator that something is very broken and we need to power cycle the account behind the feed. The user will be prompted to reauthorize the feed.
+  * condition: A `String` with the type of condition: either "authorize" or "disable".
+  * title: A `String` with a short description of the condition.
+  * description A `String` with a longer description.
+
+When "authorize" is used, the authorization tokens for the feed will be removed. A prominent user interface will prompt the user to reauthorize the feed.
+
+When "disable" is used, the condition is displayed prominently and the user will be given an option to disable the feed.
+
+Any other condition is ignored.
 
 ## Configuration
 
