@@ -1,12 +1,9 @@
 {
 	"inputs": [
 		{
-			"name": "minimum_requirement"
-		},
-		{
 			"name": "title",
 			"type": "text",
-			"prompt": "A Title",
+			"prompt": "Feed Title",
 			"placeholder": "Enter title"
 		},
 		{

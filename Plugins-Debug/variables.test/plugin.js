@@ -125,11 +125,11 @@ function performAction(actionId, actionValue, item) {
 		actionComplete(item, error);
 	}
 	else if (actionId == "reply") {
-		raiseCondition("disable", "API deprecated", "This **test feed** is a work of _art_.");
+		raiseCondition("disable", "API deprecated", "This **is an example** and a _work of art_. The connector's script raised a condition that's reported in the Settings user interface.");
 		actionComplete(null, null);
 	}
 	else if (actionId == "boom") {
-		throw new Error("Sizzle");
+		throw new Error("Sizzle aka an uncaught exception in the connector script.");
 	}
 	else if (actionId == "snooze") {
 		// force a timeout
