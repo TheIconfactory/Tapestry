@@ -1,16 +1,17 @@
 function CHOCK(value) {
-	return value.toUpperCase();
+    return value.toUpperCase();
 }
 
 function other() {
-	console.log("test");
+    console.log("test");
 }
 
+//SIN TAX ERR
 function boom() {
-	// WHAT DID YOU EXPECT
-	let error = new Error("BOOM");
-	error.cause = "BECAUSE";
-	throw error;
+    // WHAT DID YOU EXPECT
+    let error = new Error("BOOM");
+    error.cause = "BECAUSE";
+    throw error;
 }
 
 /* 

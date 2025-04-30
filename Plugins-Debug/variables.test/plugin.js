@@ -27,11 +27,18 @@ function verify() {
 }
 
 function load() {
+	//SIN TAX ERR
+	
+	let testError = new Error("TEST");
+	testError.cause = "loading stupidity";
+	
 	const bogusDate = new Date(2999, 0, 1);
 	const bogusItem = Item.createWithUriDate("https://example.com/bogus", bogusDate);
 	bogusItem.body = "Back to the future.";
 	processResults([bogusItem], false);
 	
+	//processError("foo");
+	//processError(testError);
 	//boom();
 	
 	headers = {
@@ -46,7 +53,8 @@ function load() {
 		let date = new Date();
 		let status = ""
 		if (reticulate_splines == "on") {
-			status = CHOCK("Splines are being reticulated");
+			//status = CHOCK("Splines are being reticulated");
+			status = "Splines are being reticulated";
 		}
 		if (turbo == "on") {
 			if (status.length > 0) {
@@ -62,7 +70,7 @@ function load() {
 		resultItem.body = content;
 		let object = {abc: 123, def: "xyz"};
 		let payload = JSON.stringify(object);
-		resultItem.actions = { favorite: payload, boost: "456" };
+		resultItem.actions = { favorite: payload, boost: "456", reply: "999", boom: "***", snooze: "zzz" };
 		resultItem.shortcodes = { "ONE": "https://example.com/one.jpg", "CHOCK": "http://chocklock.com/favicon.ico" };
 		resultItem.annotations = [Annotation.createWithText("Test")];
 		processResults([resultItem]);
@@ -114,6 +122,20 @@ function performAction(actionId, actionValue, item) {
 		while (new Date().getTime() < start + delay);
 		let error = new Error(`can't handle actionValue = ${actionValue}`)
 		actionComplete(item, error);
+	}
+	else if (actionId == "reply") {
+		raiseCondition("disable", "API deprecated", "This **test feed** is a work of _art_");
+		actionComplete(null, null);
+	}
+	else if (actionId == "boom") {
+		throw new Error("Sizzle");
+	}
+	else if (actionId == "snooze") {
+		// force a timeout
+	}
+	else {
+		let error = new Error(`actionId "${actionId}" not implemented`);
+		actionComplete(null, error);
 	}
 	
 }

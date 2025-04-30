@@ -1,30 +1,40 @@
 {
 	"items": [
 		{
-			"id": "favorite",
-			"name": "Add Favorite",
-			"icon": "heart.fill",
-		},
-		{
-			"id": "unfavorite",
-			"name": "Remove Favorite",
-			"icon": "heart",
-		},
-		{
 			"id": "boost",
 			"name": "Add Boost",
-			"icon": "arrow.up.to.line.circle.fill",
+			"icon": "tapestry.boost",
 		},
 		{
 			"id": "unboost",
 			"name": "Remove Boost",
-			"icon": "arrow.down.to.line.circle",
+			"icon": "tapestry.boost.fill",
+		},
+		{
+			"id": "favorite",
+			"name": "Add Favorite",
+			"icon": "heart",
+		},
+		{
+			"id": "unfavorite",
+			"name": "Remove Favorite",
+			"icon": "heart.fill",
 		},
 		{
 			"id": "reply",
 			"name": "Reply",
 			"icon": "paperplane",
-		}
+		},
+		{
+			"id": "boom",
+			"name": "Boom",
+			"icon": "flame",
+		},
+		{
+			"id": "snooze",
+			"name": "Snooze",
+			"icon": "zzz",
+		},
 	],
 	"tbd": [],
 }

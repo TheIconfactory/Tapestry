@@ -670,15 +670,15 @@ If you have used Node.js’s module loading, the approach above is very similar 
 
 Raises an persistent error condition that will be presented as a fatal error to the user:
 
-  * condition: A `String` with the type of condition: either "authorize" or "disable".
+  * type: A `String` with the type of condition: either "authorize" or "disable".
   * title: A `String` with a short description of the condition.
-  * description A `String` with a longer description.
+  * message: A `String` with a longer description.
 
 When "authorize" is used, the authorization tokens for the feed will be removed. A prominent user interface will prompt the user to reauthorize the feed.
 
 When "disable" is used, the condition is displayed prominently and the user will be given an option to disable the feed.
 
-Any other condition is ignored.
+Any other `type` is ignored.
 
 ## Configuration
 
