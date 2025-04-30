@@ -16,5 +16,6 @@
 	"fail_status_code": 401,
 	"provides_attachments": true,
 	"check_interval": 300,
-	"version": 3
+	"minimum_app_version": "1.2",
+	"version": 4
 }

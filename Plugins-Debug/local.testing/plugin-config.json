@@ -3,6 +3,8 @@
 	"display_name": "API Testing ULTRA",
 	"icon": "https://usetapestry.com/icons/generic.png",
 	"site_prompt": "Test URL",
+	"site_placeholder": "https://example.com",
 	"item_style": "post",
-	"version": 6
+	"minimum_app_version": "1.2",
+	"version": 7
 }

@@ -1,6 +1,21 @@
 {
 	"items": [
 		{
+			"id": "reply",
+			"name": "Reply",
+			"icon": "paperplane",
+		},
+		{
+			"id": "boom",
+			"name": "Boom",
+			"icon": "flame",
+		},
+		{
+			"id": "snooze",
+			"name": "Snooze",
+			"icon": "zzz",
+		},
+		{
 			"id": "boost",
 			"name": "Add Boost",
 			"icon": "tapestry.boost",
@@ -19,21 +34,6 @@
 			"id": "unfavorite",
 			"name": "Remove Favorite",
 			"icon": "heart.fill",
-		},
-		{
-			"id": "reply",
-			"name": "Reply",
-			"icon": "paperplane",
-		},
-		{
-			"id": "boom",
-			"name": "Boom",
-			"icon": "flame",
-		},
-		{
-			"id": "snooze",
-			"name": "Snooze",
-			"icon": "zzz",
 		},
 	],
 	"tbd": [],

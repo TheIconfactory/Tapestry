@@ -7,5 +7,6 @@
 	"xxx_needs_api_keys": true,
 	"needs_verification": true,
 	"verify_variables": true,
+	"minimum_app_version": "1.2",
 	"check_interval": 300
 }

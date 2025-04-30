@@ -49,8 +49,9 @@ function load() {
  	sendRequest("http://usetapestry.com.local/samples/ping", "POST", "client_id=__CLIENT_ID__&access_token=__ACCESS_TOKEN__", headers)
  	.then((text) => {
  		console.log(text);
-		let uri = "custom://variables.test";
 		let date = new Date();
+		//let uri = "custom://variables.test";
+		let uri = `https://example.com/?timestamp=${date.getTime()}`;
 		let status = ""
 		if (reticulate_splines == "on") {
 			//status = CHOCK("Splines are being reticulated");
@@ -64,7 +65,7 @@ function load() {
 		}
 		status += ` at level ${value}`;
 		status = status.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-		let content = `<p>Test content for ${site} & ${title}</p><p>${status}</p><blockquote><p>For dessert, you'll be having ${dessert_choice}. Enjoy!</p></blockquote><p><a href="https://streamer.iconfactory.net">Check user agent in logs</a><img src="https://iconfactory.com/images-v8/if_logo.png" width="188" height="43" alt="IF logo"></p>`
+		let content = `<p>Test content for ${site} & ${title}</p><p>${status}</p><blockquote><p>For dessert, you'll be having ${dessert_choice}. Enjoy!</p></blockquote><p><a href="http://usetapestry.com.local">Check user agent in logs</a><img src="https://iconfactory.com/images-v8/if_logo.png" width="188" height="43" alt="IF logo"></p>`
 		
 		const resultItem = Item.createWithUriDate(uri, date);
 		resultItem.body = content;
@@ -124,7 +125,7 @@ function performAction(actionId, actionValue, item) {
 		actionComplete(item, error);
 	}
 	else if (actionId == "reply") {
-		raiseCondition("disable", "API deprecated", "This **test feed** is a work of _art_");
+		raiseCondition("disable", "API deprecated", "This **test feed** is a work of _art_.");
 		actionComplete(null, null);
 	}
 	else if (actionId == "boom") {
