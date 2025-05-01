@@ -1,0 +1,10 @@
+{
+	"items": [
+		{
+			"id": "snooze",
+			"name": "Snooze",
+			"icon": "timer",
+		},
+	],
+	"tbd": [],
+}
