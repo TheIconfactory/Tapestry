@@ -1,11 +1,9 @@
 
 // blog.micro
 
-function verify() {
-	//sendRequest(site + "/account/verify", "POST", "token=__bearerToken__");
-	const url = site + "/account/verify";
-	sendRequest(url, "POST", "token=__ACCESS_TOKEN__")
-	.then((text) => {
+async function verify() {
+	try {
+		const text = await sendRequest(`${site}/account/verify`, "POST", "token=__ACCESS_TOKEN__")
 		const jsonObject = JSON.parse(text);
 		
 		if (jsonObject["username"] != null) {
@@ -29,17 +27,17 @@ function verify() {
 			const message = jsonObject["error"] ?? "Invalid response";
 			processError(Error(message));
 		}
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
+	}
+	catch (error) {
+		processError(error);
+	}
 }
 
-function load() {
+async function load() {
 	const filterMentions = includeMentions != "on";
 	
-	sendRequest(site + "/posts/timeline?count=200", "GET")
-	.then((text) => {
+	try {
+		const text = await sendRequest(`${site}/posts/timeline?count=200`);
 		const jsonObject = JSON.parse(text);
 		const items = jsonObject["items"];
 		var results = [];
@@ -50,6 +48,15 @@ function load() {
 				}
 			}
 			
+			let actions = {};
+			let actionValue = item.id;
+			if (item["_microblog"].is_bookmark) {
+				actions["unbookmark"] = actionValue;
+			}
+			else {
+				actions["bookmark"] = actionValue;
+			}
+		
 			const author = item.author; 
 			const identity = Identity.createWithName(author.name);
 			identity.uri = author.url;
@@ -62,12 +69,43 @@ function load() {
 			const resultItem = Item.createWithUriDate(url, date);
 			resultItem.body = content;
 			resultItem.author = identity;
+			resultItem.actions = actions;
 			
 			results.push(resultItem);
 		}
 		processResults(results);
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});	
+	}
+	catch (error) {
+		processError(error);
+	}
+}
+
+async function performAction(actionId, actionValue, item) {
+	let actions = item.actions;
+	
+	try {	
+		if (actionId == "bookmark") {
+			const text = await sendRequest(`${site}/posts/favorites`, "POST", `id=${actionValue}`)
+	
+			delete actions["bookmark"];
+			actions["unbookmark"] = actionValue;
+			item.actions = actions;
+			actionComplete(item, null);
+		}
+		else if (actionId == "unbookmark") {
+			const text = await sendRequest(`${site}/posts/favorites/${actionValue}`, "DELETE")
+
+			delete actions["unbookmark"];
+			actions["bookmark"] = actionValue;
+			item.actions = actions;
+			actionComplete(item, null);
+		}
+		else {
+			let error = new Error(`actionId "${actionId}" not implemented`);
+			actionComplete(null, error);
+		}
+	}
+	catch (error) {
+		actionComplete(null, error);
+	}
 }

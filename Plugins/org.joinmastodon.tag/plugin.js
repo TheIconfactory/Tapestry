@@ -1,14 +1,19 @@
 
 // org.joinmastodon.tag
 
+if (require('mastodon-shared.js') === false) {
+	throw new Error("Failed to load mastodon-shared.js");
+}
+
 function verify() {
-	const url = `${site}/api/v1/timelines/tag/${tag}`;
+	const verifyTag = normalizeTag(tag);
+	const url = `${site}/api/v1/timelines/tag/${verifyTag}`;
 	sendRequest(url)
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		
 		if (jsonObject.length > 0) {
-			const displayName = "#" + tag;
+			const displayName = "#" + verifyTag;
 			processVerification(displayName);
 		}
 		else {
@@ -21,7 +26,8 @@ function verify() {
 }
 
 function load() {
-	queryStatusesForTag(tag)
+	const loadTag = normalizeTag(tag);
+	queryStatusesForTag(loadTag)
 	.then((results) =>  {
 		console.log(`finished (cached) feed`);
 		processResults(results, true);
@@ -31,6 +37,16 @@ function load() {
 		processError(requestError);
 	});	
 }
+
+/*
+function normalizeTag(tag) {
+	let result = tag.trim();
+	if (result.length > 1 && result.startsWith("#")) {
+		result = result.slice(1);
+	}
+	return result;
+}
+*/
 
 function queryStatusesForTag(tag) {
 
@@ -59,6 +75,7 @@ function queryStatusesForTag(tag) {
 	
 }
 
+/*
 function postForItem(item, date = null, shortcodes = {}) {
 	const account = item["account"];
 	const displayName = account["display_name"];
@@ -222,3 +239,4 @@ function postForItem(item, date = null, shortcodes = {}) {
 	
 	return post;
 }
+*/

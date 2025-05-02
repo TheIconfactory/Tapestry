@@ -48,6 +48,8 @@ function verify() {
 	});
 }
 
+const episodeRegex = /[0-9]+$/;
+
 function load() {	
 	let extraHeaders = [];	
 	let lastModified = getItem("lastModified");
@@ -109,9 +111,9 @@ function load() {
 			for (const item of items) {
 				let url = item.link;
 				if (url != null) {
-					// only use the link URL if it has a path (to an episode)
-					const path = url.split("/").splice(3).join("/");
-					if (path.length == 0) {
+					// only use the link URL if it has a path to a numeric episode
+					const lastPathComponent = url.split("/").splice(-1).join();
+					if (lastPathComponent.match(episodeRegex) == null) {
 						url = null;
 					}
 				}

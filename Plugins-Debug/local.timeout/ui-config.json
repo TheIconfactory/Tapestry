@@ -1,0 +1,14 @@
+{
+	"inputs": [
+		{
+			"name": "onVerify",
+			"type": "switch",
+			"prompt": "Timeout on Verify",
+		},
+		{
+			"name": "onLoad",
+			"type": "switch",
+			"prompt": "Timeout on Load",
+		},
+	]
+}

@@ -19,5 +19,5 @@
 	"verify_variables": true,
 	"provides_attachments": true,
 	"check_interval": 300,
-	"version": 2
+	"version": 4
 }

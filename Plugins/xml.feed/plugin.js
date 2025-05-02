@@ -23,14 +23,14 @@ function verify() {
 			let baseUrl = null;
 			if (feedAttributes instanceof Array) {
 				for (const feedAttribute of feedAttributes) {
-					if (feedAttribute.rel == "alternate") {
+					if (feedAttribute?.rel == "alternate") {
 						baseUrl = feedAttribute.href;
 						break;
 					}
 				}
 			}
 			else {
-				if (feedAttributes.rel == "alternate") {
+				if (feedAttributes?.rel == "alternate") {
 					baseUrl = feedAttributes.href;
 				}
 			}
@@ -61,14 +61,14 @@ function verify() {
 				let feedUrl = null;
 				if (feedAttributes instanceof Array) {
 					for (const feedAttribute of feedAttributes) {
-						if (feedAttribute.rel == "self") {
+						if (feedAttribute?.rel == "self") {
 							feedUrl = feedAttribute.href;
 							break;
 						}
 					}
 				}
 				else {
-					if (feedAttributes.rel == "self") {
+					if (feedAttributes?.rel == "self") {
 						feedUrl = feedAttributes.href;
 					}
 				}
@@ -99,8 +99,8 @@ function verify() {
 // TODO: Check that XML is good:
 // if (jsonObject.rss instanceof Object	&& jsonObject.rss.channel instanceof Object) { ... }
 
-			const baseUrl = jsonObject.rss.channel.link;
-			const displayName = jsonObject.rss.channel.title?.trim();
+			const baseUrl = jsonObject.rss.channel?.link;
+			const displayName = jsonObject.rss.channel?.title?.trim();
 
 // NOTE: In theory, the channel image could be used to get an icon for the feed. But some
 // use non-square images that look bad when squished. For example, the New York Times feed
@@ -114,15 +114,25 @@ function verify() {
 //				};
 //				processVerification(verification);
 //			}
-			let feedUrl = baseUrl.split("/").splice(0,3).join("/");
-			lookupIcon(feedUrl).then((icon) => {
+			if (baseUrl != null) {
+				let feedUrl = baseUrl.split("/").splice(0,3).join("/");
+				lookupIcon(feedUrl).then((icon) => {
+					const verification = {
+						displayName: displayName,
+						icon: icon,
+						baseUrl: baseUrl
+					};
+					processVerification(verification);
+				});
+			}
+			else {
 				const verification = {
 					displayName: displayName,
-					icon: icon,
-					baseUrl: baseUrl
+					icon: null,
+					baseUrl: null
 				};
 				processVerification(verification);
-			});
+			}
 		}
 		else if (jsonObject["rdf:RDF"] != null) {
 			// RSS 1.0
@@ -217,13 +227,13 @@ function load() {
 			let feedUrl = null;
 			if (feedAttributes instanceof Array) {
 				for (const feedAttribute of feedAttributes) {
-					if (feedAttribute.rel == "alternate") {
+					if (feedAttribute?.rel == "alternate") {
 						feedUrl = feedAttribute.href;
 						break;
 					}
 				}
 			}
-			else if (feedAttributes.rel == "alternate") {
+			else if (feedAttributes?.rel == "alternate") {
 				feedUrl = feedAttributes.href;
 			} else if (
 				jsonObject.feed.id.startsWith("http://") ||
@@ -266,7 +276,16 @@ function load() {
 					}
 				}
 
-				const url = entryUrl;
+				let url = entryUrl;
+				if (true) { // NOTE: If this causes problems, we can put it behind a setting.
+					const urlClean = url.split("?").splice(0,1).join();
+					const urlParameters = url.split("?").splice(1).join("?");
+					if (urlParameters.includes("utm_id") || urlParameters.includes("utm_source") || urlParameters.includes("utm_medium") || urlParameters.includes("utm_campaign")) {
+						console.log(`removed parameters: ${urlParameters}`);
+						url = urlClean;
+					}
+				}
+
 				let date = null;
 				if (entry.published) {
 					date = new Date(entry.published);
@@ -368,8 +387,7 @@ function load() {
 		}
 		else if (jsonObject.rss != null && jsonObject.rss.channel != null) {
 			// RSS 2.0
-			const feedUrl = jsonObject.rss.channel.link;
-			const feedName = jsonObject.rss.channel.title;
+			const feedUrl = jsonObject.rss.channel?.link;
 
 			let items = [];
 			if (jsonObject.rss.channel.item != null) {
@@ -394,7 +412,16 @@ function load() {
 				}
 				const date = (itemDate == null ? new Date() : new Date(itemDate));
 				
-				const url = item.link;
+				let url = item.link;
+				if (true) { // NOTE: If this causes problems, we can put it behind a setting.
+					const urlClean = url.split("?").splice(0,1).join();
+					const urlParameters = url.split("?").splice(1).join("?");
+					if (urlParameters.includes("utm_id") || urlParameters.includes("utm_source") || urlParameters.includes("utm_medium") || urlParameters.includes("utm_campaign")) {
+						console.log(`removed parameters: ${urlParameters}`);
+						url = urlClean;
+					}
+				}
+				
 				let title = extractString(item.title);
 				let content = extractString((item["content:encoded"] ?? item.description), true);
 				
@@ -469,7 +496,7 @@ function load() {
 				
 				// add link attachment for link that isn't on this site (e.g. a link blog)
 				// but only if there isn't media already attached
-				if (attachments.length == 0) {
+				if (attachments.length == 0 && feedUrl != null) {
 					let linkPrefix = url.split("/").splice(0,3).join("/");
 					let feedPrefix = feedUrl.split("/").splice(0,3).join("/");
 					if (linkPrefix != feedPrefix) {
@@ -505,7 +532,17 @@ function load() {
 				if (item["dc:date"] == null) {
 					continue;
 				}
-				const url = item.link;
+				
+				let url = item.link;
+				if (true) { // NOTE: If this causes problems, we can put it behind a setting.
+					const urlClean = url.split("?").splice(0,1).join();
+					const urlParameters = url.split("?").splice(1).join("?");
+					if (urlParameters.includes("utm_id") || urlParameters.includes("utm_source") || urlParameters.includes("utm_medium") || urlParameters.includes("utm_campaign")) {
+						console.log(`removed parameters: ${urlParameters}`);
+						url = urlClean;
+					}
+				}
+
 				const date = new Date(item["dc:date"]);
 				let title = extractString(item.title);
 				let content = extractString(item.description, true);

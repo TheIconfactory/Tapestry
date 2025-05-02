@@ -1,11 +1,13 @@
 {
 	"id": "variables.test",
-	"display_name": "Test Variables",
+	"display_name": "Testing Stuff",
 	"icon": "https://iconfactory.com/favicon.ico",
 	"site": "https://example.com",
-	"oauth_authorize": "https://example.com/oauth/authorize",
+	"xxx_oauth_authorize": "https://example.com/oauth/authorize",
+	"xxx_needs_api_keys": true,
 	"needs_verification": true,
-	"needs_api_keys": true,
 	"verify_variables": true,
+	"minimum_app_version": "1.2",
+	"version": 43,
 	"check_interval": 300
 }

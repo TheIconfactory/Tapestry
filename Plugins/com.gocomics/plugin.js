@@ -1,46 +1,55 @@
 
 // com.gocomics
 
-/*
- NOTE: This plugin relies on the meta properties in the HTML. They are obtained by the extractProperties() function
- supplied by Tapestry.
- 
- This is a sample of what the properties look like:
- 
- <meta property="og:url" content="https://www.gocomics.com/nancy/2023/04/03" />
- <meta property="og:type" content="article" />
- <meta property="og:title" content="Nancy by Olivia Jaimes for April 03, 2023 | GoComics.com" />
- <meta property="og:image" content="https://assets.amuniversal.com/e7430910aeeb013bef63005056a9545d" />
- <meta property="og:image:height" content="276" />
- <meta property="og:image:width" content="900" />
- <meta property="og:description" content="" />
- <meta property="og:site_name" content="GoComics" />
- <meta property="fb:app_id" content="1747171135497727" />
- 
- <meta property="article:published_time" content="2023-04-03" />
- <meta property="article:author" content="Olivia Jaimes" />
- <meta property="article:section" content="comic" />
- <meta property="article:tag" content="" />
- */
-
-// NOTE: Regular expressions can be used to extract information from the HTML, too.
-const avatarRegex = /<div class="gc-avatar gc-avatar--creator xs"><img[^]*?src="(.*)"/
-
 function verify() {
-	const url = `${site}/random/${comicId}`;
+	const url = `${site}/${comicId.trim()}`;
 	sendRequest(url)
 	.then((html) => {
-		const properties = extractProperties(html);
-	
-		const title = properties["og:title"];
-		if (title != null) {
-			const displayName = title.replace(/ by.*$/, "");
-			const match = html.match(avatarRegex);
-			let icon = match[1];
-			if (icon == null) {
-				icon = "https://assets.gocomics.com/assets/favicons/favicon-96x96-92f1ac367fd0f34bc17956ef33d79433ddbec62144ee17b40add7a6a2ae6e61a.png";
-			}
 
+		const matches = html.matchAll(schemaRegex);
+				
+		let displayName = null;
+		
+		if (matches != null) {
+			for (const match of matches) {
+				try {
+					const metadata = JSON.parse(match[1]);
+					if (metadata["@type"] == "ComicSeries") {
+						displayName = metadata["name"];
+						break;
+					}
+				}
+				catch (error) {
+					console.log(`JSON.parse error = ${error}`);
+				}
+			}
+		}
+		
+		if (displayName == null) {
+			const properties = extractProperties(html);
+	
+			const title = properties["og:title"];
+			if (title != null) {
+				displayName = title.replace(/ by.*$/, "");
+			}
+		}
+		
+		if (displayName != null) {
+/*		
+			const avatarRegex = /<img.*?SiteImage\.jsx.*?src="([^"]+?)"\/>/
+
+			const match = html.match(avatarRegex);
+			let icon = null;
+			if (match != null && match[1] != null) {
+ 				icon = match[1];
+ 			}
+ 			// icon is non-square with a circular crop:
+ 			// https://gocomicscmsassets.gocomics.com/staging-assets/assets/Global_Feature_Badge_Nancy_600_78e63ba574.png
+*/
+
+			// icon is favicon
+			const icon = "https://assets.gocomics.com/assets/favicons/favicon-96x96-92f1ac367fd0f34bc17956ef33d79433ddbec62144ee17b40add7a6a2ae6e61a.png";
+			
 			const verifcation = {
 				displayName: displayName,
 				icon: icon
@@ -56,52 +65,85 @@ function verify() {
 	});
 }
 
+const schemaRegex = /<script type="application\/ld\+json">(.+?)<\/script>/g;
+
 function load() {
-	const date = new Date();
+	const url = `${site}/${comicId.trim()}`;
+
+	//const extraHeaders = {"user-agent": "curl"}; 
+	//sendRequest(url, "GET", null, extraHeaders)
 	
-	const year = date.getFullYear();
-	const month = date.getMonth() + 1;
-	const day = date.getDate();
-	
-	const timestamp = String(year) + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
-	
-	console.log(`timestamp = ${timestamp}`);
-	
-	const url = site + "/" + comicId + "/" + timestamp;
 	sendRequest(url)
 	.then((html) => {
-		const properties = extractProperties(html);
+		const matches = html.matchAll(schemaRegex);
 		
-		const image = properties["og:image"];
-		const width = properties["og:image:width"];
-		const height = properties["og:image:height"];
-		const title = properties["og:title"];
-		const siteName = properties["og:site_name"];
-		const author = properties["article:author"];
-		const publishedTime = properties["article:published_time"];
+		const now = new Date();
+		const today = Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric" }).format(now);
 		
-		if (image != null) {
-			const attachment = MediaAttachment.createWithUrl(image);
-			attachment.text = title;
-			if (width != null && height != null) {
-				attachment.aspectSize = { width: parseInt(width), height: parseInt(height) };
+		const year = now.getFullYear();
+		const month = now.getMonth() + 1;
+		const day = now.getDate();
+		const timestamp = String(year) + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
+
+		const contentUrl = `${site}/${comicId.trim()}/${timestamp}`;
+		console.log(`contentUrl = ${contentUrl}`);
+	
+		let imageUrl = null;
+		let description = null;
+		let author = null;
+		let creator = "GoComics";
+		
+		if (matches != null) {
+			for (const match of matches) {
+				try {
+					const metadata = JSON.parse(match[1]);
+					if (metadata["@type"] == "ImageObject") {
+						if (metadata["datePublished"] != null) {
+							if (metadata["datePublished"] == today) {
+								//console.log(JSON.stringify(metadata, null, "    "));
+								imageUrl = metadata["contentUrl"];
+								// NOTE: No aspect ratio in metadata - use console.log to check on this in the future...
+								if (metadata["author"] != null) {
+									author = metadata["author"]["name"];
+								}
+								if (metadata["creator"] != null) {
+									creator = metadata["creator"]["name"];
+								}
+								break;
+							}
+						}
+					}
+					else {
+						//console.log(`Not image: ${JSON.stringify(metadata, null, "    ")}`);
+					}
+				}
+				catch (error) {
+					console.log(`JSON.parse error = ${error}`);
+				}
+			}
+		}
+	
+		if (imageUrl != null) {
+			const attachment = MediaAttachment.createWithUrl(imageUrl);
+			if (description != null) {
+				attachment.text = description;
 			}
 			attachment.mimeType = "image";
-			console.log(`image = ${image}`);
-						
-			const publishedDate = new Date(publishedTime + "T00:00:00");
-			const content = `<p>Published on ${publishedDate.toLocaleDateString()} at <a href="${url}">${siteName}</a></p>`;
-			
-			const item = Item.createWithUriDate(url, publishedDate);
+			console.log(`image = ${imageUrl}`);
+							
+			const publishedDate = new Date(today);
+			const content = `<p>Published on ${publishedDate.toLocaleDateString()} at <a href="${url}">${creator}</a></p>`;
+				
+			const item = Item.createWithUriDate(contentUrl, publishedDate);
 			item.body = content;
 			item.attachments = [attachment];
-
+	
 			if (author != null) {
 				let identity = Identity.createWithName(author);
-				identity.uri = site + "/" + comicId;
+				identity.uri = site + "/" + comicId.trim();
 				item.author = identity;
 			}
-			
+	
 			processResults([item]);
 		}
 		else {
@@ -110,6 +152,6 @@ function load() {
 	})
 	.catch((requestError) => {
 		processError(requestError);
-	});
-	
+	});	
 }
+

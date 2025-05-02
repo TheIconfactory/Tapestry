@@ -1,26 +1,159 @@
 
 // com.tumblr
 
-function verify() {
-	sendRequest(site + "/v2/user/info")
-	.then((text) => {
-		const jsonObject = JSON.parse(text);
+async function verify() {
+	try {
+		const blogName = await getBlogName();
+		setItem("blogName", blogName);
 		
-		const blogs = jsonObject.response.user.blogs;
-		const blog = blogs[0];
-		
-		const displayName = blog.name;
-		const icon = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
+		const displayName = blogName;
+		const icon = "https://api.tumblr.com/v2/blog/" + blogName + "/avatar/96";
 
 		const verification = {
 			displayName: displayName,
 			icon: icon
 		};
 		processVerification(verification);
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
+	}
+	catch (error) {
+		processError(error);
+	}
+}
+
+async function load() {
+	let nowTimestamp = (new Date()).getTime();
+
+	try {
+		let blogName = getItem("blogName");
+		if (blogName == null) {
+			blogName = await getBlogName();
+			setItem("blogName", blogName);
+		}
+	
+		// NOTE: The dashboard will be filled up to the endDate, if possible.
+		let endDate = null;
+		let endDateTimestamp = getItem("endDateTimestamp");
+		if (endDateTimestamp != null) {
+			endDate = new Date(parseInt(endDateTimestamp));
+		}
+	
+		let startTimestamp = (new Date()).getTime();
+		
+		const parameters = await queryDashboard(endDate);
+		const results = parameters[0];
+		const newestItemDate = parameters[1];
+		processResults(results, true);
+		setItem("endDateTimestamp", String(newestItemDate.getTime()));
+		let endTimestamp = (new Date()).getTime();
+		console.log(`finished dashboard: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
+	}
+	catch (error) {
+		console.log(`error dashboard`);
+		processError(error);
+	}
+}
+
+async function performAction(actionId, actionValue, item) {
+	let actions = item.actions;
+	let actionValues = JSON.parse(actionValue);
+
+	try {
+		let blogName = getItem("blogName");
+		if (blogName == null) {
+			blogName = await getBlogName();
+			setItem("blogName", blogName);
+		}
+
+		let date = new Date().toISOString();
+		if (actionId == "like") {
+			const url = `${site}/v2/user/like`;
+			const jsonObject = await sendAction(url, actionValue);
+			if (jsonObject != null) {
+				if (jsonObject?.meta?.status == 200) {			
+					delete actions["like"];
+					actions["unlike"] = actionValue;
+					item.actions = actions;
+					actionComplete(item, null);
+				}
+				else {
+					let error = new Error(`Like failed with ${jsonObject?.meta?.status}`);
+					actionComplete(null, error);
+				}
+			}
+		}
+		else if (actionId == "unlike") {
+			const url = `${site}/v2/user/unlike`;
+			const jsonObject = await sendAction(url, actionValue);
+			if (jsonObject != null) {
+				if (jsonObject?.meta?.status == 200) {			
+					delete actions["unlike"];
+					actions["like"] = actionValue;
+					item.actions = actions;
+					actionComplete(item, null);
+				}
+				else {
+					let error = new Error(`Unlike failed with ${jsonObject?.meta?.status}`);
+					actionComplete(null, error);
+				}
+			}
+		}
+		else if (actionId == "reblog") {
+			const url = `${site}/v2/blog/${blogName}/post/reblog`;
+			const jsonObject = await sendAction(url, actionValue);
+			if (jsonObject != null) {
+				if (jsonObject?.meta?.status == 201) {
+					delete actions["reblog"];
+					actions["unreblog"] = actionValue;
+					item.actions = actions;
+					actionComplete(item, null);
+				}
+				else {
+					let error = new Error(`Reblog failed with ${jsonObject?.meta?.status}`);
+					actionComplete(null, error);
+				}
+			}
+		}
+ 		else if (actionId == "unreblog") {
+ 			// the unreblog action is ignored (the post needs to be removed on the Tumblr site)
+			actionComplete(null, null);
+ 		}
+		else {
+			let error = new Error(`actionId "${actionId}" not implemented`);
+			actionComplete(null, error);
+		}
+	}
+	catch (error) {
+		actionComplete(null, error);
+	}
+}
+
+async function sendAction(url, parameters) {
+	const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
+	const text = await sendRequest(url, "POST", parameters, extraHeaders, true);
+	const response = JSON.parse(text);
+	if (response.status == 401) {
+		raiseAuthorizationUpdate();
+		const authorizationError = new Error("Tumblr authorization is invalid");
+		actionComplete(null, authorizationError);
+		return null;
+	}
+	else {
+		return JSON.parse(response.body);
+	}
+}
+
+function raiseAuthorizationUpdate() {
+		const blogName = getItem("blogName");
+		raiseCondition("authorize", "Authorization needs update", `Tumblr feed **${blogName}** needs to be reauthorized to use actions.`)
+}
+
+async function getBlogName() {
+	const text = await sendRequest(site + "/v2/user/info");
+	const jsonObject = JSON.parse(text);
+	const blogs = jsonObject.response.user.blogs;
+	const blog = blogs[0];
+		
+	return blog.name;
 }
 
 function postForItem(item) {
@@ -36,6 +169,8 @@ function postForItem(item) {
 		return null;
 	}
 	
+	const blogName = getItem("blogName");
+
 	const date = new Date(item.timestamp * 1000); // timestamp is seconds since the epoch, convert to milliseconds
 
 	let contentUrl = item.post_url;
@@ -43,21 +178,38 @@ function postForItem(item) {
 	let contentBlocks = contentItem.content;
 	let contentLayouts = contentItem.layout;
 	
+	let isReblogged = false;
+	let isLiked = item.liked;
+	
 	let annotation = null;
 	if (isReblog) {
 		if (item.trail != null && item.trail.length > 0) {
 			let trailOrigin = item.trail[0];
 			
 			const itemBlog = item.blog;
-			const userName = itemBlog.name;
-			const text = "Reblogged by " + userName;
-			annotation = Annotation.createWithText(text);
-			annotation.icon = "https://api.tumblr.com/v2/blog/" + itemBlog.name + "/avatar/96";
-			annotation.uri = item.post_url;
+			const itemBlogName = itemBlog.name;
+
+			if (itemBlogName == blogName) {
+				const text = "Reblogged by you";
+				annotation = Annotation.createWithText(text);
+				annotation.icon = "https://api.tumblr.com/v2/blog/" + blogName + "/avatar/96";
+
+				isReblogged = true;
+			}
+			else {
+				const text = "Reblogged by " + itemBlogName;
+				annotation = Annotation.createWithText(text);
+				annotation.icon = "https://api.tumblr.com/v2/blog/" + itemBlog.name + "/avatar/96";
+				annotation.uri = item.post_url;
+			}
 			
 			contentItem = trailOrigin;
 			contentBlocks = contentItem.content;
 			contentLayouts = contentItem.layout;
+			
+			if (itemBlog.name == blogName) {
+				isReblog = true;
+			}
 			
 // 			if (contentItem.blog.url != null && contentItem.post.id != null) {
 // 				contentUrl = contentItem.blog.url + "/" + contentItem.post.id;
@@ -243,10 +395,25 @@ function postForItem(item) {
 	if (annotation != null) {
 		post.annotations = [annotation];
 	}
+	
+	let actionValues = { id: item.id_string, reblog_key: item.reblog_key };
+
+	let actions = {};
+	if (!isReblogged) {
+		actions["reblog"] = JSON.stringify(actionValues);
+	}
+	if (isLiked) {
+		actions["unlike"] = JSON.stringify(actionValues);
+	}
+	else {
+		actions["like"] = JSON.stringify(actionValues);
+	}
+	post.actions = actions;
+
 	return post;
 }
 
-function queryDashboard(endDate) {
+async function queryDashboard(endDate) {
 
 	// NOTE: These constants are related to the feed limits within Tapestry - it doesn't store more than
 	// 3,000 items or things older than 30 days.
@@ -358,34 +525,6 @@ function queryDashboard(endDate) {
 	});
 	
 }
-
-function load() {
-	let nowTimestamp = (new Date()).getTime();
-
-	// NOTE: The dashboard will be filled up to the endDate, if possible.
-	let endDate = null;
-	let endDateTimestamp = getItem("endDateTimestamp");
-	if (endDateTimestamp != null) {
-		endDate = new Date(parseInt(endDateTimestamp));
-	}
-
-	let startTimestamp = (new Date()).getTime();
-	
-	queryDashboard(endDate)
-	.then((parameters) =>  {
-		results = parameters[0];
-		newestItemDate = parameters[1];
-		processResults(results, true);
-		setItem("endDateTimestamp", String(newestItemDate.getTime()));
-		let endTimestamp = (new Date()).getTime();
-		console.log(`finished dashboard: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
-	})
-	.catch((requestError) => {
-		console.log(`error dashboard`);
-		processError(requestError);
-	});
-}
-
 
 function formatText(text, textFormats) {
 	let index = -1;

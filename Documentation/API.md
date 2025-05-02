@@ -76,7 +76,7 @@ if (myContent != null) {
 
 ```javascript
 const uri = "https://example.com/unique/path/to/content";
-const date = Date();
+const date = new Date();
 const item = Item.createWithUriDate(uri, date);
 item.title = "Hello.";
 item.body = "<p>This is <em>a contrived</em> example, but <b>so what?</b></p>";
@@ -610,6 +610,75 @@ Returns a `String` that was saved in local storage. If no value was stored, `nul
 
 All items in local storage are removed.
 
+### performAction(actionId, actionValue, item)
+
+Sends an action to the connector.
+
+  * actionId: A `String` with the action id
+  * actionValue: The `String` value that was assigned to the action.
+  * item: `Item` to be processed.
+  
+See section on `actions.json` for more information on how to perform actions.
+
+### actionComplete(item, error)
+
+Indicates that the action has been performed. Must be called.
+
+  * item: `Item` to be updated. A null value indicates that the item was not changed.
+  * error: If not null, the `Error` indicates what went wrong and will be displayed in the user interface.
+
+See section on `actions.json` for more information on how to complete actions.
+
+### require(resourceName) → Value | Object | String | false
+
+  * resourceName: `String` with the name of a text resource to load.
+  
+The connector folder can contain a folder named "resources". The files in that folder are loaded using this function.
+
+The resource’s file name extension determines what type of data is returned:
+
+  * **".js"** causes the contents of the file to be evaluated and any resulting value is returned. This can be used to define functions that are used by `plugin.js` and allow you to organize and share your code. Any errors during evaluation will throw an exception that’s displayed in the user interface.
+  * **".json"** parses the contents of the file and returns the resulting `Object`. If no object can be parsed, `false` is returned.
+  * Any other extension, including **".txt"** returns the contents of the file as a UTF-8 `String`.
+  * If the file contains any other kind of data, such as an image, `false` is returned.
+
+Files in resources folder can be symbolic links (not aliases) to other files in the folder that contains the connectors. This way the connectors "com.example.one" and "com.example.two" can share common code in a single file. When you save a connector, the symbolic links are resolved and stored individually in the resulting .tapestry file.
+
+If you are loading functions, errors can be detected with a `false` return value:
+
+```javascript
+if (require('utility.js') === false) {
+	throw new Error("Failed to load utility.js");
+}
+```
+
+This can be extended to ensure that `String` and `Object` are loaded correctly.
+
+```javascript
+let template = require('template.txt');
+if (template === false) {
+	throw new Error("Failed to load template")
+}
+else {
+	console.log(`template = ${template}`)
+}
+```
+
+If you have used Node.js’s module loading, the approach above is very similar approach. Note that there is no need to export functions from the .js file that is being loaded: all functions and variables in the file are exported.
+
+### raiseCondition(condition, title, description)
+
+Raises an persistent error condition that will be presented as a fatal error to the user:
+
+  * type: A `String` with the type of condition: either "authorize" or "disable".
+  * title: A `String` with a short description of the condition.
+  * message: A `String` with a longer description.
+
+When "authorize" is used, the authorization tokens for the feed will be removed. A prominent user interface will prompt the user to reauthorize the feed.
+
+When "disable" is used, the condition is displayed prominently and the user will be given an option to disable the feed.
+
+Any other `type` is ignored.
 
 ## Configuration
 
@@ -620,6 +689,8 @@ Each connector is defined using the following files:
   * `ui-config.json` (Optional)
   * `README.md` (Recommended)
   * `suggestions.json` (Optional)
+  * `discovery.json` (Optional)
+  * `actions.json` (Optional)
   
 The contents of each of these files is discussed below.
 
@@ -649,11 +720,12 @@ Recommended properties:
   * default\_color: `String` with a default color name for feeds created by the connector. Valid values are "purple", "gold", "blue", "coral", "slate", "orange", "green", "teal". If no value is specified, "gray" will be used.
   * item\_style: `String` with either "post" or "article" to define the content layout.
   * version: `Number` with an integer value that increments with newer versions of the connector. If no value is supplied, 1 is assumed.
- 	
+  * crosstalk: `String` with "inclusive", "exclusive", or "disabled". See the explanation of these modes below.
+  
 Optional properties:
 
   * needs\_verification: `Boolean` with true if verification is needed (by calling `verify()`)
-  * verify\_variables: 'Boolean' with true if variable changes cause verification. Use this option if changing a variable will affect  loading content (because its a part of a URL, for example).
+  * verify\_variables: `Boolean` with true if variable changes cause verification. Use this option if changing a variable will affect  loading content (because its a part of a URL, for example).
   * provides\_attachments: `Boolean` with true if connector generates attachments directly, otherwise post-processing of HTML content will be used to capture images, videos, and link previews.
   * authorization\_header: `String` with a template for the authorization header. If no value is specified, "Bearer \_\_ACCESS\_TOKEN\_\_" will be used. See below for options.
   * refresh\_status\_code: `Number` with the HTTP status code that indicates authorization needs to be refreshed. Default value is 401. A value of 0 will not attempt to refresh tokens.
@@ -684,21 +756,27 @@ Optional JWT properties:
 
 > **Note:** The oauth\_authorize, oauth\_token, jwt\_authorize, and jwt\_refresh endpoints can be relative or absolute URLs. Relative paths use the `site` variable above as a base (allowing a single connector to support multiple federated servers, like with Mastodon). Absolute paths allow different domains to be used for the initial authorize and token generation (as with Tumblr).
 
-The authorization\_header string provides a template for the API endpoints. The following items in the string will be replaced with values managed by the Tapestry app:
+The `authorization_header` string provides a template for the API endpoints. The following items in the string will be replaced with values managed by the Tapestry app:
 
   * `__ACCESS_TOKEN__` The access token returned when authenticating with OAuth or JWT.
   * `__CLIENT_ID__` The client ID used to identify the connector with the API.
   
-For example, you could set a string value of `OAuth oauth_consumer_key="__CLIENT_ID__", oauth_token="__ACCESS_TOKEN__"` and the following header would be generated:
+For example, a string value of `OAuth oauth_consumer_key="__CLIENT_ID__", oauth_token="__ACCESS_TOKEN__"` will generate the following header:
 
 	Authorization: OAuth oauth_consumer_key="dead-beef-1234" oauth_token="feed-face-5678"
 
-Any credentials collected by Tapestry is used automatically during a `sendRequest`. An authorization header will be added when the following are true:
+Any credentials collected by Tapestry are used automatically during a `sendRequest`. An authorization header will be added when the following are true:
 
   * URL scheme is HTTPS
   * Port is 443
   * The host is a domain or subdomain of the feed's URL. For example, if the feed originates at `example.com`, requests to `api.example.com` will get the header, but requests to `1337hacker.com` will not.
 
+Connectors can be configured for Tapestry’s Crosstalk feature using the `crosstalk` property. The options are:
+
+  * `inclusive`: Crosstalk checks items in this connector’s feeds and all items in other feeds where Crosstalk is enabled. This is the default behavior.
+  * `exclusive`: Crosstalk is only checked with items from other feeds that _do not_ use this connector. If two items are similar and use the same connector, they are _not marked_ as Crosstalk. This mode is used by the GoComics connector to prevent daily comics from being labeled as Crosstalk even though they have very similar content (FoxTrot and FoxTrot Classics, for example).
+  * `disabled`: Opts this connector entirely out of Crosstalk. Items from feeds using this connector will never be checked or labeled as Crosstalk even if they are similar to an item in another feed.
+  
 #### EXAMPLES
 
 The configuration for the Mastodon connector is:
@@ -1055,7 +1133,7 @@ The rules for the user’s URL consist of two parts:
 
 If the `extract` pattern is empty it's considered a match and the full URL will be passed to the variable (this will likely be the `site`). The following example sets the `site` variable with the URL entered by the user.
 
-``` json
+```json
 	"url": [
 		{
 			"extract": "",
@@ -1072,7 +1150,7 @@ If necessary, non-capturing groups like "(?:foo|bar)" can be used in the regular
 
 This example extracts the "aww" from `http://reddit.com/r/aww/whatever` and puts it in a "subreddit" variable:
 
-``` json
+```json
 	"url": [
 		{
 			"extract": "/reddit.com/r/([^/]+)/",
@@ -1083,7 +1161,7 @@ This example extracts the "aww" from `http://reddit.com/r/aww/whatever` and puts
 
 This example extracts two capture groups from `https://mastodon.social/tags/TapestryApp`. The first one sets `site` to "https://mastodon.social" and the second puts "TapestryApp" in a "tag" variable:
 
-``` json
+```json
 	"url": [
 		{
 			"extract": "/(https://[^:/\\s]+)/tags/([a-zA-Z0-9_]+.*)/",
@@ -1098,7 +1176,7 @@ The content at the URL provided by the user can also be checked. The strategy is
 
 This approach allows your connector to check things like `<link>` or `<meta>` tags for things that it needs. For example, a page that has the following HTML markup can be used with a connector that handles RSS feeds:
 
-``` html
+```html
 <link rel="alternate" type="application/atom+xml" href="/feeds/main" />
 ```
 
@@ -1228,6 +1306,117 @@ If none of the rules above apply, the content can be checked for JSON keys. Ther
 ```
 
 The `key` must be a top-level key in the JSON content. The example ensures that the JSON dictionary has a `version` key with the correct `value`.
+
+### actions.json
+
+This file defines actions that can alter items supplied by a connector. An action is defined by its `id` that can be used in code with a `name` and `icon` that is used in the Tapestry user interface. The `name` can be any SF Symbol name or one of Tapestry's built-in symbols (listed below).
+
+```json
+{
+	"items": [
+		{
+			id: "favorite",
+			name: "Add Favorite",
+			icon: "heart.fill",
+		},
+		{
+			id: "unfavorite",
+			name: "Remove Favorite",
+			icon: "heart",
+		},
+	],
+}
+```
+
+When returning an `Item` in `processResults()` you will specify a dictionary of actions that can be applied to the item. Each action has an `id` and a string value that will be passed to the action when it's performed.
+
+For example, an action that marks an item as a favorite, might need an identifier: 
+
+```javascript
+	item.actions = { favorite: "123456" };
+```
+
+It's also likely that structured data will be needed, so JSON can be used as an action value:
+
+```javascript
+	item.actions = { like: `{ "uri": "at:..." }`, repost: `{ "uri": "at:..." }` };
+```
+
+When an item has one or more actions, a menu will be displayed in the app. When a user selects one of the actions the `performAction` function is called with the action `id`, `value`, and `item`.
+
+It is the connector’s responsibility to manage the list of actions as the state of the item changes. For example, if an action to "favorite" is performed, the action would be removed from the item and replaced with "unfavorite".
+
+The modified item is returned to Tapestry using `actionComplete`. If the action cannot be performed, an `Error` should be returned and will be displayed to the user.
+
+This example performs "favorite" and "unfavorite" on an item. Note that any part of the item can be modified: the body in this example, but it could be annotations or attachments as well. The example also shows how the state of the item is managed using `item.actions`:
+
+```javascript
+
+function performAction(actionId, actionValue, item) {
+	console.log(`actionId = ${actionId}`);
+	if (actionId == "favorite") {
+		let content = item.body;
+		content += "<p>Faved!</p>";
+		item.body = content;
+		
+		let actions = item.actions;
+		delete actions["favorite"];
+		actions["unfavorite"] = "boo";
+		item.actions = actions;
+		actionComplete(item, null);
+	}
+	else if (actionId == "unfavorite") {
+		let content = item.body;
+		content += "<p><strong>UNFAVED!</strong></p>";
+		item.body = content;
+
+		let actions = item.actions;
+		delete actions["unfavorite"];
+		actions["favorite"] = "yay";
+		item.actions = actions;
+		actionComplete(item, null);
+	}
+	else if (actionId == "whoops") {
+		let error = new Error("That wasn't supposed to happen!")
+		actionComplete(null, error);
+	}
+
+```
+
+#### Built-in Symbols
+
+The following names can be used for the `icon` of an action:
+
+tapestry.arrow.right.circle.fill
+tapestry.bluesky
+tapestry.bookmark.fill
+tapestry.bookmark
+tapestry.boost.fill
+tapestry.boost
+tapestry.counter.arrow
+tapestry.crosstalk
+tapestry.hashtag
+tapestry.jump.back
+tapestry.jump.to.marker
+tapestry.jump.to.top
+tapestry.mark.fill
+tapestry.mark
+tapestry.mastodon
+tapestry.microblog
+tapestry.muffled
+tapestry.open.original
+tapestry.person.2
+tapestry.person
+tapestry.reddit
+tapestry.sparkles.premium
+tapestry.star.fill
+tapestry.star
+tapestry.timeline.collapsed
+tapestry.timeline.expanded
+tapestry.timeline.mini
+tapestry.tumblr
+tapestry.view.details
+tapestry.youtube
 
 ## HTML Content
 

@@ -1,8 +1,13 @@
 
 // org.joinmastodon.account
 
+if (require('mastodon-shared.js') === false) {
+	throw new Error("Failed to load mastodon-shared.js");
+}
+
 function verify() {
-	const url = `${site}/api/v1/accounts/lookup?acct=${account}`
+	const verifyAccount = normalizeAccount(account);
+	const url = `${site}/api/v1/accounts/lookup?acct=${verifyAccount}`
 	sendRequest(url)
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
@@ -50,7 +55,9 @@ function load() {
 		});	
 	}
 	else {
-		sendRequest(site + "/api/v1/accounts/" + id + "/statuses?limit=40")
+		const loadAccount = normalizeAccount(account);
+		const url = `${site}/api/v1/accounts/lookup?acct=${loadAccount}`
+		sendRequest(url)
 		.then((text) => {
 			const jsonObject = JSON.parse(text);
 		
@@ -73,6 +80,16 @@ function load() {
 	}
 }
 
+/*
+function normalizeAccount(account) {
+	let result = account.trim();
+	if (result.length > 1 && result.startsWith("@")) {
+		result = result.slice(1);
+	}
+	return result;
+}
+*/
+
 function queryStatusesForUser(id) {
 
 	return new Promise((resolve, reject) => {
@@ -90,7 +107,7 @@ function queryStatusesForUser(id) {
 					if (includeBoosts == "on") {
 						post = postForItem(item.reblog);
 						
-						annotation = Annotation.createWithText("Boosted");
+						annotation = Annotation.createWithText("BOOSTED");
 						annotation.uri = item.account["url"];
 					}
 				}
@@ -98,7 +115,7 @@ function queryStatusesForUser(id) {
 					if (includeReplies == "on") {
 						post = postForItem(item);
 
-						annotation = Annotation.createWithText("Reply");
+						annotation = Annotation.createWithText("REPLY");
 						annotation.uri = item.account["url"];
 					}
 				}
@@ -123,6 +140,7 @@ function queryStatusesForUser(id) {
 	
 }
 
+/*
 function postForItem(item, date = null, shortcodes = {}) {
 	const account = item["account"];
 	const displayName = account["display_name"];
@@ -286,3 +304,5 @@ function postForItem(item, date = null, shortcodes = {}) {
 	
 	return post;
 }
+
+*/

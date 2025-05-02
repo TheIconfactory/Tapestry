@@ -89,7 +89,16 @@ function load() {
 			}
 			const feedName = jsonObject.feed.title;
 			
-			const entries = jsonObject.feed.entry;
+			let entries = [];
+			if (jsonObject.feed.entry != null) {
+				const entry = jsonObject.feed.entry;
+				if (entry instanceof Array) {
+					entries = entry;
+				}
+				else {
+					entries = [entry];
+				}
+			}
 			var results = [];
 			for (const entry of entries) {
 				const entryAttributes = entry.link$attrs;

@@ -14,5 +14,6 @@
 	"oauth_grant_type": "authorization_code",
 	"canPost": true,
 	"check_interval": 300,
-	"version": 1
+	"minimum_app_version": "1.2",
+	"version": 3
 }

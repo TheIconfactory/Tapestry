@@ -1,5 +1,9 @@
 
-// org.joinmastodon
+// org.joinmastodon.list
+
+if (require('mastodon-shared.js') === false) {
+	throw new Error("Failed to load mastodon-shared.js");
+}
 
 function verify() {
 	sendRequest(site + "/api/v1/accounts/verify_credentials")
@@ -16,10 +20,11 @@ function verify() {
 		.then((text) => {
 			const jsonObject = JSON.parse(text);
 		
+			const verifyList = normalizeList(list)
 			let found = false;
 			let displayName = userName;
 			for (const listItem of jsonObject) {
-				if (listItem.id == list || listItem.title == list) {
+				if (listItem.id == verifyList || listItem.title == verifyList) {
 					setItem("listId", listItem.id);
 					displayName = `${listItem.title} - ${userName}`;
 					found = true;
@@ -65,9 +70,10 @@ function load() {
 		.then((text) => {
 			const jsonObject = JSON.parse(text);
 		
+			const loadList = normalizeList(list)
 			let found = false;
 			for (const listItem of jsonObject) {
-				if (listItem.id == list || listItem.title == list) {
+				if (listItem.id == loadList || listItem.title == loadList) {
 					setItem("listId", listItem.id);
 					listId = listItem.id;
 					found = true;
@@ -94,6 +100,12 @@ function load() {
 		});
 	}
 }
+
+/*
+function normalizeList(list) {
+	return list.trim();
+}
+*/
 
 function queryStatusesForList(listId) {
 
@@ -215,6 +227,7 @@ function queryStatusesForList(listId) {
 	
 }
 
+/*
 function postForItem(item, date = null, shortcodes = {}) {
 	const account = item["account"];
 	const displayName = account["display_name"];
@@ -378,3 +391,5 @@ function postForItem(item, date = null, shortcodes = {}) {
 	
 	return post;
 }
+
+*/

@@ -1,0 +1,14 @@
+{
+	"id": "social.bsky.list",
+	"display_name": "Bluesky - Follow List",
+	"service_name": "Bluesky",
+	"default_color": "blue",
+	"icon": "https://bsky.app/static/apple-touch-icon.png",
+	"item_style": "post",
+	"site": "https://public.api.bsky.app",
+	"needs_verification": true,
+	"verify_variables": true,
+	"provides_attachments": true,
+	"check_interval": 300,
+	"version": 1
+}

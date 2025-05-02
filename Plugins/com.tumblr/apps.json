@@ -4,7 +4,7 @@
 			"id": "com.tumblr",
 			"name": "Tumblr",
 			"template": "__URL__",
-			"pattern": "https://([a-z0-9_]+\\.|)tumblr\\.com"
+			"pattern": "https://([a-z0-9_\\-]+\\.|)tumblr\\.com"
 		}
 	]
 }

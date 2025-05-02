@@ -102,7 +102,7 @@ function queryFeedForGenerator(did, feedId) {
 				let post = null;
 				if (item.reblog != null) {
 					post = postForItem(item.reblog, lastTimestamp);
-					annotation = Annotation.createWithText("Boosted");
+					annotation = Annotation.createWithText("REPOST");
 					annotation.uri = item.account["url"];
 				}
 				else {

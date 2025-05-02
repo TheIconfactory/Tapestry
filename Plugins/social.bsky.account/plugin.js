@@ -2,7 +2,8 @@
 // account.social.bsky
 
 function verify() {
-	sendRequest(site + `/xrpc/app.bsky.actor.getProfile?actor=${account}`)
+	let verifyAccount = normalizeAccount(account);
+	sendRequest(site + `/xrpc/app.bsky.actor.getProfile?actor=${verifyAccount}`)
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		
@@ -55,7 +56,8 @@ function load() {
 		});	
 	}
 	else {
-		sendRequest(site + `/xrpc/app.bsky.actor.getProfile?actor=${account}`)
+		let loadAccount = normalizeAccount(account);
+		sendRequest(site + `/xrpc/app.bsky.actor.getProfile?actor=${loadAccount}`)
 		.then((text) => {
 			const jsonObject = JSON.parse(text);
 		
@@ -77,6 +79,14 @@ function load() {
 			processError(requestError);
 		});
 	}
+}
+
+function normalizeAccount(account) {
+	let result = account.trim();
+	if (result.length > 1 && result.startsWith("@")) {
+		result = result.slice(1);
+	}
+	return result;
 }
 
 function queryFeedForUser(did) {

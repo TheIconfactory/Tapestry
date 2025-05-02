@@ -7,6 +7,8 @@ function verify() {
 		const jsonObject = JSON.parse(text);
 		const displayName = "@" + jsonObject.handle;
 		const did = jsonObject.did;
+
+		setItem("did", did);
 		
 		sendRequest(site + `/xrpc/app.bsky.actor.getProfile?actor=${did}`)
 		.then((text) => {
@@ -33,9 +35,187 @@ function verify() {
 	});
 }
 
+// NOTE: This reference counter tracks loading so we can let the app know when all async loading work is complete.
+var loadCounter = 0;
+
+function load() {
+	// NOTE: The timeline will be filled up to the endDate, if possible.
+	let endDate = null;
+	let endDateTimestamp = getItem("endDateTimestamp");
+	if (endDateTimestamp != null) {
+		endDate = new Date(parseInt(endDateTimestamp));
+	}
+
+	loadCounter = 0;
+	if (includeHome == "on") {
+		loadCounter += 1;
+	}
+	if (includeMentions == "on") {
+		loadCounter += 1;
+	}
+	if (loadCounter == 0) {
+		processResults([]);
+		return;
+	}
+	
+	if (includeHome == "on") {
+		let startTimestamp = (new Date()).getTime();
+	
+		queryTimeline(endDate)
+		.then((parameters) =>  {
+			results = parameters[0];
+			newestItemDate = parameters[1];
+  			loadCounter -= 1;
+			processResults(results, loadCounter == 0);
+			setItem("endDateTimestamp", String(newestItemDate.getTime()));
+			let endTimestamp = (new Date()).getTime();
+			console.log(`finished timeline: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
+		})
+		.catch((requestError) => {
+			console.log(`error timeline`);
+			processError(requestError);
+		});
+	}
+	
+	if (includeMentions == "on") {
+		queryMentions()
+		.then((results) =>  {
+			loadCounter -= 1;
+			console.log(`finished mentions, loadCounter = ${loadCounter}`);
+			processResults(results, loadCounter == 0);
+		})
+		.catch((requestError) => {
+			loadCounter -= 1;
+			console.log(`error mentions, loadCounter = ${loadCounter}`);
+			processError(requestError);
+		});	
+	}
+}
+
+async function performAction(actionId, actionValue, item) {
+	let actions = item.actions;
+	let actionValues = JSON.parse(actionValue);
+	
+	try {
+		let did = getItem("did");
+		if (did == null) {
+			did = await getDid();
+			setItem("did", did);
+		}
+
+		let date = new Date().toISOString();
+		if (actionId == "like") {
+			const body = {
+				collection: "app.bsky.feed.like",
+				repo: did,
+				record : {
+					"$type": "app.bsky.feed.like",
+					subject: {
+						uri: actionValues["uri"],
+						cid: actionValues["cid"]
+					},
+					createdAt: date,
+				}
+			};
+			
+			const url = `${site}/xrpc/com.atproto.repo.createRecord`;
+			const parameters = JSON.stringify(body);
+			const extraHeaders = { "content-type": "application/json" };
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			const jsonObject = JSON.parse(text);
+			const rkey = jsonObject.uri.split("/").pop();
+			
+			delete actions["like"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"], rkey: rkey };
+			actions["unlike"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item, null);
+		}
+		else if (actionId == "unlike") {
+			const body = {
+				collection: "app.bsky.feed.like",
+				repo: did,
+				rkey: actionValues["rkey"]
+			};
+			
+			const url = `${site}/xrpc/com.atproto.repo.deleteRecord`;
+			const parameters = JSON.stringify(body);
+			const extraHeaders = { "content-type": "application/json" };
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			const jsonObject = JSON.parse(text);
+
+			delete actions["unlike"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"] };
+			actions["like"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item, null);
+		}
+		else if (actionId == "repost") {
+			const body = {
+				collection: "app.bsky.feed.repost",
+				repo: did,
+				record : {
+					"$type": "app.bsky.feed.repost",
+					subject: {
+						uri: actionValues["uri"],
+						cid: actionValues["cid"]
+					},
+					createdAt: date,
+				}
+			};
+			
+			const url = `${site}/xrpc/com.atproto.repo.createRecord`;
+			const parameters = JSON.stringify(body);
+			const extraHeaders = { "content-type": "application/json" };
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			const jsonObject = JSON.parse(text);
+			const rkey = jsonObject.uri.split("/").pop();
+			
+			delete actions["repost"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"], rkey: rkey };
+			actions["unrepost"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item, null);
+		}
+		else if (actionId == "unrepost") {
+			const body = {
+				collection: "app.bsky.feed.repost",
+				repo: did,
+				rkey: actionValues["rkey"]
+			};
+			
+			const url = `${site}/xrpc/com.atproto.repo.deleteRecord`;
+			const parameters = JSON.stringify(body);
+			const extraHeaders = { "content-type": "application/json" };
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			const jsonObject = JSON.parse(text);
+			
+			delete actions["unrepost"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"] };
+			actions["repost"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item, null);
+		}
+		else {
+			let error = new Error(`actionId "${actionId}" not implemented`);
+			actionComplete(null, error);
+		}
+	}
+	catch (error) {
+		actionComplete(null, error);
+	}
+}
+
 const uriPrefix = "https://bsky.app";
 const uriPrefixContent = "https://cdn.bsky.app";
 const uriPrefixVideo = "https://video.bsky.app";
+
+async function getDid() {
+	const text = await sendRequest(site + "/xrpc/com.atproto.server.getSession");
+	const jsonObject = JSON.parse(text);
+	const did = jsonObject.did;
+	return did;
+}
 
 function queryTimeline(endDate) {
 
@@ -166,121 +346,12 @@ function queryMentions() {
 			}
 			
 			resolve(results);
-			/*
-			let results = [];
-			for (const item of jsonObject) {
-				let postItem = item["status"];
-
-				if (postItem == null) {
-					// NOTE: Not sure why this happens, but sometimes a mention payload doesn't have a status. If that happens, we just skip it.
-					continue;
-				}
-				
-				let visibility = postItem["visibility"] ?? "public";
-
-				let annotation = null;
-				let shortcodes = {};
-				
-				if (visibility == "public" || visibility == "unlisted") {
-					if (postItem.mentions != null && postItem.mentions.length > 0) {
-						const mentions = postItem.mentions;
-						const account = mentions[0];
-						const userName = account["username"];
-						let text = "Replying to @" + userName;
-						if (mentions.length > 1) {
-							text += " and others";
-						}
-						annotation = Annotation.createWithText(text);
-						annotation.uri = account["url"];
-	
-						const accountEmojis = account["emojis"];
-						if (accountEmojis != null && accountEmojis.length > 0) {
-							for (const emoji of accountEmojis) {
-								shortcodes[emoji.shortcode] = emoji.static_url;
-							}
-						}
-					}
-				}
-				else if (visibility == "private") {
-					annotation = Annotation.createWithText(`FOLLOWERS ONLY`);
-				}
-				else if (visibility == "direct") {
-					annotation = Annotation.createWithText(`PRIVATE MENTION`);
-				}	
-	
-				const post = postForItem(postItem, null, shortcodes);
-				if (annotation != null) {
-					post.annotations = [annotation];
-				}
-	
-				results.push(post);
-			}
-			resolve(results);
-			*/
-			resolve([]);
 		})
 		.catch((error) => {
 			reject(error);
 		});
 	});
 	
-}
-
-// NOTE: This reference counter tracks loading so we can let the app know when all async loading work is complete.
-var loadCounter = 0;
-
-function load() {
-	// NOTE: The timeline will be filled up to the endDate, if possible.
-	let endDate = null;
-	let endDateTimestamp = getItem("endDateTimestamp");
-	if (endDateTimestamp != null) {
-		endDate = new Date(parseInt(endDateTimestamp));
-	}
-
-	loadCounter = 0;
-	if (includeHome == "on") {
-		loadCounter += 1;
-	}
-	if (includeMentions == "on") {
-		loadCounter += 1;
-	}
-	if (loadCounter == 0) {
-		processResults([]);
-		return;
-	}
-	
-	if (includeHome == "on") {
-		let startTimestamp = (new Date()).getTime();
-	
-		queryTimeline(endDate)
-		.then((parameters) =>  {
-			results = parameters[0];
-			newestItemDate = parameters[1];
-  			loadCounter -= 1;
-			processResults(results, loadCounter == 0);
-			setItem("endDateTimestamp", String(newestItemDate.getTime()));
-			let endTimestamp = (new Date()).getTime();
-			console.log(`finished timeline: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
-		})
-		.catch((requestError) => {
-			console.log(`error timeline`);
-			processError(requestError);
-		});
-	}
-	
-	if (includeMentions == "on") {
-		queryMentions()
-		.then((results) =>  {
-			loadCounter -= 1;
-			console.log(`finished mentions, loadCounter = ${loadCounter}`);
-			processResults(results, loadCounter == 0);
-		})
-		.catch((requestError) => {
-			loadCounter -= 1;
-			console.log(`error mentions, loadCounter = ${loadCounter}`);
-			processError(requestError);
-		});	
-	}
 }
 
 function postForItem(item) {
@@ -297,6 +368,26 @@ function postForItem(item) {
 				
 	let content = contentForRecord(item.post.record);
 	
+	let actions = {};
+	if (item.post.viewer?.like != null) {
+		const rkey = item.post.viewer.like.split("/").pop();
+		const values = { uri: item.post.uri, cid: item.post.cid, rkey: rkey };
+		actions["unlike"] = JSON.stringify(values);
+	}
+	else {
+		const values = { uri: item.post.uri, cid: item.post.cid };
+		actions["like"] = JSON.stringify(values);
+	}
+	if (item.post.viewer?.repost != null) {
+		const rkey = item.post.viewer.repost.split("/").pop();
+		const values = { uri: item.post.uri, cid: item.post.cid, rkey: rkey };
+		actions["unrepost"] = JSON.stringify(values);
+	}
+	else {
+		const values = { uri: item.post.uri, cid: item.post.cid };
+		actions["repost"] = JSON.stringify(values);
+	}
+
 	let contentWarning = null;
 	if (item.post.labels != null && item.post.labels.length > 0) {
 		const labels = item.post.labels.map((label) => { return label?.val ?? "" }).join(", ");
@@ -341,6 +432,7 @@ function postForItem(item) {
 		const post = Item.createWithUriDate(postUri, date);
 		post.body = content;
 		post.author = identity;
+		post.actions = actions;
 		if (attachments != null) {
 			post.attachments = attachments
 		}
@@ -372,7 +464,7 @@ function postForNotification(notification) {
 		contentWarning = labels; //`Labeled: ${ labels }`;
 	}
 	
-	let annotation = Annotation.createWithText("Mention");
+	let annotation = Annotation.createWithText("MENTION");
 		
 	let attachments = attachmentsForEmbed(notification.record.embed, encodeURIComponent(author.did));
 				

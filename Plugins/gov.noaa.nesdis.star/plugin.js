@@ -4,7 +4,7 @@
 function verify() {
 	let displayName = "";
 	if (satellite == "East Coast") {
-		displayName = "GOES16 Satellite";
+		displayName = "GOES19 Satellite";
 	}
 	else {
 		displayName = "GOES18 Satellite";
@@ -45,7 +45,7 @@ function load() {
 	if (doUpdate) {
 		let directory = "GOES18";
 		if (satellite == "East Coast") {
-			directory = "GOES16";
+			directory = "GOES19";
 		}
 
 		let subdirectory = "CONUS";
@@ -68,30 +68,35 @@ function load() {
 				imageRegex = /<a href="(.*-2500x1500\.jpg)">/gm
 			}
 			const matches = [...html.matchAll(imageRegex)];
-			const lastMatch = matches[matches.length - 1];
-			const imageUrl = lastMatch[1];
-
-			let year = parseInt(imageUrl.substring(0, 4));
-			let dayOfYear = parseInt(imageUrl.substring(4, 7));
-			let hour = parseInt(imageUrl.substring(7, 9));
-			let minute = parseInt(imageUrl.substring(9, 11));
-			
-			const url = `https://cdn.star.nesdis.noaa.gov/${directory}/ABI/${subdirectory}/${image}/${imageUrl}`;
-			
-			const initialDate = new Date(Date.UTC(year, 0, 1, hour, minute));
-			const date = new Date(initialDate.setUTCDate(dayOfYear));
-			
-			let attachment = MediaAttachment.createWithUrl(url);
-			attachment.aspectSize = {width: imageWidth, height: imageHeight};
-			
-			const content = `<p>${image} image of ${view} (${satellite})</p>`;
-			var resultItem = Item.createWithUriDate(url, date);
-			resultItem.body = content;
-			resultItem.attachments = [attachment];
-			
-			processResults([resultItem]);
-			
-			setItem("lastUpdate", String(nowTimestamp));
+			if (matches.length > 0) {
+				const lastMatch = matches[matches.length - 1];
+				const imageUrl = lastMatch[1];
+	
+				let year = parseInt(imageUrl.substring(0, 4));
+				let dayOfYear = parseInt(imageUrl.substring(4, 7));
+				let hour = parseInt(imageUrl.substring(7, 9));
+				let minute = parseInt(imageUrl.substring(9, 11));
+				
+				const url = `https://cdn.star.nesdis.noaa.gov/${directory}/ABI/${subdirectory}/${image}/${imageUrl}`;
+				
+				const initialDate = new Date(Date.UTC(year, 0, 1, hour, minute));
+				const date = new Date(initialDate.setUTCDate(dayOfYear));
+				
+				let attachment = MediaAttachment.createWithUrl(url);
+				attachment.aspectSize = {width: imageWidth, height: imageHeight};
+				
+				const content = `<p>${image} image of ${view} (${satellite})</p>`;
+				var resultItem = Item.createWithUriDate(url, date);
+				resultItem.body = content;
+				resultItem.attachments = [attachment];
+				
+				processResults([resultItem]);
+				
+				setItem("lastUpdate", String(nowTimestamp));
+			}
+			else {
+				processError(Error(`No images for: /${directory}/ABI/${subdirectory}/${image}`));
+			}
 		})
 		.catch((requestError) => {
 			processError(requestError);
