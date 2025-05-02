@@ -1,7 +1,7 @@
 {
 	"inputs": [
 		{
-			"name": "include_categories",
+			"name": "includeCategories",
 			"type": "switch",
 			"prompt": "Include Categories",
 			"value": "off",

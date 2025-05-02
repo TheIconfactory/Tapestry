@@ -305,6 +305,20 @@ function load() {
 				else {
 					content = extractString((entry.content ?? entry.summary), true);
 				}
+
+				if (includeCategories == "on") {
+					if (entry.category$attrs != null) {
+						let categories = null;
+						if (Array.isArray(entry.category$attrs)) {
+							categories = entry.category$attrs;
+						}
+						else {
+							categories = [entry.category$attrs];
+						}
+						const categoriesContent = categories.map(c=>`Category:"${c["term"]}"`).join(', ')
+						content = `${content}<p>${categoriesContent}</p>`
+					}
+				}
 				
 				var identity = null;
 				if (entry.author != null) {
@@ -425,15 +439,16 @@ function load() {
 				let title = extractString(item.title);
 				let content = extractString((item["content:encoded"] ?? item.description), true);
 				
-				if (include_categories == "on" && item.category != null) {
-					var categories
+				if (includeCategories == "on" && item.category != null) {
+					let categories = null;
 					if (Array.isArray(item.category)){
 						categories = item.category
-					} else {
+					}
+					else {
 						categories = [item.category]
 					}
-					const categories_html = categories.map(c=>`Category:"${c}"`).join(', ')
-					content = `${content}<p>${categories_html}</p>`
+					const categoriesContent = categories.map(c=>`Category:"${c}"`).join(', ')
+					content = `${content}<p>${categoriesContent}</p>`
 				}
 
 				let identity = null;
