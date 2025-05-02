@@ -315,7 +315,7 @@ function load() {
 						else {
 							categories = [entry.category$attrs];
 						}
-						const categoriesContent = categories.map(c=>`Category:"${c["term"]}"`).join(', ')
+						const categoriesContent = categories.map(c=>`Category: "${c["term"]}"`).join(', ')
 						content = `${content}<p>${categoriesContent}</p>`
 					}
 				}
@@ -447,7 +447,7 @@ function load() {
 					else {
 						categories = [item.category]
 					}
-					const categoriesContent = categories.map(c=>`Category:"${c}"`).join(', ')
+					const categoriesContent = categories.map(c=>`Category: "${c}"`).join(', ')
 					content = `${content}<p>${categoriesContent}</p>`
 				}
 

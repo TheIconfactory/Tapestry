@@ -106,6 +106,15 @@ function load() {
 			else if (item['content_text'] != null) {
 				content = item['content_text'].replaceAll("\n", "<br/>")
 			}
+			
+			if (includeTags == "on") {
+				if (item['tags'] != null) {
+					let tags = item['tags'];
+					const tagsContent = tags.map(t=>`Tag: "${t}"`).join(', ')
+					content = `${content}<p>${tagsContent}</p>`
+				}
+			}
+
 			const authors = item["authors"];
 			
 			let linkAttachment = null;

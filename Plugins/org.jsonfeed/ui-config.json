@@ -1,4 +1,11 @@
 {
 	"inputs": [
+		{
+			"name": "includeTags",
+			"type": "switch",
+			"prompt": "Include Tags",
+			"value": "off",
+			"placeholder": "When enabled, tags will be appended in the form Tag: \"Breaking News\""
+		}
 	]
 }

@@ -5,7 +5,7 @@
 			"type": "switch",
 			"prompt": "Include Categories",
 			"value": "off",
-			"placeholder": "When enabled, categories will be appended to the end of item content in the format Category:\"Breaking News\""
+			"placeholder": "When enabled, categories will be appended in the form Category: \"Breaking News\""
 		}
 	]
 }
