@@ -424,6 +424,17 @@ function load() {
 				
 				let title = extractString(item.title);
 				let content = extractString((item["content:encoded"] ?? item.description), true);
+				
+				if (include_categories == "on" && item.category != null) {
+					var categories
+					if (Array.isArray(item.category)){
+						categories = item.category
+					} else {
+						categories = [item.category]
+					}
+					const categories_html = categories.map(c=>`Category:"${c}"`).join(', ')
+					content = `${content}<p>${categories_html}</p>`
+				}
 
 				let identity = null;
 				let authorName = item["dc:creator"] ?? item["author"];
