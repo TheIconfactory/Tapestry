@@ -118,9 +118,12 @@ function performAction(actionId, actionValue, item) {
 		actionComplete(item, null);
 	}
 	else if (actionId == "boost") {
-		const delay = 2000;
-		let start = new Date().getTime();
-		while (new Date().getTime() < start + delay);
+		let actions = item.actions;
+		actions.xxx.yyy; // "TypeError: undefined is not an object ..."
+		boost - 1; // "ReferenceError: Can't find variable: boost"
+// 		const delay = 2000;
+// 		let start = new Date().getTime();
+// 		while (new Date().getTime() < start + delay);
 		let error = new Error(`can't handle actionValue = ${actionValue}`)
 		actionComplete(item, error);
 	}
