@@ -846,6 +846,9 @@ function contentForRecord(record) {
 	// so we have to convert it back to bytes, find what we need, and then make a new UTF-16 string.
 	
 	try {
+		content = content.replaceAll("<", "\x02"); // replace less-than with SOT (Start Of Text) ASCII code
+		content = content.replaceAll(">", "\x03"); // replace greater-than with EOT (End Of Text) ASCII code
+
 		if (record.facets != null) {
 			// NOTE: Facets are processed in reverse order determined by the starting index. This is because the output string
 			// is being modified in place.
@@ -893,7 +896,9 @@ function contentForRecord(record) {
 	for (const paragraph of paragraphs) {
 		finalContent += "<p>" + paragraph.replaceAll("\n", "<br/>") + "</p>";
 	}
-	
+	finalContent = finalContent.replaceAll("\x02", "&lt;"); // replace SOT (Start Of Text) ASCII code with less-than HTML entity
+	finalContent = finalContent.replaceAll( "\x03", "&gt;"); // replace EOT (End Of Text) ASCII code with greater-than HTML entity
+
 	return finalContent;
 }
 
