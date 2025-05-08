@@ -729,6 +729,7 @@ Optional properties:
   * provides\_attachments: `Boolean` with true if connector generates attachments directly, otherwise post-processing of HTML content will be used to capture images, videos, and link previews.
   * authorization\_header: `String` with a template for the authorization header. If no value is specified, "Bearer \_\_ACCESS\_TOKEN\_\_" will be used. See below for options.
   * refresh\_status\_code: `Number` with the HTTP status code that indicates authorization needs to be refreshed. Default value is 401. A value of 0 will not attempt to refresh tokens.
+  * minimum\_app\_version: `String` with the version number of the Tapestry app that must be used for the connector. If the app version is lower than the specified value, the connector will be ignored until a newer version is installed.
   * check\_interval: `Number` with number of seconds between load requests (currently unimplemented).
 
 Optional OAuth properties:
