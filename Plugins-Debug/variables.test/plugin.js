@@ -132,7 +132,8 @@ function performAction(actionId, actionValue, item) {
 		actionComplete(null, null);
 	}
 	else if (actionId == "boom") {
-		throw new Error("Sizzle aka an uncaught exception in the connector script.");
+		boom()
+		//throw new Error("Sizzle aka an uncaught exception in the connector script.");
 	}
 	else if (actionId == "snooze") {
 		// force a timeout

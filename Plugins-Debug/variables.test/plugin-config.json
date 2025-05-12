@@ -8,6 +8,6 @@
 	"needs_verification": true,
 	"verify_variables": true,
 	"minimum_app_version": "1.2",
-	"version": 43,
+	"version": 44,
 	"check_interval": 300
 }
