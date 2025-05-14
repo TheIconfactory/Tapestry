@@ -604,7 +604,11 @@ function load() {
 function attachmentForAttributes(mediaAttributes) {
 	let attachment = null;
 	if (mediaAttributes != null && mediaAttributes.url != null) {
-		attachment = MediaAttachment.createWithUrl(mediaAttributes.url);
+		let url = mediaAttributes.url;
+		if (url.includes("&amp;")) { // attempt to make an invalid URL into a valid one: looking at you Daily Beast
+			url = url.replaceAll("&amp;", "&");
+		}
+		attachment = MediaAttachment.createWithUrl(url);
 		if (mediaAttributes.width != null && mediaAttributes.height != null) {
 			let width = mediaAttributes.width;
 			let height = mediaAttributes.height;
