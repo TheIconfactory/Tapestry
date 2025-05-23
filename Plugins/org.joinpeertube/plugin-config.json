@@ -1,6 +1,13 @@
 {
 	"id": "org.joinpeertube",
 	"display_name": "PeerTube",
-	"register": "/api/v1/apps",
-	"needsVerification": true
+	"icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Logo_de_PeerTube.svg/500px-Logo_de_PeerTube.svg.png",
+	"needsVerification": true,
+	"provides_attachments": true,
+	"service_name": "PeerTube",
+	"default_color": "orange",
+	"version": 1,
+	"site_prompt": "Channel",
+	"site_placeholder": "https://techlore.tv/c/techlore",
+	"site_help": "Enter the URL for the PeerTube channel you want to follow.",
 }

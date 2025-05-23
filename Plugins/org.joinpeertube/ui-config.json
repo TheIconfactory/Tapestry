@@ -3,15 +3,9 @@
 		{
 			"name": "site",
 			"type": "url",
-			"prompt": "Instance",
+			"prompt": "PeerTube Channel URL",
 			"validate_as": "url",
-			"placeholder": "https://neat.tube"
-		},
-		{
-			"name": "channelID",
-			"type": "text",
-			"prompt": "Channel ID",
-			"placeholder": "techlore"
+			"placeholder": "https://peertube_instance.com/c/channel_name"
 		}
 	]
 }
