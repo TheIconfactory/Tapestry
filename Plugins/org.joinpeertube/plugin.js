@@ -70,7 +70,7 @@ function load() {
 			const url = video.url;
 			const title = video.name;
 			const date = new Date(video.publishedAt);
-			const content = video.name + "<br><p>" + video.description + "</p>";
+			const content = video.description;
 			
 			const displayName = video.channel.displayName;
 			const channelURL = video.channel.url;
