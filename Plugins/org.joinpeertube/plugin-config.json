@@ -9,5 +9,5 @@
 	"version": 1,
 	"site_prompt": "Channel",
 	"site_placeholder": "https://techlore.tv/c/techlore",
-	"site_help": "Enter the URL for the PeerTube channel you want to follow.",
+	"site_help": "Enter the URL for the PeerTube channel you want to follow."
 }
