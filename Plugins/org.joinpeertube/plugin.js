@@ -75,21 +75,17 @@ function load() {
 			const displayName = video.channel.displayName;
 			const channelURL = video.channel.url;
 			
-			const creatorAvatarPath = video.channel.avatars && video.channel.avatars.length > 1 ? video.channel.avatars[1].path : (video.channel.avatar ? video.channel.avatar.path : '');
-			const creatorAvatar = creatorAvatarPath ? "https://" + video.channel.host + creatorAvatarPath : '';
+			const creatorAvatar = video.channel.avatars[1].path;
 
 			var item = Item.createWithUriDate(url, date);
 			item.title = title;
 			item.body = content;
 			
 			// Add preview image as an attachment using MediaAttachment API
-			if (video.previewPath && info.instanceBaseUrl) {
-				const previewImageUrl = info.instanceBaseUrl + video.previewPath;
-				const attachment = MediaAttachment.createWithUrl(previewImageUrl);
-				attachment.mimeType = "image/jpeg"; // Assuming JPEG, adjust if needed
-				attachment.text = video.name; // Use 'text' for accessibility description
-				item.attachments = [attachment];
-			}
+			const previewImageUrl = info.instanceBaseUrl + video.previewPath;
+			const attachment = MediaAttachment.createWithUrl(previewImageUrl);
+			attachment.text = video.name; // Use video title for accessibility description
+			item.attachments = [attachment];
 
 			item.creator = {
 				name: displayName,
