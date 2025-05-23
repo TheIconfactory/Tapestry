@@ -87,11 +87,11 @@ function load() {
 			attachment.text = video.name; // Use video title for accessibility description
 			item.attachments = [attachment];
 
-			item.creator = {
-				name: displayName,
-				uri: channelURL,
-				avatar: creatorAvatar
-			};
+			const identity = Identity.createWithName(displayName);
+			identity.uri = channelURL;
+			identity.avatar = creatorAvatar;
+
+			item.author = identity;
 			
 			results.push(item);
 		}
