@@ -1,0 +1,25 @@
+{
+	"html": [
+		{
+			"element": "link",
+			"check": "type",
+			"match": "/application/(?:rss|atom)\\+xml/",
+			"use": "href",
+			"variable": "site"
+		}
+	],
+	"xml": [
+		{
+			"root": "feed",
+			"with": "entry"
+		},
+		{
+			"root": "rss",
+			"with": "item"
+		},
+		{
+			"root": "rdf:RDF",
+			"with": "items"
+		}
+	]
+}

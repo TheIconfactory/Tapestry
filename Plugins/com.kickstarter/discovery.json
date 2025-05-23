@@ -1,0 +1,15 @@
+{
+	"sites": [
+		"kickstarter.com"
+	],
+	"url": [
+		{
+			"extract": "/kickstarter.com/projects/([^/]+)/",
+			"variable": "creator_username"
+		},
+		{
+			"extract": "/kickstarter.com/projects/[^/]+/([^/?]+)/",
+			"variable": "project_slug"
+		},
+	]
+}

@@ -1,0 +1,24 @@
+{
+	"items": [
+		{
+			"id": "repost",
+			"name": "Repost",
+			"icon": "tapestry.boost",
+		},
+		{
+			"id": "unrepost",
+			"name": "Remove Repost",
+			"icon": "tapestry.boost.fill",
+		},
+		{
+			"id": "like",
+			"name": "Like",
+			"icon": "heart",
+		},
+		{
+			"id": "unlike",
+			"name": "Remove Like",
+			"icon": "heart.fill",
+		},
+	],
+}

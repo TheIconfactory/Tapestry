@@ -1,0 +1,11 @@
+{
+	"sites": [
+		"gocomics.com"
+	],
+	"url": [
+		{
+			"extract": "/gocomics.com/([^/]+)/",
+			"variable": "comicId"
+		}
+	]
+}

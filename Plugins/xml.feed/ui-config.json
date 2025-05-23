@@ -1,11 +1,11 @@
 {
 	"inputs": [
 		{
-			"name": "site",
-			"type": "url",
-			"prompt": "Feed URL",
-			"validate_as": "url",
-			"placeholder": "https://foo.com/feed.xml"
+			"name": "includeCategories",
+			"type": "switch",
+			"prompt": "Include Categories",
+			"value": "off",
+			"placeholder": "When enabled, categories will be appended in the form Category: \"Breaking News\""
 		}
 	]
 }

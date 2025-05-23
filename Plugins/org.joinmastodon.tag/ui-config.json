@@ -1,0 +1,10 @@
+{
+	"inputs": [
+		{
+			"name": "tag",
+			"type": "text",
+			"prompt": "Tag",
+			"placeholder": "TapestryApp",
+		}
+	]
+}

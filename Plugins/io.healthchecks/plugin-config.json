@@ -1,5 +1,11 @@
 {
-  "id": "io.healthchecks",
-  "display_name": "Healthchecks",
-  "check_interval": 300
+	"id": "io.healthchecks",
+	"display_name": "Healthchecks",
+	"icon": "https://healthchecks.io/static/img/apple-touch-icon.png",
+	"site": "https://healthchecks.io",
+	"needs_verification": true,
+	"verify_variables": true,
+	"provides_attachments": true,
+	"check_interval": 300,
+	"version": 2
 }

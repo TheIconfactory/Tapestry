@@ -1,0 +1,19 @@
+{
+	"html": [
+		{
+			"element": "meta",
+			"check": "property",
+			"match": "og:site_name",
+			"use": "content",
+			"extract": "/.*Mastodon.*/" 
+		},
+		{
+			"element": "meta",
+			"check": "property",
+			"match": "og:url",
+			"use": "content",
+			"extract": "/(https://[^/]+)/",
+			"variable": "site"
+		}
+	]
+}

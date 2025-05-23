@@ -1,0 +1,29 @@
+{
+	"html": [
+		{
+			"element": "link",
+			"check": "type",
+			"match": "/application/(?:json|feed\\+json)/",
+			"use": "href",
+			"extract": "/^((?!wp-json).)*$/",
+			"comment": "The regex above lets this rule filter out WordPress API links",
+		},
+		{
+			"element": "link",
+			"check": "type",
+			"match": "/application/(?:json|feed\\+json)/",
+			"use": "href",
+			"variable": "site"
+		}
+	],
+	"json": [
+		{
+			"key": "version",
+			"value": "https://jsonfeed.org/version/1"
+		},
+		{
+			"key": "version",
+			"value": "https://jsonfeed.org/version/1.1"
+		}
+	]
+}

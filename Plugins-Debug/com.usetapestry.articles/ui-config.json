@@ -1,0 +1,9 @@
+{
+	"inputs": [
+		{
+			"name": "group",
+			"prompt": "Group",
+			"placeholder": "kottke"
+		}
+	]
+}

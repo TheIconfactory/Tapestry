@@ -1,0 +1,16 @@
+{
+	"inputs": [
+		{
+			"name": "account",
+			"type": "text",
+			"prompt": "User",
+			"placeholder": "ReallyRickAstley",
+		},
+		{
+			"name": "includeFlair",
+			"type": "switch",
+			"prompt": "Include Annotation for Flair",
+			"value": "on",
+		},
+	]
+}

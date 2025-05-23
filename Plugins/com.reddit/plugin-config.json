@@ -1,14 +1,13 @@
 {
 	"id": "com.reddit",
-	"display_name": "Reddit",
-	"oauth_authorize": "https://www.reddit.com/api/v1/authorize",
-	"oauth_token": "https://www.reddit.com/api/v1/access_token",
-	"oauth_type": "code",
-	"oauth_code_key": "code",
-	"oauth_scope": "identity+read",
-	"oauth_grant_type": "authorization_code",
-	"oauth_http_redirect": true,
-	"oauth_basic_auth": true,
-	"oauth_extra_parameters": "&duration=permanent",
-	"check_interval": 300
+	"display_name": "Reddit - Follow Subreddit",
+	"service_name": "Reddit",
+	"default_color": "coral",
+	"icon": "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png",
+	"site": "https://www.reddit.com",
+	"needs_verification": true,
+	"verify_variables": true,
+	"provides_attachments": true,
+	"check_interval": 300,
+	"version": 5
 }

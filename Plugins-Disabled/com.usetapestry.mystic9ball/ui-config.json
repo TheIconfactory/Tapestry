@@ -1,0 +1,11 @@
+{
+	"inputs": [
+		{
+			"name": "interval",
+			"type": "choices",
+			"prompt": "Minutes Between Shakes",
+			"value": "30",
+			"choices": "1, 5, 15, 30, 60, 90"
+		}
+	]
+}

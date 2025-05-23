@@ -1,5 +1,11 @@
 {
 	"id": "org.nginx",
 	"display_name": "NGINX",
-	"check_interval": 300
+	"service_name": "NGINX",
+	"icon": "https://nginx.org/favicon.ico",
+	"site_prompt": "Status URL",
+	"site_placeholder": "https://example.com/basic_status",
+	"needs_verification": true,
+	"check_interval": 300,
+	"version": 1
 }

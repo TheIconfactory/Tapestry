@@ -1,7 +1,18 @@
 {
 	"id": "social.bsky",
 	"display_name": "Bluesky",
+	"service_name": "Bluesky",
+	"default_color": "blue",
+	"icon": "https://bsky.app/static/apple-touch-icon.png",
+	"item_style": "post",
+	"site": "https://bsky.social",
+	"jwt_prompt": "Email Address",
 	"jwt_authorize": "/xrpc/com.atproto.server.createSession",
 	"jwt_refresh": "/xrpc/com.atproto.server.refreshSession",
-	"check_interval": 300
+	"refresh_status_code": 400,
+	"fail_status_code": 400,
+	"provides_attachments": true,
+	"check_interval": 300,
+	"minimum_app_version": "1.2",
+	"version": 8
 }

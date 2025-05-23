@@ -1,108 +1,111 @@
 
 // blog.micro
 
-function identify() {
-	sendRequest(site + "/account/verify", "POST", "token=__bearerToken__")
-	.then((text) => {
+async function verify() {
+	try {
+		const text = await sendRequest(`${site}/account/verify`, "POST", "token=__ACCESS_TOKEN__")
 		const jsonObject = JSON.parse(text);
 		
-		const identifier = jsonObject["username"];
-		setIdentifier(identifier);
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
+		if (jsonObject["username"] != null) {
+			displayName = "@" + jsonObject["username"];
+
+			var icon = null;
+			if (jsonObject["avatar"] != null) {
+				icon = jsonObject["avatar"];
+			}
+			else {
+				icon = "https://cdn.micro.blog/images/icons/favicon_192.png";
+			}
+			
+			const verification = {
+				displayName: displayName,
+				icon: icon
+			};
+			processVerification(verification);
+		}
+		else {
+			const message = jsonObject["error"] ?? "Invalid response";
+			processError(Error(message));
+		}
+	}
+	catch (error) {
+		processError(error);
+	}
 }
 
-function load() {
-	sendRequest(site + "/posts/timeline", "GET")
-	.then((text) => {
+async function load() {
+	const filterMentions = includeMentions != "on";
+	
+	try {
+		const text = await sendRequest(`${site}/posts/timeline?count=200`);
 		const jsonObject = JSON.parse(text);
 		const items = jsonObject["items"];
 		var results = [];
 		for (const item of items) {
-			const author = item["author"]; 
-			const creator = Creator.createWithUriName(author["url"], author["name"]);
-			creator.avatar = author["avatar"];
+			if (filterMentions) {
+				if (item["_microblog"].is_mention) {
+					continue;
+				}
+			}
 			
-			const uri = item["url"];
-			const date = new Date(item["date_published"]);
-			const content = item['content_html'];
-			const post = Post.createWithUriDateContent(uri, date, content);
-			post.creator = creator;
+			let actions = {};
+			let actionValue = item.id;
+			if (item["_microblog"].is_bookmark) {
+				actions["unbookmark"] = actionValue;
+			}
+			else {
+				actions["bookmark"] = actionValue;
+			}
+		
+			const author = item.author; 
+			const identity = Identity.createWithName(author.name);
+			identity.uri = author.url;
+			identity.avatar = author.avatar;
+			identity.username = "@" + author._microblog.username
 			
-			results.push(post);
+			const url = item.url;
+			const date = new Date(item.date_published);
+			const content = item.content_html;
+			const resultItem = Item.createWithUriDate(url, date);
+			resultItem.body = content;
+			resultItem.author = identity;
+			resultItem.actions = actions;
+			
+			results.push(resultItem);
 		}
 		processResults(results);
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});	
-}
-
-function sendPost(parameters) {
-	sendRequest(site + "/micropub", "POST", parameters)
-	.then((text) => {
-		const jsonObject = JSON.parse(text);
-		processResults([jsonObject], true);
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
-}
-
-function sendAttachments(post) {
-	sendRequest(site + "/micropub?q=config")
-	.then((text) => {
-		const jsonObject = JSON.parse(text);
-		const mediaEndpoint = jsonObject["media-endpoint"];
-		
-		if (mediaEndpoint != null) {
-			const file = post.attachments[0].media;
-			uploadFile(file, mediaEndpoint)
-			.then((text) => {
-				const jsonObject = JSON.parse(text);
-
-				// {"url":"https://chockenberry.micro.blog/uploads/2023/bac6e514ee.png","poster":""}
-
-				const photo = jsonObject["url"];
-				
-				const status = post.content;
-				const dictionary = {
-					type: [ "h-entry" ],
-					properties: {
-						content: [ status ],
-						photo: [ photo ]
-					}
-				};
-				const parameters = JSON.stringify(dictionary);
-
-				sendPost(parameters);
-			})
-			.catch((requestError) => {
-				processError(requestError);
-			});
-
-		}
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
-}
-
-function send(post) {
-	if (post.attachments != null && post.attachments.length > 0) {
-		sendAttachments(post);
 	}
-	else {
-		const status = post.content;
-		const dictionary = {
-			type: [ "h-entry" ],
-			properties: {
-				content: [ status ]
-			}
-		};
-		const parameters = JSON.stringify(dictionary);
-		sendPost(parameters);
+	catch (error) {
+		processError(error);
+	}
+}
+
+async function performAction(actionId, actionValue, item) {
+	let actions = item.actions;
+	
+	try {	
+		if (actionId == "bookmark") {
+			const text = await sendRequest(`${site}/posts/favorites`, "POST", `id=${actionValue}`)
+	
+			delete actions["bookmark"];
+			actions["unbookmark"] = actionValue;
+			item.actions = actions;
+			actionComplete(item, null);
+		}
+		else if (actionId == "unbookmark") {
+			const text = await sendRequest(`${site}/posts/favorites/${actionValue}`, "DELETE")
+
+			delete actions["unbookmark"];
+			actions["bookmark"] = actionValue;
+			item.actions = actions;
+			actionComplete(item, null);
+		}
+		else {
+			let error = new Error(`actionId "${actionId}" not implemented`);
+			actionComplete(null, error);
+		}
+	}
+	catch (error) {
+		actionComplete(null, error);
 	}
 }

@@ -1,11 +1,11 @@
 {
 	"inputs": [
 		{
-			"name": "site",
-			"type": "url",
-			"prompt": "Feed URL",
-			"validate_as": "url",
-			"placeholder": "https://foo.com/feed.json"
+			"name": "includeTags",
+			"type": "switch",
+			"prompt": "Include Tags",
+			"value": "off",
+			"placeholder": "When enabled, tags will be appended in the form Tag: \"Breaking News\""
 		}
 	]
 }

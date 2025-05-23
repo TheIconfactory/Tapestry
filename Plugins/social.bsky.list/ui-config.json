@@ -1,0 +1,16 @@
+{
+	"inputs": [
+		{
+			"name": "account",
+			"type": "text",
+			"prompt": "Account",
+			"placeholder": "iconfactory.com",
+		},
+		{
+			"name": "listId",
+			"type": "text",
+			"prompt": "List Identifier",
+			"placeholder": "3lng6ryhigk2a",
+		},
+	]
+}

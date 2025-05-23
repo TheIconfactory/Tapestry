@@ -1,0 +1,16 @@
+{
+	"id": "org.joinmastodon.account",
+	"display_name": "Mastodon - Follow Account",
+	"service_name": "Mastodon",
+	"default_color": "slate",
+	"icon": "https://mastodon.social/packs/media/icons/apple-touch-icon-180x180-a75559a0af48064c1b7c71b81f3bf7c6.png",
+	"item_style": "post",
+	"site_prompt": "Instance",
+	"site_placeholder": "https://mastodon.social",
+	"site_help": "Enter the Instance where the Mastodon account is located, then the name of the Account below.",
+	"needs_verification": true,
+	"verify_variables": true,
+	"provides_attachments": true,
+	"check_interval": 300,
+	"version": 7
+}

@@ -1,0 +1,10 @@
+{
+	"id": "local.testing",
+	"display_name": "API Testing ULTRA",
+	"icon": "https://usetapestry.com/icons/generic.png",
+	"site_prompt": "Test URL",
+	"site_placeholder": "https://example.com",
+	"item_style": "post",
+	"minimum_app_version": "1.3",
+	"version": 8
+}

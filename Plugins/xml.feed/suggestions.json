@@ -1,0 +1,26 @@
+{
+	"sites": [
+		{
+			"value": "https://www.apple.com/newsroom/rss-feed.rss",
+			"title": "Apple Newsroom"
+		},
+		{
+			"value": "https://daily.bandcamp.com/feed",
+			"title": "Bandcamp Daily"
+		},
+		{
+			"value": "https://blog.iconfactory.com/feed/",
+			"title": "Iconfactory Breakroom",
+		},
+		{
+			"value": "https://mjtsai.com/blog/feed/",
+			"title": "Michael Tsai",
+		},
+		{
+			"value": "https://www.smithsonianmag.com/rss/latest_articles/",
+			"title": "Smithsonian Magazine"
+		},
+	]
+}
+
+

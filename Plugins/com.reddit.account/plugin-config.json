@@ -1,0 +1,13 @@
+{
+	"id": "com.reddit.account",
+	"display_name": "Reddit - Follow User",
+	"service_name": "Reddit",
+	"default_color": "coral",
+	"icon": "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png",
+	"site": "https://www.reddit.com",
+	"needs_verification": true,
+	"verify_variables": true,
+	"provides_attachments": true,
+	"check_interval": 300,
+	"version": 4
+}

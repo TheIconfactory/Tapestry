@@ -1,0 +1,14 @@
+{
+	"items": [
+		{
+			"id": "bookmark",
+			"name": "Bookmark",
+			"icon": "tapestry.bookmark",
+		},
+		{
+			"id": "unbookmark",
+			"name": "Remove Bookmark",
+			"icon": "tapestry.bookmark.fill",
+		},
+	],
+}

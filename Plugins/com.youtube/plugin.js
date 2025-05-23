@@ -1,44 +1,62 @@
 
-// xml.feed
+// com.youtube
 
-function identify() {
-	console.log("identify")
+const avatarRegex = /<link rel="image_src" href="([^"]*)">/;
+const urlRegex = /(https?:[^\s]*)/g;
+
+function verify() {
 	sendRequest(site)
 	.then((xml) => {	
-		let jsonObject = xmlParse(xml);
+		const jsonObject = xmlParse(xml);
 		
 		if (jsonObject.feed != null) {
 			// Atom 1.0
 			const feedAttributes = jsonObject.feed.link$attrs;
-			let feedUrl = null;
+			let baseUrl = null;
 			if (feedAttributes instanceof Array) {
 				for (const feedAttribute of feedAttributes) {
 					if (feedAttribute.rel == "alternate") {
-						feedUrl = feedAttribute.href;
+						baseUrl = feedAttribute.href;
 						break;
 					}
 				}
 			}
 			else {
 				if (feedAttributes.rel == "alternate") {
-					feedUrl = feedAttributes.href;
+					baseUrl = feedAttributes.href;
 				}
 			}
 			const feedName = jsonObject.feed.title;
+					
+			const extraHeaders = {"user-agent": "WhatsApp/2"}; // avoid EU cookie nonsense
+			sendRequest(baseUrl, "GET", null, extraHeaders)
+			.then((html) => {
+				const match = html.match(avatarRegex);
+				const icon = match[1];
 
-			const dictionary = {
-				identifier: feedName,
-				baseUrl: feedUrl
-			};
-			setIdentifier(dictionary);
+				const verification = {
+					displayName: feedName,
+					icon: icon,
+					baseUrl: baseUrl
+				};
+				processVerification(verification);
+			})
+			.catch((requestError) => {
+				const verification = {
+					displayName: feedName,
+					icon: "https://www.youtube.com/s/desktop/905763c7/img/favicon_144x144.png",
+					baseUrl: baseUrl
+				};
+				processVerification(verification);
+				processError(requestError);
+			});	
 		}
 		else if (jsonObject.rss != null) {
 			// RSS 2.0
-			processError(new Error("Invalid feed format"));
+			processError(Error("Invalid feed format"));
 		}
 		else {
-			// Unknown
-			setIdentifier("Unknown");
+			processError(Error("Unknown feed format"));
 		}
 	})
 	.catch((requestError) => {
@@ -46,26 +64,10 @@ function identify() {
 	});
 }
 
-const avatarRegex = /<link rel="image_src" href="([^"]*)">/
-
-function metaProperties(html) {
-	var properties = {};
-	
-	const matches = html.matchAll(metaRegex);
-	for (const match of matches) {
-		const key = match[1];
-		const value = match[2];
-		properties[key] = value;
-	}
-
-	return properties;
-}
 
 function load() {	
-	console.log("load")
 	sendRequest(site)
 	.then((xml) => {
-		
 		let jsonObject = xmlParse(xml);
 				
 		if (jsonObject.feed != null) {
@@ -87,58 +89,78 @@ function load() {
 			}
 			const feedName = jsonObject.feed.title;
 			
-			sendRequest(feedUrl)
-			.then((html) => {
-				const match = html.match(avatarRegex);
-				const avatar = match[1];
-
-				var creator = Creator.createWithUriName(feedUrl, feedName)
-				creator.avatar = avatar
-		
-				const entries = jsonObject.feed.entry;
-				var results = [];
-				for (const entry of entries) {
-					const entryAttributes = entry.link$attrs;
-					let entryUrl = null;
-					if (entryAttributes instanceof Array) {
-						for (const entryAttribute of entryAttributes) {
-						if (entryAttribute.rel == "alternate") {
-							entryUrl = entryAttribute.href;
-							break;
-						}
+			let entries = [];
+			if (jsonObject.feed.entry != null) {
+				const entry = jsonObject.feed.entry;
+				if (entry instanceof Array) {
+					entries = entry;
+				}
+				else {
+					entries = [entry];
+				}
+			}
+			var results = [];
+			for (const entry of entries) {
+				const entryAttributes = entry.link$attrs;
+				let entryUrl = null;
+				if (entryAttributes instanceof Array) {
+					for (const entryAttribute of entryAttributes) {
+					if (entryAttribute.rel == "alternate") {
+						entryUrl = entryAttribute.href;
+						break;
 					}
+				}
+				}
+				else {
+					if (entryAttributes.rel == "alternate") {
+						entryUrl = entryAttributes.href;
 					}
-					else {
-						if (entryAttributes.rel == "alternate") {
-							entryUrl = entryAttributes.href;
-						}
-					}
-
-					const url = entryUrl;
-					const date = new Date(entry.published); // could also be "entry.updated"
-				
-					const mediaGroup = entry["media:group"];
-				
-					const thumbnail = mediaGroup["media:thumbnail$attrs"].url;
-					const attachment = Attachment.createWithMedia(thumbnail);
-
-					const content = mediaGroup["media:title"];
-					const post = Post.createWithUriDateContent(url, date, content);
-					post.creator = creator;
-					post.attachments = [attachment];
-				
-					results.push(post);
 				}
 
-				processResults(results);
-			})
-			.catch((requestError) => {
-				processError(requestError);
-			});	
+				const url = entryUrl;
+				const date = new Date(entry.published); // could also be "entry.updated"
+			
+				const videoId = entry["yt:videoId"];
+				const embed = `<iframe id="player" type="text/html" width="640" height="390" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`
+				
+				const linkUrl = `https://www.youtube.com/watch?v=${videoId}`;
+				const linkAttachment = LinkAttachment.createWithUrl(linkUrl);
+				
+				const mediaGroup = entry["media:group"];
+			
+				const title = mediaGroup["media:title"];
+				let description = null;
+				if (includeDescription == "on") {
+					if (mediaGroup["media:description"] != null) {
+						// NOTE: YouTube shorts do not have a description.
+						let rawDescription = mediaGroup["media:description"];
+						let linkedDescription = rawDescription.replace(urlRegex, "<a href=\"$1\">$1</a>");
+						let paragraphs = linkedDescription.split("\n\n");
+						description = paragraphs.map((paragraph) => {
+							let lines = paragraph.split("\n");
+							let breakLines = lines.join("<br/>");
+							return `<p>${breakLines}</p>`
+						}).join("\n")
+					}
+				}
+				const resultItem = Item.createWithUriDate(url, date);
+				resultItem.title = title;
+				if (description != null) {
+					resultItem.body = embed + description;
+				}
+				else {
+					resultItem.body = embed;
+				}
+				resultItem.attachments = [linkAttachment];
+			
+				results.push(resultItem);
+			}
+
+			processResults(results);
 		}
 		else if (jsonObject.rss != null) {
 			// RSS 2.0
-			processError(new Error("Invalid feed format"));
+			processError(Error("Invalid feed format"));
 		}
 		else {
 			// Unknown

@@ -1,0 +1,10 @@
+{
+	"id": "local.ping",
+	"display_name": "Ping Website",
+	"icon": "https://usetapestry.com/icons/ping.png",
+	"site_prompt": "Website",
+	"site_placeholder": "https://example.com",
+	"needs_verification": true,
+	"check_interval": 300,
+	"version": 2
+}

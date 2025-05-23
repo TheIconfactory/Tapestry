@@ -1,130 +1,157 @@
 
 // com.gocomics
 
-function identify() {
-	if (comicId != null && comicId.length > 0) {
-		const baseUrl = "https://www.gocomics.com";
-		const url = baseUrl + "/" + comicId;
-		sendRequest(url, "HEAD")
-		.then((dictionary) => {
-			const jsonObject = JSON.parse(dictionary);
-			
-			const responseUrl = jsonObject["url"];
-			
-			// NOTE: If the responseUrl is the same as the original url, there was no redirect
-			// and the comicId is valid.
-			if (responseUrl == url) {
-				setIdentifier(comicId);
-			}
-			else {
-				setIdentifier(null);
-			}
-		})
-		.catch((requestError) => {
-			setIdentifier(null);
-		});
-	}
-	else {
-		setIdentifier(null);
-	}
-}
-
-
-/*
- NOTE: The regular expression below will match the meta properties in the HTML, which are then put into a
- dictionary as key/value pairs.
- 
- This is a sample of what the properties look like:
- 
- <meta property="og:url" content="https://www.gocomics.com/nancy/2023/04/03" />
- <meta property="og:type" content="article" />
- <meta property="og:title" content="Nancy by Olivia Jaimes for April 03, 2023 | GoComics.com" />
- <meta property="og:image" content="https://assets.amuniversal.com/e7430910aeeb013bef63005056a9545d" />
- <meta property="og:image:height" content="276" />
- <meta property="og:image:width" content="900" />
- <meta property="og:description" content="" />
- <meta property="og:site_name" content="GoComics" />
- <meta property="fb:app_id" content="1747171135497727" />
- 
- <meta property="article:published_time" content="2023-04-03" />
- <meta property="article:author" content="Olivia Jaimes" />
- <meta property="article:section" content="comic" />
- <meta property="article:tag" content="" />
- */
-
-const metaRegex = /<meta\s+property=\"(.*)\"\s+content=\"(.*)\".*>/g
-
-function metaProperties(html) {
-	var properties = {};
-	
-	const matches = html.matchAll(metaRegex);
-	for (const match of matches) {
-		const key = match[1];
-		const value = match[2];
-		properties[key] = value;
-	}
-
-	return properties;
-}
-
-const avatarRegex = /<div class="gc-avatar gc-avatar--creator xs"><img[^]*?src="(.*)"/
-
-var lastTimestamp = null
-
-function load() {
-	const baseUrl = "https://www.gocomics.com";
-	const date = new Date();
-	
-	const year = date.getFullYear();
-	const month = date.getMonth() + 1;
-	const day = date.getDate();
-	
-	const timestamp = String(year) + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
-	
-	if (timestamp == lastTimestamp) {
-		return;
-	}
-	
-	const url = baseUrl + "/" + comicId + "/" + timestamp;
+function verify() {
+	const url = `${site}/${comicId.trim()}`;
 	sendRequest(url)
 	.then((html) => {
-		const properties = metaProperties(html);
+
+		const matches = html.matchAll(schemaRegex);
+				
+		let displayName = null;
 		
-		const image = properties["og:image"];
-		const title = properties["og:title"];
-		const url = properties["og:url"];
-		const siteName = properties["og:site_name"];
-		const author = properties["article:author"];
+		if (matches != null) {
+			for (const match of matches) {
+				try {
+					const metadata = JSON.parse(match[1]);
+					if (metadata["@type"] == "ComicSeries") {
+						displayName = metadata["name"];
+						break;
+					}
+				}
+				catch (error) {
+					console.log(`JSON.parse error = ${error}`);
+				}
+			}
+		}
 		
-		if (image != null) {
-			const media = image;
-			const attachment = Attachment.createWithMedia(media);
-			attachment.text = title;
-			
-			const text = title.replace(/\| GoComics.com$/, "at <a href=\"" + url + "\">" + siteName + "</a>");
-			
-			const content = "<p>" + text + "</p>";
-			const post = Post.createWithUriDateContent(url, date, content);
-			post.attachments = [attachment];
+		if (displayName == null) {
+			const properties = extractProperties(html);
+	
+			const title = properties["og:title"];
+			if (title != null) {
+				displayName = title.replace(/ by.*$/, "");
+			}
+		}
+		
+		if (displayName != null) {
+/*		
+			const avatarRegex = /<img.*?SiteImage\.jsx.*?src="([^"]+?)"\/>/
 
 			const match = html.match(avatarRegex);
-			const avatar = match[1];
+			let icon = null;
+			if (match != null && match[1] != null) {
+ 				icon = match[1];
+ 			}
+ 			// icon is non-square with a circular crop:
+ 			// https://gocomicscmsassets.gocomics.com/staging-assets/assets/Global_Feature_Badge_Nancy_600_78e63ba574.png
+*/
 
-			const creatorUrl = baseUrl + "/" + comicId;
-			const creatorName = author;
-			const creator = Creator.createWithUriName(creatorUrl, creatorName);
-			creator.avatar = avatar;
+			// icon is favicon
+			const icon = "https://assets.gocomics.com/assets/favicons/favicon-96x96-92f1ac367fd0f34bc17956ef33d79433ddbec62144ee17b40add7a6a2ae6e61a.png";
 			
-			post.creator = creator;
-			
-			processResults([post]);
-			
-			lastTimestamp = timestamp;
+			const verifcation = {
+				displayName: displayName,
+				icon: icon
+			};
+			processVerification(verifcation);
+		}
+		else {
+			processError(Error("Invalid Comic ID"));
 		}
 	})
 	.catch((requestError) => {
-		// NOTE: It's possible that the comic for the day has not been posted yet (timezones, yay). So fail silently.
-		//processError(requestError);
+		processError(requestError);
 	});
-	
 }
+
+const schemaRegex = /<script type="application\/ld\+json">(.+?)<\/script>/g;
+
+function load() {
+	const url = `${site}/${comicId.trim()}`;
+
+	//const extraHeaders = {"user-agent": "curl"}; 
+	//sendRequest(url, "GET", null, extraHeaders)
+	
+	sendRequest(url)
+	.then((html) => {
+		const matches = html.matchAll(schemaRegex);
+		
+		const now = new Date();
+		const today = Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric" }).format(now);
+		
+		const year = now.getFullYear();
+		const month = now.getMonth() + 1;
+		const day = now.getDate();
+		const timestamp = String(year) + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
+
+		const contentUrl = `${site}/${comicId.trim()}/${timestamp}`;
+		console.log(`contentUrl = ${contentUrl}`);
+	
+		let imageUrl = null;
+		let description = null;
+		let author = null;
+		let creator = "GoComics";
+		
+		if (matches != null) {
+			for (const match of matches) {
+				try {
+					const metadata = JSON.parse(match[1]);
+					if (metadata["@type"] == "ImageObject") {
+						if (metadata["datePublished"] != null) {
+							if (metadata["datePublished"] == today) {
+								//console.log(JSON.stringify(metadata, null, "    "));
+								imageUrl = metadata["contentUrl"];
+								// NOTE: No aspect ratio in metadata - use console.log to check on this in the future...
+								if (metadata["author"] != null) {
+									author = metadata["author"]["name"];
+								}
+								if (metadata["creator"] != null) {
+									creator = metadata["creator"]["name"];
+								}
+								break;
+							}
+						}
+					}
+					else {
+						//console.log(`Not image: ${JSON.stringify(metadata, null, "    ")}`);
+					}
+				}
+				catch (error) {
+					console.log(`JSON.parse error = ${error}`);
+				}
+			}
+		}
+	
+		if (imageUrl != null) {
+			const attachment = MediaAttachment.createWithUrl(imageUrl);
+			if (description != null) {
+				attachment.text = description;
+			}
+			attachment.mimeType = "image";
+			console.log(`image = ${imageUrl}`);
+							
+			const publishedDate = new Date(today);
+			const content = `<p>Published on ${publishedDate.toLocaleDateString()} at <a href="${url}">${creator}</a></p>`;
+				
+			const item = Item.createWithUriDate(contentUrl, publishedDate);
+			item.body = content;
+			item.attachments = [attachment];
+	
+			if (author != null) {
+				let identity = Identity.createWithName(author);
+				identity.uri = site + "/" + comicId.trim();
+				item.author = identity;
+			}
+	
+			processResults([item]);
+		}
+		else {
+			processResults([]);
+		}
+	})
+	.catch((requestError) => {
+		processError(requestError);
+	});	
+}
+

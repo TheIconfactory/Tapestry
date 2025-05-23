@@ -1,6 +1,8 @@
 
 # Tapestry Loom - User Guide
 
+**NOTE: This documentation is out-of-date and needs to be updated for the latest version of Tapestry Loom**
+
 ## Introduction
 
 The Tapestry Loom is a tool that allows you to build and test plugins using the [Tapestry API](API.md)
@@ -42,9 +44,9 @@ Pressing this button initates the OAuth authentication for the plugin.
 
 Pressing this button refreshes the OAuth authentication if it has a refresh token.
 
-#### Identify
+#### Verify
 
-This button calls the `identify()` action in the plugin.
+This button calls the `verify()` action in the plugin.
 
 #### Load
 

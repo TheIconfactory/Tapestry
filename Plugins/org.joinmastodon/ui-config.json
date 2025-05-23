@@ -1,11 +1,21 @@
 {
 	"inputs": [
 		{
-			"name": "site",
-			"type": "url",
-			"prompt": "Instance",
-			"validate_as": "url",
-			"placeholder": "https://mastodon.social"
-		}
+			"name": "includeHome",
+			"type": "switch",
+			"prompt": "Include People You Follow",
+			"value": "on",
+		},
+		{
+			"name": "includeStatuses",
+			"type": "switch",
+			"prompt": "Include Your Own Posts",
+			"value": "on",
+		},
+		{
+			"name": "includeMentions",
+			"type": "switch",
+			"prompt": "Include Mentions From Others"
+		},
 	]
 }

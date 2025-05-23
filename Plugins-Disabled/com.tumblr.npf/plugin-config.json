@@ -1,0 +1,18 @@
+{
+	"id": "com.tumblr.npf",
+	"display_name": "Tumblr (NPF)",
+	"service_name": "Tumblr",
+	"default_color": "green",
+	"icon": "https://assets.tumblr.com/pop/manifest/favicon-0e3d244a.ico",
+	"item_style": "post",
+	"site": "https://api.tumblr.com",
+	"oauth_authorize": "https://www.tumblr.com/oauth2/authorize",
+	"oauth_token": "https://api.tumblr.com/v2/oauth2/token",
+	"oauth_type": "code",
+	"oauth_code_key": "code",
+	"oauth_scope": "basic+offline_access",
+	"oauth_grant_type": "authorization_code",
+	"oauth_http_redirect": true,
+	"provides_attachments": true,
+	"check_interval": 300
+}

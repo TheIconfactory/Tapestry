@@ -1,0 +1,12 @@
+{
+ 	"sites": [
+ 		"bsky.app",
+ 		"bsky.social"
+ 	],
+ 	"url": [
+		{
+			"extract": "/https://[^/]+/profile/([^/]+)/feed/([^/]+)/",
+			"variable": "account, feedId",
+		}
+	]
+}

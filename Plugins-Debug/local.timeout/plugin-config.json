@@ -1,0 +1,10 @@
+{
+	"id": "local.timeout",
+	"display_name": "Timeout",
+	"icon": "https://usetapestry.com/icons/generic.png",
+	"site": "https://example.com",
+	"needs_verification": true,
+	"verify_variables": true,
+	"minimum_app_version": "1.2",
+	"version": 1
+}

@@ -1,11 +1,10 @@
 {
 	"inputs": [
 		{
-			"name": "site",
-			"type": "url",
-			"prompt": "Channel URL",
-			"validate_as": "url",
-			"placeholder": "https://youtube.com/feeds/video.xml"
+			"name": "includeDescription",
+			"type": "switch",
+			"prompt": "Include Video Description",
+			"value": "on",
 		}
 	]
 }

@@ -1,0 +1,10 @@
+{
+	"inputs": [
+		{
+			"name": "list",
+			"type": "text",
+			"prompt": "List Identifier",
+			"placeholder": "Friends",
+		},
+	]
+}
