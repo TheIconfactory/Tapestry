@@ -775,7 +775,7 @@ Any credentials collected by Tapestry are used automatically during a `sendReque
 Connectors can be configured for Tapestry’s Crosstalk feature using the `crosstalk` property. The options are:
 
   * `inclusive`: Crosstalk checks items in this connector’s feeds and all items in other feeds where Crosstalk is enabled. This is the default behavior.
-  * `exclusive`: Crosstalk is only checked with items from other feeds that _do not_ use this connector. If two items are similar and use the same connector, they are _not marked_ as Crosstalk. This mode is used by the GoComics connector to prevent daily comics from being labeled as Crosstalk even though they have very similar content (FoxTrot and FoxTrot Classics, for example).
+  * `exclusive`: Crosstalk is only checked with items from other feeds that _do not_ use this connector. If two items are similar and use the same connector, they are _not marked_ as Crosstalk. This mode is used by some connectors to prevent daily items from being labeled as Crosstalk even though they have very similar content ("FoxTrot" and "FoxTrot Classics", for example).
   * `disabled`: Opts this connector entirely out of Crosstalk. Items from feeds using this connector will never be checked or labeled as Crosstalk even if they are similar to an item in another feed.
   
 #### EXAMPLES
@@ -1103,11 +1103,11 @@ The following sections describe each category.
 
 The sites category is a list of strings where the connector can be used. These checks are performed on the URL that is supplied by the user.
 
-For example. the `com.gocomics` connector only works on one site so it uses:
+For example. the `com.example` connector only works on one site so it uses:
 
 ```json
 	"site": [
-		"gocomics.com"
+		"example.com"
 	],
 ```
 
