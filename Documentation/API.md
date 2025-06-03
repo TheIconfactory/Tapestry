@@ -1316,14 +1316,14 @@ This file defines actions that can alter items supplied by a connector. An actio
 {
 	"items": [
 		{
-			id: "favorite",
-			name: "Add Favorite",
-			icon: "heart.fill",
+			"id": "favorite",
+			"name": "Add Favorite",
+			"icon": "heart.fill",
 		},
 		{
-			id: "unfavorite",
-			name: "Remove Favorite",
-			icon: "heart",
+			"id": "unfavorite",
+			"name": "Remove Favorite",
+			"icon": "heart",
 		},
 	],
 }
