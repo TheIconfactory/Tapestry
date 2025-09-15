@@ -459,7 +459,7 @@ When a string is returned, it will be used as a `displayName` with an empty `bas
 
   * text: `String` is the text representation of the XML data.
 
-If `minimum_app_version` is `1.3` or higher, this returns a `Promise` which asynchronously returns and `Object` or raises an error.
+If `minimum_app_version` is `1.3` or higher, this returns a `Promise` which asynchronously returns an `Object` or raises an error.
 
 If `minimum_app_version` is unspecified or below `1.3`, this synchronously returns an `Object` or throws an error.
 
@@ -594,7 +594,7 @@ This functionality should be enough to parse XML generated from hierarchical dat
 
   * text: `String` is the text representation of the property list data formatted as XML.
 
-If `minimum_app_version` is `1.3` or higher, this returns a `Promise` which asynchronously returns and `Object` or raises an error.
+If `minimum_app_version` is `1.3` or higher, this returns a `Promise` which asynchronously returns an `Object` or raises an error.
 
 If `minimum_app_version` is unspecified or below `1.3`, this synchronously returns an `Object` or throws an error.
 
@@ -606,7 +606,7 @@ Note that old style property lists or JSON property lists are not supported.
 
   * text: `String` is HTML content with `<meta>` properties (such as Open Graph).
 
-If `minimum_app_version` is `1.3` or higher, this returns a `Promise` which asynchronously returns and `Object` or raises an error.
+If `minimum_app_version` is `1.3` or higher, this returns a `Promise` which asynchronously returns an `Object` or raises an error.
 
 If `minimum_app_version` is unspecified or below `1.3`, this synchronously returns an `Object` or throws an error.
 
@@ -748,7 +748,7 @@ Recommended properties:
   * item\_style: `String` with either "post" or "article" to define the content layout.
   * version: `Number` with an integer value that increments with newer versions of the connector. If no value is supplied, 1 is assumed.
   * crosstalk: `String` with "inclusive", "exclusive", or "disabled". See the explanation of these modes below.
-  * minimum\_app\_version: `String` with the version number of the Tapestry app that must be used for the connector. If the app version is lower than the specified value, the connector will be ignored until a newer version is installed. **Some API behaviors are also influenced by this setting.**
+  * minimum\_app\_version: `String` with the version number of the Tapestry app that must be used for the connector. If the app version is lower than the specified value, the connector will be ignored until a newer version is installed. **Some API behaviors are also influenced by this setting!**
   
 Optional properties:
 
