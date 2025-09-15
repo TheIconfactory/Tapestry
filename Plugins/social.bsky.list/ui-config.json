@@ -12,5 +12,15 @@
 			"prompt": "List Identifier",
 			"placeholder": "3lng6ryhigk2a",
 		},
+        {
+            "name": "includeReposts",
+            "type": "switch",
+            "prompt": "Include Reposts"
+        },
+        {
+            "name": "includeReplies",
+            "type": "switch",
+            "prompt": "Include Replies"
+        },
 	]
 }
