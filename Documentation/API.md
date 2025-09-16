@@ -107,11 +107,13 @@ Adds a content warning to the item and blurs any attachments.
 
 The creator of the content. See `Identity` below.
 
-#### attachments: Array of MediaAttachment and LinkAttachment
+#### attachments: Array of MediaAttachment and LinkAttachment and Item
 
-Media and link attachments for the content. See `MediaAttachment` and `LinkAttachment` below.
+Media, link, and quoted item attachments for the content. See `MediaAttachment` and `LinkAttachment` below.
 
 > **Note:** If the `provides_attachments` configuration parameter is not set or false, attachments will be generated automatically using the elements of the `body` HTML. If no other media attachments in the item have been set, inline images and videos will be used to create media attachments automatically. Additionally, the first link in the first paragraph will be checked for a link attachment. See the section on HTML Content for more information.
+
+> **Compatibility:** Item objects as attachments are only supported in Tapestry 1.3 or higher and will be ignored by older versions.
 
 #### shortcodes: Dictionary
 
