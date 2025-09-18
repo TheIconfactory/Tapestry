@@ -33,16 +33,6 @@ function postForItem(item, includeActions = false, date = null, shortcodes = {})
 	identity.avatar = account["avatar"];
 
 	let content = item["content"];
-	if (item["poll"] != null) {
-		if (item["poll"].options != null) {
-			let multiple = (item["poll"]?.multiple ?? false) ? "(Multiple Choice)" : "";
-			content += "<p><ul>";
-			for (const option of item["poll"].options) {
-				content += `<li>${option.title}</li>`;
-			}
-			content += `</ul>${multiple}</p>`;
-		}			
-	}
 
 	let contentWarning = null;
 	const spoilerText = item["spoiler_text"];
@@ -206,7 +196,16 @@ function postForItem(item, includeActions = false, date = null, shortcodes = {})
         }
         attachments.push(attachment);
     }
-	
+
+    const poll = item["poll"];
+    if (poll != null && poll.options != null && poll.expires_at != null) {
+        let attachment = PollAttachment.create();
+        attachment.options = poll.options.map((option) => PollOption.create(option.title, option.votes_count));
+        attachment.endDate = new Date(poll.expires_at);
+        attachment.multipleChoice = poll?.multiple ?? false;
+        attachments.push(attachment);
+    }
+
 	if (attachments.length > 0) {
 		post.attachments = attachments;
 	}
