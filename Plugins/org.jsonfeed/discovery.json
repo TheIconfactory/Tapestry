@@ -3,7 +3,7 @@
 		{
 			"element": "link",
 			"check": "type",
-			"match": "/application/(?:json|feed\\+json)/",
+			"match": "/application/(?:json|feed\\+json)\\s*$/",
 			"use": "href",
 			"extract": "/^((?!wp-json).)*$/",
 			"comment": "The regex above lets this rule filter out WordPress API links",
@@ -11,7 +11,7 @@
 		{
 			"element": "link",
 			"check": "type",
-			"match": "/application/(?:json|feed\\+json)/",
+			"match": "/application/(?:json|feed\\+json)\\s*$/",
 			"use": "href",
 			"variable": "site"
 		}

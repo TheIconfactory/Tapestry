@@ -9,6 +9,7 @@ This is a work-in-progress and details are certain to change.
 
 > **Note:** The JavaScript in connectors must conform to the [ECMA-262 specification](http://www.ecma-international.org/publications/standards/Ecma-262.htm). This specification defines the language and its basic [functions](https://262.ecma-international.org/14.0/#sec-function-properties-of-the-global-object) and [objects](https://262.ecma-international.org/14.0/#sec-constructor-properties-of-the-global-object). Additions that support the Document Object Model (DOM) and other browser functions are not available.
 
+---
 ## Variables
 
 Any variables that have been specified in `ui-config.json` are set before the script is executed. For example, the Mastodon connector specifies the following inputs:
@@ -35,6 +36,7 @@ sendRequest(site + "/api/v1/timelines/home?limit=40")
 
 See the Configuration section below for the specification of `ui-config.json` and each input/variable.
 
+---
 ## Objects
 
 The following objects are used to create content for the Tapestry app.
@@ -69,7 +71,7 @@ if (myContent != null) {
 	item.body = myContent;
 }
 ```
-
+---
 ### Item
 
 `Item` objects are used to populate a timeline in the app. Items can be either posts or articles. You create one with:
@@ -107,11 +109,13 @@ Adds a content warning to the item and blurs any attachments.
 
 The creator of the content. See `Identity` below.
 
-#### attachments: Array of MediaAttachment and LinkAttachment
+#### attachments: Array of MediaAttachment and LinkAttachment and Item
 
-Media and link attachments for the content. See `MediaAttachment` and `LinkAttachment` below.
+Media, link, and quoted item attachments for the content. See `MediaAttachment` and `LinkAttachment` below.
 
 > **Note:** If the `provides_attachments` configuration parameter is not set or false, attachments will be generated automatically using the elements of the `body` HTML. If no other media attachments in the item have been set, inline images and videos will be used to create media attachments automatically. Additionally, the first link in the first paragraph will be checked for a link attachment. See the section on HTML Content for more information.
+
+> **Compatibility:** Item objects as attachments are only supported in Tapestry 1.3 or higher and will be ignored by older versions.
 
 #### shortcodes: Dictionary
 
@@ -124,6 +128,7 @@ item.shortcodes = { "ONE": "https://example.com/one.jpg", "CHOCK": "https://choc
 
 Shortcode tokens must not contain spaces or additional colons: using `:my fancy code:` or `:what:the:hell:` is invalid and will be ignored. 
 
+---
 ### Identity
 
 An `Item` can have a author that indicates how the content was created. It can be a person, a woman, a man, a camera, or a TV. The information is used to present an avatar and header in the timeline.
@@ -153,6 +158,7 @@ A unique URI for the creator on the Internet. Can be an individual’s account p
 
 A string containing the URL for the creator’s avatar on the Internet. A Base64 encoded data URL can be used, if needed. If no avatar is specified a generic image will be displayed in the timeline.
 
+---
 ### Annotation
 
 An `Item` can have annotations that indicates how the content arrived in the timeline. It can be used for boosts, replies, reposts, reblogs, or any other type of reference.
@@ -178,7 +184,7 @@ A string containing a URL for the annotation’s icon. If no icon is specified o
 
 A URI with more information about the annotation. For things like boosts/reposts/reblogs that are done by an account the user follows, a link to the account listed in the annotation would be appropriate.
 
-
+---
 ### MediaAttachment
 
 `Item`s can also have media attachments. Photos, videos, and audio are commonly available from APIs and other data sources, and this is how you get them into the timeline. They will be displayed under the HTML content.
@@ -254,6 +260,7 @@ An object with `width` and `height` properties. The values are used to optimize 
 
 An object with `x` and `x` properties. The values are used to center media in the timeline. If no values are specified, the center at (0, 0) is assumed.
 
+---
 ### LinkAttachment
 
 #### url: String (required)
@@ -296,13 +303,60 @@ A string that provides a placeholder image.
 
 An object with `width` and `height` properties, typically from Open Graph [og:image:width](https://ogp.me/#structured) and [og:image:height](https://ogp.me/#structured).
 
+---
+### PollAttachment
 
+Used for attaching information about a poll to an `Item`.
+
+```javascript
+const attachment = PollAttachment.create();
+attachment.options = [ PollOption.create("Option 1", 16), PollOption.create("Option 2", 26) ];
+attachment.endDate = new Date();
+
+item.attachments = [attachment];
+```
+
+#### options: Array of PollOptions (required)
+
+An array of `PollOption` objects for each option in the poll.
+
+#### endDate: Date (optional)
+
+An optional date that the poll ends. If not specified, Tapestry renders the poll without showing a countdown time label.
+
+#### multipleChoice: Bool (default false)
+
+Set to `true` if the poll allows mutliple choices or not.
+
+> **Compatibility:** Requires `minimum_app_version="1.3"` or higher.
+
+---
+### PollOption
+
+Used to define an option for a `PollAttachment`.
+
+```javascript
+const a = PollOption.create("Zero votes.", 0);
+const b = PollOption.create("This has 16 votes.", 16);
+const c = PollOption.create("Unspecified votes.");
+const poll = PollAttachment.create([a, b, c]);
+```
+
+#### title: String (required)
+#### votes: Number (optional)
+
+If `votes` is left unspecified on one or more options in a `PollAttachment`, Tapestry will not show vote totals or percentages.
+
+> **Compatibility:** Requires `minimum_app_version="1.3"` or higher.
+
+---
 ## Actions
 
 The Tapestry app will call the following functions in `plugin.js` when it needs the script to read or write data. If no implementation is provided, no action will be performed. For example, some sources will not need to `verify()` themselves.
 
 All actions are performed asynchronously (using one or more JavaScript Promise objects). An action indicates that it has completed using the `processResults`, `processError`, and `processVerification` functions specified below.
 
+---
 ### verify()
 
 Determines if a site is reachable and gathers properties for the feed. After `processVerification` is called a feed can be saved by a user.
@@ -317,14 +371,17 @@ When you call `processVerification` you can supply an object with these properti
 
 This function will only be called if `needs_verification` is set to true in the connectors’s configuration.
 
+---
 ### load()
 
 Loads any new data and return it to the app with `processResults` or `processError`. Variables can be used to determine what to load. For example, whether to include mentions on Mastodon or not.
 
+---
 ## Functions
 
 The following functions are available to the script to help it perform the actions listed above.
 
+---
 ### sendRequest(url, method, parameters, extraHeaders, fullResponse) → Promise
 
 Sends a request. If configured, a bearer token will be included with the request automatically.
@@ -410,7 +467,22 @@ function verify() {
 
 > **Note:** The JavaScript code doesn’t have access to the OAuth access token (for security, no authentication information is exposed to the connector). If an access token is needed in a list of `parameters`, use `__ACCESS_TOKEN__` — it will be substituted before the request is sent to the endpoint.
 
+---
+### sendConditionalRequest(url, method, parameters, extraHeaders, fullResponse) → Promise
 
+This performs an [HTTP conditional request](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Conditional_requests). 
+
+The behavior is nearly identical to `sendRequest()` with one very important difference: If `fullResponse` is false or unspecified and the server responds with an `HTTP 304 Not Modified` response, the value returned by the promise will be `null`.
+
+The purpose of this is to make it faster to check when content has changed since the last time it was requested. Internally the request's `url` is used as a key to record the modified date and/or etag as returned by the server. That information is then automatically added to the headers of your next conditional request for that same `url` so the server can know how to respond.
+
+For feed-like data sources (such as RSS), this often results in a very significant speedup because it avoids re-downloading and re-importing unchanged content.
+
+> **Note:** Not all web servers are correctly configured to support conditional requests. If the server doesn't send the required headers or otherwise ignores them, this function will fallback to behaving identically to `sendRequest()`.
+
+> **Compatibility:** Requires `minimum_app_version="1.3"` or higher.
+
+---
 ### processResults(results, isComplete)
 
 Sends any data that’s retrieved to the Tapestry app for display.
@@ -420,12 +492,14 @@ Sends any data that’s retrieved to the Tapestry app for display.
 
 After returning a true value for `isComplete` any further results will be ignored. If you have multiple async `sendRequest` in your connector, you'll need to have some kind of reference counter to know when to set the flag to true. See the [Mastodon connector](https://github.com/TheIconfactory/Tapestry/blob/main/Plugins/org.joinmastodon/plugin.js) for an example of how to do this.
 
+---
 ### processError(error)
 
 Sends any error to the Tapestry app for display
 
   * error: `Error` which indicates what went wrong. Will be displayed in the user interface.
 
+---
 ### processVerification(verification)
 
 Sets the parameters for the site and service.
@@ -442,11 +516,14 @@ When a string is returned, it will be used as a `displayName` with an empty `bas
 
 > **Note:** A `baseUrl` is typically used for feeds where the site is "feed.example.com" but images and other resources are loaded from "example.com".
   
-### xmlParse(text) → Object
+---
+### xmlParse(text) → (Object | Promise)
 
   * text: `String` is the text representation of the XML data.
-  
-Returns an `Object` representation of the XML data, much like `JSON.parse` does.
+
+If `minimum_app_version` is `1.3` or higher, this returns a `Promise` which asynchronously returns an `Object` or raises an error.
+
+If `minimum_app_version` is unspecified or below `1.3`, this synchronously returns an `Object` or throws an error.
 
 > **Note:** Do not assume that the order of the keys in the object dictionaries will be the same as they occurred in the XML. No order is preserved during processing (as is the case with JSON parsing).
 
@@ -573,26 +650,42 @@ Finally, not all XML nodes will be accessible with a object property path. An XM
 
 This functionality should be enough to parse XML generated from hierarchical data, such as an RSS feed generated by a WordPress database of posts.
 
-### plistParse(text) → Object
+> **Compatibility:** Returns a `Promise` if `minimum_app_version="1.3"` or higher.
+
+---
+### plistParse(text) → (Object | Promise)
 
   * text: `String` is the text representation of the property list data formatted as XML.
-  
-Returns an `Object` representation of the data, much like `JSON.parse` does.
+
+If `minimum_app_version` is `1.3` or higher, this returns a `Promise` which asynchronously returns an `Object` or raises an error.
+
+If `minimum_app_version` is unspecified or below `1.3`, this synchronously returns an `Object` or throws an error.
 
 Note that old style property lists or JSON property lists are not supported.
 
-### extractProperties(text) → Object
+> **Compatibility:** Returns a `Promise` if `minimum_app_version="1.3"` or higher.
+
+---
+### extractProperties(text) → (Object | Promise)
 
   * text: `String` is HTML content with `<meta>` properties (such as Open Graph).
-  
-Returns an `Object` representation containing the HTML’s properties. These values can be used to generate link previews or enhance the content without scraping the markup.
 
+If `minimum_app_version` is `1.3` or higher, this returns a `Promise` which asynchronously returns an `Object` or raises an error.
+
+If `minimum_app_version` is unspecified or below `1.3`, this synchronously returns an `Object` or throws an error.
+
+The `Object` representation contains the HTML’s properties. These values can be used to generate link previews or enhance the content without scraping the markup.
+
+> **Compatibility:** Returns a `Promise` if `minimum_app_version="1.3"` or higher.
+
+---
 ### lookupIcon(url) → Promise
 
   * url: `String` with a path to an HTML page
   
 Returns a `Promise` with a resolve handler that includes a `String` parameter with a path to an icon for the page. If no icon can be found, a `null` value is returned.
 
+---
 ### setItem(key, value)
 
   * key: `String` a key for value being stored.
@@ -600,16 +693,19 @@ Returns a `Promise` with a resolve handler that includes a `String` parameter wi
   
 Items can be removed from local storage by passing a `null` value. The amount of local storage is limited to 100,000 total characters and any items set beyond that threshold will be ignored.
   
+---
 ### getItem(key) → String
 
   * key: `String` a key for value that was stored.
   
 Returns a `String` that was saved in local storage. If no value was stored, `null` is returned.
 
+---
 ### clearItems()
 
 All items in local storage are removed.
 
+---
 ### performAction(actionId, actionValue, item)
 
 Sends an action to the connector.
@@ -620,6 +716,7 @@ Sends an action to the connector.
   
 See section on `actions.json` for more information on how to perform actions.
 
+---
 ### actionComplete(item, error)
 
 Indicates that the action has been performed. Must be called.
@@ -629,6 +726,7 @@ Indicates that the action has been performed. Must be called.
 
 See section on `actions.json` for more information on how to complete actions.
 
+---
 ### require(resourceName) → Value | Object | String | false
 
   * resourceName: `String` with the name of a text resource to load.
@@ -666,6 +764,7 @@ else {
 
 If you have used Node.js’s module loading, the approach above is very similar approach. Note that there is no need to export functions from the .js file that is being loaded: all functions and variables in the file are exported.
 
+---
 ### raiseCondition(condition, title, description)
 
 Raises an persistent error condition that will be presented as a fatal error to the user:
@@ -680,6 +779,7 @@ When "disable" is used, the condition is displayed prominently and the user will
 
 Any other `type` is ignored.
 
+---
 ## Configuration
 
 Each connector is defined using the following files:
@@ -694,6 +794,7 @@ Each connector is defined using the following files:
   
 The contents of each of these files is discussed below.
 
+---
 ### plugin-config.json
 
 Required properties:
@@ -721,6 +822,7 @@ Recommended properties:
   * item\_style: `String` with either "post" or "article" to define the content layout.
   * version: `Number` with an integer value that increments with newer versions of the connector. If no value is supplied, 1 is assumed.
   * crosstalk: `String` with "inclusive", "exclusive", or "disabled". See the explanation of these modes below.
+  * minimum\_app\_version: `String` with the version number of the Tapestry app that must be used for the connector. If the app version is lower than the specified value, the connector will be ignored until a newer version is installed. **Some API behaviors are also influenced by this setting!**
   
 Optional properties:
 
@@ -729,8 +831,9 @@ Optional properties:
   * provides\_attachments: `Boolean` with true if connector generates attachments directly, otherwise post-processing of HTML content will be used to capture images, videos, and link previews.
   * authorization\_header: `String` with a template for the authorization header. If no value is specified, "Bearer \_\_ACCESS\_TOKEN\_\_" will be used. See below for options.
   * refresh\_status\_code: `Number` with the HTTP status code that indicates authorization needs to be refreshed. Default value is 401. A value of 0 will not attempt to refresh tokens.
-  * minimum\_app\_version: `String` with the version number of the Tapestry app that must be used for the connector. If the app version is lower than the specified value, the connector will be ignored until a newer version is installed.
   * check\_interval: `Number` with number of seconds between load requests (currently unimplemented).
+  * synchronizable\_credentials: `Boolean` allows feed authentication tokens to by synced using iCloud keychain when `true` (default is `true`).
+  * hidden\_tag\_classes: `Array` of `String`s of HTML CSS class names. HTML tags in an item's body with a matching class will be hidden when rendering the item preview for the timeline.
 
 Optional OAuth properties:
 
@@ -809,6 +912,7 @@ The configuration for the JSON Feed connector is:
 }
 ```
  
+---
 ### ui-config.json
 
 The user interface in the Tapestry app is configured with this file. A connector can have any number of inputs, specified as an `Array`. Each input has this required property:
@@ -871,6 +975,7 @@ Here is an example of the different kinds of variables:
 }
 ```
 
+---
 ### plugin.js
 
 A JavaScript file that implements the Actions specified above using the Functions listed above. This is the file that pulls all the pieces described above into code that gets data and transforms it for use in the universal timeline.
@@ -920,6 +1025,7 @@ function load() {
 
 This connector took about an hour to write with no prior knowledge of the API or data formats involved. All of the connectors in the current version of the Tapestry app range in length from about 50 to 200 lines of code (including comments).
 
+---
 ### README.md
 
 This file, formatted with Markdown, is displayed in Tapestry when the user views your connector’s information. It is highly recommended since it provides valuable context for the end user.
@@ -939,6 +1045,7 @@ This first connector for Tapestry was written by Craig Hockenberry
 ([@chockenberry](https://mastodon.social/@chockenberry)) while creating a prototype.
 ```
 
+---
 ### suggestions.json
 
 The contents of this file will help the user setup the connector. There are two types of suggestions: one for site URLs and another for settings.
@@ -1002,6 +1109,7 @@ If multiple names and values are needed, the following form can be used:
 	]
 ```
 
+---
 ### apps.json
 
 The contents of this file will help the user select a native app to be used by feeds created with this connector.
@@ -1080,6 +1188,7 @@ The \_\_URL\_\_ template value can be useful for apps that support [Universal Li
 
 The `pattern` is a case-insensitive regular expression. When a link’s URL matches the pattern, the URL created by the template will be opened.
 
+---
 ### discovery.json
 
 This file helps the user find your connector when they have a URL to a page of HTML. The rules in this file will be checked and if all constraints match, the connector will be suggested to the user in an interface that simplifies set up.
@@ -1308,6 +1417,7 @@ If none of the rules above apply, the content can be checked for JSON keys. Ther
 
 The `key` must be a top-level key in the JSON content. The example ensures that the JSON dictionary has a `version` key with the correct `value`.
 
+---
 ### actions.json
 
 This file defines actions that can alter items supplied by a connector. An action is defined by its `id` that can be used in code with a `name` and `icon` that is used in the Tapestry user interface. The `name` can be any SF Symbol name or one of Tapestry's built-in symbols (listed below).
@@ -1419,6 +1529,7 @@ tapestry.tumblr
 tapestry.view.details
 tapestry.youtube
 
+---
 ## HTML Content
 
 ### How Tapestry uses HTML

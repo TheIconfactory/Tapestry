@@ -166,7 +166,18 @@ function postForItem(item) {
 	}
 
 	let showItem = true;
-	
+
+    if (includeReposts != "on") {
+        if (repostContent != null) {
+            showItem = false;
+        }
+    }
+    if (includeReplies != "on") {
+        if (replyContent != null && repostContent == null) { // show replies only if they are not reposted
+            showItem = false;
+        }
+    }
+
 	if (showItem) {
 		let attachments = attachmentsForEmbed(item.post.embed);
 				
