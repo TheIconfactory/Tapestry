@@ -3,32 +3,38 @@
 		{
 			"id": "boost",
 			"name": "Boost",
-			"icon": "tapestry.boost",
+			"icon": "tapestry.boost"
 		},
 		{
 			"id": "unboost",
 			"name": "Remove Boost",
-			"icon": "tapestry.boost.fill",
+			"icon": "tapestry.boost.fill"
 		},
 		{
 			"id": "favorite",
 			"name": "Favorite",
-			"icon": "tapestry.star",
+			"icon": "tapestry.star"
 		},
 		{
 			"id": "unfavorite",
 			"name": "Remove Favorite",
-			"icon": "tapestry.star.fill",
+			"icon": "tapestry.star.fill"
 		},
 		{
 			"id": "bookmark",
 			"name": "Bookmark",
-			"icon": "tapestry.bookmark",
+			"icon": "tapestry.bookmark"
 		},
 		{
 			"id": "unbookmark",
 			"name": "Remove Bookmark",
-			"icon": "tapestry.bookmark.fill",
+			"icon": "tapestry.bookmark.fill"
 		},
-	],
+		{
+			"id": "thread",
+			"name": "Thread",
+			"icon": "text.bubble",
+			"role": "context"
+		}
+	]
 }

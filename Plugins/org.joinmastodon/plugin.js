@@ -131,97 +131,80 @@ function load() {
 	}
 }
 
-function performAction(actionId, actionValue, item) {
+async function performAction(actionId, actionValue, item) {
 	let actions = item.actions;
 	
 	if (actionId == "favorite") {
 		const url = `${site}/api/v1/statuses/${actionValue}/favourite`;
-		sendRequest(url, "POST")
-		.then((text) => {
-			const jsonObject = JSON.parse(text);
-			
-			delete actions["favorite"];
-			actions["unfavorite"] = actionValue;
-			item.actions = actions;
-			actionComplete(item, null);
-		})
-		.catch((requestError) => {
-			actionComplete(null, requestError);
-		});	
+		let text = await sendRequest(url, "POST");
+		const jsonObject = JSON.parse(text);
+		
+		delete actions["favorite"];
+		actions["unfavorite"] = actionValue;
+		item.actions = actions;
+		actionComplete(item);
 	}
 	else if (actionId == "unfavorite") {
 		const url = `${site}/api/v1/statuses/${actionValue}/unfavourite`;
-		sendRequest(url, "POST")
-		.then((text) => {
-			delete actions["unfavorite"];
-			actions["favorite"] = actionValue;
-			item.actions = actions;
-			actionComplete(item, null);
-		})
-		.catch((requestError) => {
-			actionComplete(null, requestError);
-		});	
+		let text = await sendRequest(url, "POST");
+		delete actions["unfavorite"];
+		actions["favorite"] = actionValue;
+		item.actions = actions;
+		actionComplete(item);
 	}
 	else if (actionId == "boost") {
 		const url = `${site}/api/v1/statuses/${actionValue}/reblog`;
-		sendRequest(url, "POST")
-		.then((text) => {
-			let annotation = Annotation.createWithText("Boosted by you");
-			item.annotations = [annotation];
-			
-			delete actions["boost"];
-			actions["unboost"] = actionValue;
-			item.actions = actions;
-			actionComplete(item, null);
-		})
-		.catch((requestError) => {
-			actionComplete(null, requestError);
-		});	
+		let text = await sendRequest(url, "POST");
+		let annotation = Annotation.createWithText("Boosted by you");
+		item.annotations = [annotation];
+		
+		delete actions["boost"];
+		actions["unboost"] = actionValue;
+		item.actions = actions;
+		actionComplete(item);
 	}
 	else if (actionId == "unboost") {
 		const url = `${site}/api/v1/statuses/${actionValue}/unreblog`;
-		sendRequest(url, "POST")
-		.then((text) => {
-			item.annotations = [];
-			
-			delete actions["unboost"];
-			actions["boost"] = actionValue;
-			item.actions = actions;
-			actionComplete(item, null);
-		})
-		.catch((requestError) => {
-			actionComplete(null, requestError);
-		});	
+		let text = await sendRequest(url, "POST");
+		item.annotations = [];
+		
+		delete actions["unboost"];
+		actions["boost"] = actionValue;
+		item.actions = actions;
+		actionComplete(item);
 	}
 	else if (actionId == "bookmark") {
 		const url = `${site}/api/v1/statuses/${actionValue}/bookmark`;
-		sendRequest(url, "POST")
-		.then((text) => {
-			delete actions["bookmark"];
-			actions["unbookmark"] = actionValue;
-			item.actions = actions;
-			actionComplete(item, null);
-		})
-		.catch((requestError) => {
-			actionComplete(null, requestError);
-		});	
+		let text = await sendRequest(url, "POST");
+		delete actions["bookmark"];
+		actions["unbookmark"] = actionValue;
+		item.actions = actions;
+		actionComplete(item);
 	}
 	else if (actionId == "unbookmark") {
 		const url = `${site}/api/v1/statuses/${actionValue}/unbookmark`;
-		sendRequest(url, "POST")
-		.then((text) => {
-			delete actions["unbookmark"];
-			actions["bookmark"] = actionValue;
-			item.actions = actions;
-			actionComplete(item, null);
-		})
-		.catch((requestError) => {
-			actionComplete(null, requestError);
-		});	
+		let text = await sendRequest(url, "POST");
+		delete actions["unbookmark"];
+		actions["bookmark"] = actionValue;
+		item.actions = actions;
+		actionComplete(item);
+	}
+	else if (actionId == "thread") {
+		const url = `${site}/api/v1/statuses/${actionValue}/context`;
+		let text = await sendRequest(url);
+		const jsonObject = JSON.parse(text);
+		let results = [];
+		for (const item of jsonObject["ancestors"]) {
+			results.push(postForItem(item, true));
+		}
+		results.push(item);
+		for (const item of jsonObject["descendants"]) {
+			results.push(postForItem(item, true));
+		}
+		actionComplete(results);
 	}
 	else {
-		let error = new Error(`actionId "${actionId}" not implemented`);
-		actionComplete(null, error);
+		throw new Error(`actionId "${actionId}" not implemented`);
 	}
 }
 

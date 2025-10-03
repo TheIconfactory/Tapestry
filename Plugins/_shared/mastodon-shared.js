@@ -55,7 +55,9 @@ function postForItem(item, includeActions = false, date = null, shortcodes = {})
 	post.body = content;
 
 	if (includeActions) {
-		let actions = {};
+		let actions = {
+			"thread": item.id
+		};
 		if (item?.favourited) {
 			actions["unfavorite"] = item.id;
 		}
