@@ -21,7 +21,42 @@ function normalizeTag(tag) {
 	return result;
 }
 
-function postForItem(item, includeActions = false, date = null, shortcodes = {}) {
+function postForItem(item) {
+	const postDate = new Date(item["created_at"]);
+
+	let shortcodes = {};
+	let annotation = null;
+
+	if (item["reblog"] != null) {
+		const account = item["account"];
+		const displayName = account["display_name"];
+		const userName = account["username"];
+		const accountName = (displayName ? displayName : userName);
+		annotation = Annotation.createWithText(`${accountName} Boosted`);
+		annotation.uri = account["url"];
+		annotation.icon = account["avatar"];
+
+		// We use the booster's display_name in the annotation and it may have custom emoji.
+		const accountEmojis = account["emojis"];
+		if (accountEmojis != null && accountEmojis.length > 0) {
+			for (const emoji of accountEmojis) {
+				shortcodes[emoji.shortcode] = emoji.static_url;
+			}
+		}
+
+		// The rest of the info all comes from the boosted item itself.
+		item = item["reblog"];
+	}
+
+	// Items boosted by the authenticated account override the annotation.
+	if (item?.reblogged) {
+		annotation = Annotation.createWithText("Boosted by you");
+		annotation.uri = item.account["url"];
+	}
+
+	const uri = item["url"];
+	const post = Item.createWithUriDate(uri, postDate);
+
 	const account = item["account"];
 	const displayName = account["display_name"];
 	const userName = account["username"];
@@ -31,75 +66,110 @@ function postForItem(item, includeActions = false, date = null, shortcodes = {})
 	identity.username = "@" + fullAccountName;
 	identity.uri = account["url"];
 	identity.avatar = account["avatar"];
+	post.author = identity;
 
-	let content = item["content"];
+	post.body = item["content"];
 
-	let contentWarning = null;
 	const spoilerText = item["spoiler_text"];
 	if (spoilerText != null && spoilerText.length > 0) {
-		contentWarning = spoilerText;
+		post.contentWarning = spoilerText;
 	}
-	
-	let postDate;
-	if (date == null) {
-		postDate = new Date(item["created_at"]);
-	}
-	else {
-		postDate = date;
-	}
-	
-	const uri = item["url"];
-	const post = Item.createWithUriDate(uri, postDate);
+		
+	if (annotation == null) {
+		const visibility = item["visibility"] ?? "public";
 
-	post.author = identity;
-	post.body = content;
+		if (visibility == "private") {
+			annotation = Annotation.createWithText(`FOLLOWERS ONLY`);
+		}
+		else if (visibility == "direct") {
+			annotation = Annotation.createWithText(`PRIVATE MENTION`);
+		}
+		else if (visibility == "public" || visibility == "unlisted") {
+			if (item.in_reply_to_account_id != null) {
+				if (item.in_reply_to_account_id == account.id) {
+					let text = "Replying to self";
+					annotation = Annotation.createWithText(text);
+					annotation.uri = account["url"];
+				}
+				// NOTE: At one point we added annotations for who a post is replying to, however it was originally
+				// very inconsistent - specifically, it was added only on items from your own mentions timeline by the
+				// main mastodon connector AND for every reply in the list connector regardless who posted it. But
+				// not for the other connectors and not for other sources (like your main home timeline source) in
+				// the regular connector!
+				//
+				// I have no idea how this situation came about, but it was very inconsistent and I'm trying to unify
+				// these behaviors so that items loaded from a conversation thread, for example, end up being created
+				// the same way as items from your main timeline or from a mention - otherwise there's some behaviors
+				// in the UI where annotations can come and go depending on how an item was last downloaded which is
+				// not great.
+				/*
+				else if (item.mentions != null && item.mentions.length > 0) {
+					const mentions = item.mentions;
+					const account = mentions[0];
+					const userName = account["username"];
+					let text = "Replying to @" + userName;
+					if (mentions.length > 1) {
+						text += " and others";
+					}
+					annotation = Annotation.createWithText(text);
+					annotation.uri = account["url"];
+				}
+				*/
+			}
+		}
+	}
 
-	if (includeActions) {
-		let actions = {
-			"thread": item.id
-		};
-		if (item?.favourited) {
-			actions["unfavorite"] = item.id;
-		}
-		else {
-			actions["favorite"] = item.id;
-		}
-		if (item?.reblogged) {
-			actions["unboost"] = item.id;
-		}
-		else {
-			actions["boost"] = item.id;
-		}
-		if (item?.bookmarked) {
-			actions["unbookmark"] = item.id;
-		}
-		else {
-			actions["bookmark"] = item.id;
-		}
-		post.actions = actions;
+	if (annotation != null) {
+		post.annotations = [annotation];
 	}
-	
-	if (contentWarning != null) {
-		post.contentWarning = contentWarning;
-	}
-	
+
 	const itemEmojis = item["emojis"];
 	if (itemEmojis != null && itemEmojis.length > 0) {
 		for (const emoji of itemEmojis) {
 			shortcodes[emoji.shortcode] = emoji.static_url;
 		}
 	}
+
 	const accountEmojis = account["emojis"];
 	if (accountEmojis != null && accountEmojis.length > 0) {
 		for (const emoji of accountEmojis) {
 			shortcodes[emoji.shortcode] = emoji.static_url;
 		}
 	}
-	if (Object.keys(shortcodes).length > 0) {
-		post.shortcodes = shortcodes;
-		//console.log(JSON.stringify(shortcodes));
+
+	post.shortcodes = shortcodes;
+
+	let actions = {};
+
+	if (item?.favourited) {
+		actions["unfavorite"] = item.id;
 	}
-	
+	else {
+		actions["favorite"] = item.id;
+	}
+
+	if (item?.reblogged) {
+		actions["unboost"] = item.id;
+	}
+	else {
+		actions["boost"] = item.id;
+	}
+
+	if (item?.bookmarked) {
+		actions["unbookmark"] = item.id;
+	}
+	else {
+		actions["bookmark"] = item.id;
+	}
+
+	if (item?.replies_count > 0) {
+		actions["replies"] = item.id;
+	} else {
+		actions["thread"] = item.id;
+	}
+
+	post.actions = actions;
+
 	let attachments = [];
 
     const mediaAttachments = item["media_attachments"];
@@ -165,7 +235,7 @@ function postForItem(item, includeActions = false, date = null, shortcodes = {})
 
     const quote = item["quote"];
     if (quote != null && quote.quoted_status != null) {
-        let attachment = postForItem(quote.quoted_status, includeActions)
+        let attachment = postForItem(quote.quoted_status)
         attachments.push(attachment);
     }
 
@@ -208,9 +278,76 @@ function postForItem(item, includeActions = false, date = null, shortcodes = {})
         attachments.push(attachment);
     }
 
-	if (attachments.length > 0) {
-		post.attachments = attachments;
-	}
+	post.attachments = attachments;
 	
 	return post;
 }
+
+// By being in mastodon-shared.js, all of the mastodon connectors get this.
+// However, most actions will not work unless authenticated! So be sure to
+// edit the actions.json file for each connector and only include the ones
+// that can actually work for the non-authorized connector variants!
+async function performAction(actionId, actionValue, item) {
+	let actions = item.actions;
+	
+	if (actionId == "favorite") {
+		await sendRequest(`${site}/api/v1/statuses/${actionValue}/favourite`, "POST");
+		delete actions["favorite"];
+		actions["unfavorite"] = actionValue;
+		item.actions = actions;
+		actionComplete(item);
+	}
+	else if (actionId == "unfavorite") {
+		await sendRequest(`${site}/api/v1/statuses/${actionValue}/unfavourite`, "POST");
+		delete actions["unfavorite"];
+		actions["favorite"] = actionValue;
+		item.actions = actions;
+		actionComplete(item);
+	}
+	else if (actionId == "boost") {
+		await sendRequest(`${site}/api/v1/statuses/${actionValue}/reblog`, "POST");
+		delete actions["boost"];
+		actions["unboost"] = actionValue;
+		item.actions = actions;
+		item.annotations = [Annotation.createWithText("Boosted by you")];
+		actionComplete(item);
+	}
+	else if (actionId == "unboost") {
+		await sendRequest(`${site}/api/v1/statuses/${actionValue}/unreblog`, "POST");
+		delete actions["unboost"];
+		actions["boost"] = actionValue;
+		item.actions = actions;
+		item.annotations = [];
+		actionComplete(item);
+	}
+	else if (actionId == "bookmark") {
+		await sendRequest(`${site}/api/v1/statuses/${actionValue}/bookmark`, "POST");
+		delete actions["bookmark"];
+		actions["unbookmark"] = actionValue;
+		item.actions = actions;
+		actionComplete(item);
+	}
+	else if (actionId == "unbookmark") {
+		await sendRequest(`${site}/api/v1/statuses/${actionValue}/unbookmark`, "POST");
+		delete actions["unbookmark"];
+		actions["bookmark"] = actionValue;
+		item.actions = actions;
+		actionComplete(item);
+	}
+	else if (actionId == "thread" || actionId == "replies") {
+		const context = JSON.parse(await sendRequest(`${site}/api/v1/statuses/${actionValue}/context`));
+		let results = [];
+		for (const item of context["ancestors"]) {
+			results.push(postForItem(item));
+		}
+		results.push(item);
+		for (const item of context["descendants"]) {
+			results.push(postForItem(item));
+		}
+		actionComplete(results);
+	}
+	else {
+		throw new Error(`actionId "${actionId}" not implemented`);
+	}
+}
+
