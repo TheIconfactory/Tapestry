@@ -109,13 +109,15 @@ Adds a content warning to the item and blurs any attachments.
 
 The creator of the content. See `Identity` below.
 
-#### attachments: Array of MediaAttachment and LinkAttachment and Item
+#### attachments: Array of MediaAttachment and LinkAttachment and Item and PollAttachment
 
-Media, link, and quoted item attachments for the content. See `MediaAttachment` and `LinkAttachment` below.
+Media, link, poll, and quoted item attachments for the content. See `MediaAttachment`, `LinkAttachment`, and `PollAttachment` below.
+
+As of 1.3, the `attachments` array can also include ordinary `Item` instances to achieve a "quoted post" presentation when needed.
 
 > **Note:** If the `provides_attachments` configuration parameter is not set or false, attachments will be generated automatically using the elements of the `body` HTML. If no other media attachments in the item have been set, inline images and videos will be used to create media attachments automatically. Additionally, the first link in the first paragraph will be checked for a link attachment. See the section on HTML Content for more information.
 
-> **Compatibility:** Item objects as attachments are only supported in Tapestry 1.3 or higher and will be ignored by older versions.
+> **Compatibility:** Item and PollAttachment attachments are only supported in Tapestry 1.3 or higher and will be ignored by older versions.
 
 #### shortcodes: Dictionary
 
@@ -350,7 +352,7 @@ If `votes` is left unspecified on one or more options in a `PollAttachment`, Tap
 > **Compatibility:** Requires `minimum_app_version="1.3"` or higher.
 
 ---
-## Actions
+## Interface Functions
 
 The Tapestry app will call the following functions in `plugin.js` when it needs the script to read or write data. If no implementation is provided, no action will be performed. For example, some sources will not need to `verify()` themselves.
 
@@ -374,10 +376,25 @@ This function will only be called if `needs_verification` is set to true in the 
 ---
 ### load()
 
-Loads any new data and return it to the app with `processResults` or `processError`. Variables can be used to determine what to load. For example, whether to include mentions on Mastodon or not.
+Your script should implement this function to load any new data and return it to the app with `processResults` or `processError`. Variables can be used to determine what to load. For example, whether to include mentions on Mastodon or not.
 
 ---
-## Functions
+### performAction(actionId, actionValue, item)
+
+Tapestry calls this function when an action needs to be performed by the connector.
+
+  * actionId: A `String` with the action id
+  * actionValue: The `String` value that was assigned to the action.
+  * item: the `Item` instance that the action is being requested for.
+
+After performing the action, call `actionComplete()` with the results.
+
+> **Note:** Only one action per feed is allowed to be running at a time.
+  
+See section on `actions.json` and `actionComplete()` for more information on how to define and perform actions.
+
+---
+## Utility Functions
 
 The following functions are available to the script to help it perform the actions listed above.
 
@@ -706,25 +723,16 @@ Returns a `String` that was saved in local storage. If no value was stored, `nul
 All items in local storage are removed.
 
 ---
-### performAction(actionId, actionValue, item)
-
-Sends an action to the connector.
-
-  * actionId: A `String` with the action id
-  * actionValue: The `String` value that was assigned to the action.
-  * item: `Item` to be processed.
-  
-See section on `actions.json` for more information on how to perform actions.
-
----
-### actionComplete(item, error)
+### actionComplete(results, error)
 
 Indicates that the action has been performed. Must be called.
 
-  * item: `Item` to be updated. A null value indicates that the item was not changed.
+  * results: An `Item` or Array of `Item`s that were updated. A null value indicates there were no results.
   * error: If not null, the `Error` indicates what went wrong and will be displayed in the user interface.
 
 See section on `actions.json` for more information on how to complete actions.
+
+> **Compatibility:** Returning an array of `Item`s requires `minimum_app_version="1.4"` or higher.
 
 ---
 ### require(resourceName) → Value | Object | String | false
@@ -1420,7 +1428,15 @@ The `key` must be a top-level key in the JSON content. The example ensures that 
 ---
 ### actions.json
 
-This file defines actions that can alter items supplied by a connector. An action is defined by its `id` that can be used in code with a `name` and `icon` that is used in the Tapestry user interface. The `name` can be any SF Symbol name or one of Tapestry's built-in symbols (listed below).
+This file defines actions that can alter items supplied by a connector. An action is defined and referenced by `id`, however the `name` and `icon` are displayed in the Tapestry user interface. The `icon` can be any SF Symbol name or one of Tapestry's built-in symbols (listed below).
+
+As of Tapestry 1.4, actions can also have an optional `role` that further determines where the action is rendered in the UI, assumptions about the action's return values, and how it is expected to behave. (See roles listed below.)
+
+By default, actions are displayed as buttons on items in the timeline and/or in the item's overflow menu.
+
+The `actions.json` file must define all possible actions, however when displaying an individual item in the timeline, only the actions attached to that item will actually be presented to the user.
+
+Actions are displayed or preferred in the order they are defined in the `actions.json` file.
 
 ```json
 {
@@ -1428,18 +1444,24 @@ This file defines actions that can alter items supplied by a connector. An actio
 		{
 			"id": "favorite",
 			"name": "Add Favorite",
-			"icon": "heart.fill",
+			"icon": "heart.fill"
 		},
 		{
 			"id": "unfavorite",
 			"name": "Remove Favorite",
-			"icon": "heart",
+			"icon": "heart"
 		},
+		{
+			"id": "thread",
+			"name": "Thread",
+			"icon": "bubble",
+			"role": "context"
+		}
 	],
 }
 ```
 
-When returning an `Item` in `processResults()` you will specify a dictionary of actions that can be applied to the item. Each action has an `id` and a string value that will be passed to the action when it's performed.
+When returning an `Item` in `processResults()` you can include a dictionary of `actions` that can be applied to that item. Each action has an `id` and a string value that will be passed to the action when it's performed.
 
 For example, an action that marks an item as a favorite, might need an identifier: 
 
@@ -1453,9 +1475,9 @@ It's also likely that structured data will be needed, so JSON can be used as an 
 	item.actions = { like: `{ "uri": "at:..." }`, repost: `{ "uri": "at:..." }` };
 ```
 
-When an item has one or more actions, a menu will be displayed in the app. When a user selects one of the actions the `performAction` function is called with the action `id`, `value`, and `item`.
+When an item has one or more actions, a menu or one or more action buttons will be displayed in the app. When a user selects one of the actions the `performAction` function is called with the action `id`, `value`, and `item`.
 
-It is the connector’s responsibility to manage the list of actions as the state of the item changes. For example, if an action to "favorite" is performed, the action would be removed from the item and replaced with "unfavorite".
+It is the connector’s responsibility to manage the list of actions as the state of the item changes. For example, if an action to "favorite" is performed, the action would be removed from the item and replaced with "unfavorite" action with a different icon and/or name so the user can tell that the state has changed.
 
 The modified item is returned to Tapestry using `actionComplete`. If the action cannot be performed, an `Error` should be returned and will be displayed to the user.
 
@@ -1493,6 +1515,16 @@ function performAction(actionId, actionValue, item) {
 	}
 
 ```
+
+#### Action Roles
+
+The following roles are supported for actions.
+
+By default, actions have a `null` role which means they don't get any special treatment and are generally displayed as buttons directly on the item in the timeline or, if there are too many, as options in the item's overflow menu.
+
+**`"context"`**
+
+A context action is expected to return additional context about the item such as a conversation thread. To display a conversation thread, for example, call `actionComplete()` with an array of `Item`s. The display order is preserved (Tapestry will not re-sort these items by date). It is your responsibility to return the original item in the resulting array in the position you want it to be displayed otherwise it will not be included in the resulting timeline view. Context actions appear in the swipe menu for items in the timeline and also replace the default "Details" button. (Added in Tapestry 1.4.)
 
 #### Built-in Symbols
 
