@@ -131,100 +131,6 @@ function load() {
 	}
 }
 
-function performAction(actionId, actionValue, item) {
-	let actions = item.actions;
-	
-	if (actionId == "favorite") {
-		const url = `${site}/api/v1/statuses/${actionValue}/favourite`;
-		sendRequest(url, "POST")
-		.then((text) => {
-			const jsonObject = JSON.parse(text);
-			
-			delete actions["favorite"];
-			actions["unfavorite"] = actionValue;
-			item.actions = actions;
-			actionComplete(item, null);
-		})
-		.catch((requestError) => {
-			actionComplete(null, requestError);
-		});	
-	}
-	else if (actionId == "unfavorite") {
-		const url = `${site}/api/v1/statuses/${actionValue}/unfavourite`;
-		sendRequest(url, "POST")
-		.then((text) => {
-			delete actions["unfavorite"];
-			actions["favorite"] = actionValue;
-			item.actions = actions;
-			actionComplete(item, null);
-		})
-		.catch((requestError) => {
-			actionComplete(null, requestError);
-		});	
-	}
-	else if (actionId == "boost") {
-		const url = `${site}/api/v1/statuses/${actionValue}/reblog`;
-		sendRequest(url, "POST")
-		.then((text) => {
-			let annotation = Annotation.createWithText("Boosted by you");
-			item.annotations = [annotation];
-			
-			delete actions["boost"];
-			actions["unboost"] = actionValue;
-			item.actions = actions;
-			actionComplete(item, null);
-		})
-		.catch((requestError) => {
-			actionComplete(null, requestError);
-		});	
-	}
-	else if (actionId == "unboost") {
-		const url = `${site}/api/v1/statuses/${actionValue}/unreblog`;
-		sendRequest(url, "POST")
-		.then((text) => {
-			item.annotations = [];
-			
-			delete actions["unboost"];
-			actions["boost"] = actionValue;
-			item.actions = actions;
-			actionComplete(item, null);
-		})
-		.catch((requestError) => {
-			actionComplete(null, requestError);
-		});	
-	}
-	else if (actionId == "bookmark") {
-		const url = `${site}/api/v1/statuses/${actionValue}/bookmark`;
-		sendRequest(url, "POST")
-		.then((text) => {
-			delete actions["bookmark"];
-			actions["unbookmark"] = actionValue;
-			item.actions = actions;
-			actionComplete(item, null);
-		})
-		.catch((requestError) => {
-			actionComplete(null, requestError);
-		});	
-	}
-	else if (actionId == "unbookmark") {
-		const url = `${site}/api/v1/statuses/${actionValue}/unbookmark`;
-		sendRequest(url, "POST")
-		.then((text) => {
-			delete actions["unbookmark"];
-			actions["bookmark"] = actionValue;
-			item.actions = actions;
-			actionComplete(item, null);
-		})
-		.catch((requestError) => {
-			actionComplete(null, requestError);
-		});	
-	}
-	else {
-		let error = new Error(`actionId "${actionId}" not implemented`);
-		actionComplete(null, error);
-	}
-}
-
 function queryHomeTimeline(endDate) {
 
 	// NOTE: These constants are related to the feed limits within Tapestry - it doesn't store more than
@@ -259,39 +165,9 @@ function queryHomeTimeline(endDate) {
 				const jsonObject = JSON.parse(text);
 				for (const item of jsonObject) {
 					const date = new Date(item["created_at"]);
-					
-					let annotation = null;
-					let shortcodes = {};
-					let postItem = item;
-					if (item["reblog"] != null) {
-						const account = item["account"];
-						const displayName = account["display_name"];
-						const userName = account["username"];
-						const accountName = (displayName ? displayName : userName);
-						annotation = Annotation.createWithText(`${accountName} Boosted`);
-						annotation.uri = account["url"];
-						annotation.icon = account["avatar"];
 
-						const accountEmojis = account["emojis"];
-						if (accountEmojis != null && accountEmojis.length > 0) {
-							for (const emoji of accountEmojis) {
-								shortcodes[emoji.shortcode] = emoji.static_url;
-							}
-						}
-							
-						postItem = item["reblog"];
-					}
+					const post = postForItem(item);
 
-					if (annotation == null) {
-						let visibility = item["visibility"] ?? "public";
-						if (visibility == "private") {
-							annotation = Annotation.createWithText(`FOLLOWERS ONLY`);
-						}
-						else if (visibility == "direct") {
-							annotation = Annotation.createWithText(`PRIVATE MENTION`);
-						}
-					}
-					
 					if (!endUpdate && date < endDate) {
 						console.log(`>>>> END date = ${date}`);
 						endUpdate = true;
@@ -305,11 +181,6 @@ function queryHomeTimeline(endDate) {
 						endUpdate = true;
 					}
 					
-					const post = postForItem(postItem, true, date, shortcodes);
-					if (annotation != null) {
-						post.annotations = [annotation];
-					}
-						
 					results.push(post);
 		
 					lastId = item["id"];
@@ -359,51 +230,11 @@ function queryMentions() {
 			const jsonObject = JSON.parse(text);
 			let results = [];
 			for (const item of jsonObject) {
-				let postItem = item["status"];
-
-				if (postItem == null) {
-					// NOTE: Not sure why this happens, but sometimes a mention payload doesn't have a status. If that happens, we just skip it.
-					continue;
+				const postItem = item["status"];
+				// NOTE: Not sure why this happens, but sometimes a mention payload doesn't have a status. If that happens, we just skip it.
+				if (postItem != null) {
+					results.push(postForItem(postItem));
 				}
-				
-				let visibility = postItem["visibility"] ?? "public";
-
-				let annotation = null;
-				let shortcodes = {};
-				
-				if (visibility == "public" || visibility == "unlisted") {
-					if (postItem.mentions != null && postItem.mentions.length > 0) {
-						const mentions = postItem.mentions;
-						const account = mentions[0];
-						const userName = account["username"];
-						let text = "Replying to @" + userName;
-						if (mentions.length > 1) {
-							text += " and others";
-						}
-						annotation = Annotation.createWithText(text);
-						annotation.uri = account["url"];
-	
-						const accountEmojis = account["emojis"];
-						if (accountEmojis != null && accountEmojis.length > 0) {
-							for (const emoji of accountEmojis) {
-								shortcodes[emoji.shortcode] = emoji.static_url;
-							}
-						}
-					}
-				}
-				else if (visibility == "private") {
-					annotation = Annotation.createWithText(`FOLLOWERS ONLY`);
-				}
-				else if (visibility == "direct") {
-					annotation = Annotation.createWithText(`PRIVATE MENTION`);
-				}	
-	
-				const post = postForItem(postItem, true, null, shortcodes);
-				if (annotation != null) {
-					post.annotations = [annotation];
-				}
-	
-				results.push(post);
 			}
 			resolve(results);
 		})
@@ -422,34 +253,7 @@ function queryStatusesForUser(id) {
 			const jsonObject = JSON.parse(text);
 			let results = [];
 			for (const item of jsonObject) {
-				let annotation = null;
-				
-				let post = null;
-				if (item.reblog != null) {
-					const date = new Date(item["created_at"]);
-					post = postForItem(item.reblog, true, date);
-					annotation = Annotation.createWithText("Boosted by you");
-					annotation.uri = item.account["url"];
-				}
-				else {
-					post = postForItem(item, true);
-				}
-
-				if (annotation == null) {
-					let visibility = item["visibility"] ?? "public";
-					if (visibility == "private") {
-						annotation = Annotation.createWithText(`FOLLOWERS ONLY`);
-					}
-					else if (visibility == "direct") {
-						annotation = Annotation.createWithText(`PRIVATE MENTION`);
-					}	
-				}
-				
-				if (annotation != null) {
-					post.annotations = [annotation];
-				}
-
-				results.push(post);
+				results.push(postForItem(item));
 			}
 			resolve(results);
 		})

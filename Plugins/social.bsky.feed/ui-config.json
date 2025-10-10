@@ -12,5 +12,15 @@
 			"prompt": "Feed Identifier",
 			"placeholder": "for-science",
 		},
+        {
+            "name": "includeReposts",
+            "type": "switch",
+            "prompt": "Include Reposts"
+        },
+        {
+            "name": "includeReplies",
+            "type": "switch",
+            "prompt": "Include Replies"
+        },
 	]
 }
