@@ -38,6 +38,16 @@ function postForItem(item, includeActions = false, dateOverride = null) {
             const values = { uri: item.post.uri, cid: item.post.cid };
             actions["repost"] = JSON.stringify(values);
         }
+        if (item.post.viewer?.bookmarked != null) {
+        	if (item.post.viewer?.bookmarked == false) {
+    			const values = { uri: item.post.uri, cid: item.post.cid };
+            	actions["save"] = JSON.stringify(values);
+            }
+            else {
+    			const values = { uri: item.post.uri, cid: item.post.cid };
+            	actions["unsave"] = JSON.stringify(values);
+            }
+        }
     }
 
     let contentWarning = null;

@@ -200,6 +200,39 @@ async function performAction(actionId, actionValue, item) {
 			item.actions = actions;
 			actionComplete(item, null);
 		}
+		else if (actionId == "save") {
+			const body = {
+				uri: actionValues["uri"],
+				cid: actionValues["cid"]
+			};
+			
+			const url = `${site}/xrpc/app.bsky.bookmark.createBookmark`;
+			const parameters = JSON.stringify(body);
+			const extraHeaders = { "content-type": "application/json" };
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+
+			delete actions["save"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"] };
+			actions["unsave"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item);
+		}
+		else if (actionId == "unsave") {
+			const body = {
+				uri: actionValues["uri"]
+			};
+
+			const url = `${site}/xrpc/app.bsky.bookmark.deleteBookmark`;
+			const parameters = JSON.stringify(body);
+			const extraHeaders = { "content-type": "application/json" };
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			
+			delete actions["unsave"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"] };
+			actions["save"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item);
+		}
 		else {
 			let error = new Error(`actionId "${actionId}" not implemented`);
 			actionComplete(null, error);

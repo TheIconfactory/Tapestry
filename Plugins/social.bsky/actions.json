@@ -20,5 +20,15 @@
 			"name": "Remove Like",
 			"icon": "heart.fill",
 		},
+		{
+			"id": "save",
+			"name": "Save",
+			"icon": "tapestry.bookmark",
+		},
+		{
+			"id": "unsave",
+			"name": "Remove Save",
+			"icon": "tapestry.bookmark.fill",
+		},
 	],
 }
