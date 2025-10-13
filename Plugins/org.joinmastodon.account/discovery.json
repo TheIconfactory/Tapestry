@@ -2,7 +2,7 @@
 	"url": [
 		{
 			"extract": "/(https://[^:/\\s]+)(?:/@|/users/)([a-zA-Z0-9_]+.*)/",
-			"variable": "site, account",
+			"variable": "site, account"
 		}
 	]
 }

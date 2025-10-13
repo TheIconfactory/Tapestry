@@ -4,7 +4,7 @@
 			"name": "includeDescription",
 			"type": "switch",
 			"prompt": "Include Video Description",
-			"value": "on",
+			"value": "on"
 		}
 	]
 }

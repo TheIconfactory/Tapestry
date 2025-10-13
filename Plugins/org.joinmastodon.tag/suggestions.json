@@ -4,13 +4,13 @@
 			"name": "tag",
 			"value": "TapestryApp",
 			"title": "#TapestryApp",
-			"site": "https://mastodon.social",
+			"site": "https://mastodon.social"
 		},
 		{
 			"name": "tag",
 			"value": "Apple",
 			"title": "#Apple",
-			"site": "https://mastodon.social",
-		},
+			"site": "https://mastodon.social"
+		}
 	]
 }

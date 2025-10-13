@@ -2,7 +2,7 @@
 	"url": [
 		{
 			"extract": "/(https://[^:/\\s]+)/lists/([^\/]+)/",
-			"variable": "site, list",
+			"variable": "site, list"
 		}
 	]
 }

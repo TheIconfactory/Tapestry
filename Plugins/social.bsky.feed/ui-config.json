@@ -4,13 +4,13 @@
 			"name": "account",
 			"type": "text",
 			"prompt": "Account",
-			"placeholder": "bossett.social",
+			"placeholder": "bossett.social"
 		},
 		{
 			"name": "feedId",
 			"type": "text",
 			"prompt": "Feed Identifier",
-			"placeholder": "for-science",
+			"placeholder": "for-science"
 		},
         {
             "name": "includeReposts",
@@ -21,6 +21,6 @@
             "name": "includeReplies",
             "type": "switch",
             "prompt": "Include Replies"
-        },
+        }
 	]
 }

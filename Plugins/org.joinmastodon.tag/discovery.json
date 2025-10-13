@@ -2,7 +2,7 @@
 	"url": [
 		{
 			"extract": "/(https://[^:/\\s]+)/tags/([a-zA-Z0-9_]+.*)/",
-			"variable": "site, tag",
+			"variable": "site, tag"
 		}
 	]
 }

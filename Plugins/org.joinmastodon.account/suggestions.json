@@ -4,23 +4,23 @@
 			"title": "@Gargron",
 			"names": [
 				"account",
-				"site",
+				"site"
 			],
 			"values": [
 				"Gargron",
-				"https://mastodon.social",
-			],
+				"https://mastodon.social"
+			]
 		},
 		{
 			"title": "@Iconfactory",
 			"names": [
 				"account",
-				"site",
+				"site"
 			],
 			"values": [
 				"Iconfactory",
-				"https://iconfactory.world",
-			],
-		},
+				"https://iconfactory.world"
+			]
+		}
 	]
 }

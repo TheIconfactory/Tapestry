@@ -3,12 +3,12 @@
 		{
 			"id": "bookmark",
 			"name": "Bookmark",
-			"icon": "tapestry.bookmark",
+			"icon": "tapestry.bookmark"
 		},
 		{
 			"id": "unbookmark",
 			"name": "Remove Bookmark",
-			"icon": "tapestry.bookmark.fill",
-		},
-	],
+			"icon": "tapestry.bookmark.fill"
+		}
+	]
 }

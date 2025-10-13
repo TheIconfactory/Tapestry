@@ -4,7 +4,7 @@
 			"name": "account",
 			"type": "text",
 			"prompt": "Account",
-			"placeholder": "jay.bsky.team",
+			"placeholder": "jay.bsky.team"
 		},
 		{
 			"name": "includeReposts",
@@ -15,6 +15,6 @@
 			"name": "includeReplies",
 			"type": "switch",
 			"prompt": "Include Their Replies"
-		},
+		}
 	]
 }

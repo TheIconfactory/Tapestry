@@ -6,7 +6,7 @@
 			"match": "/application/(?:json|feed\\+json)\\s*$/",
 			"use": "href",
 			"extract": "/^((?!wp-json).)*$/",
-			"comment": "The regex above lets this rule filter out WordPress API links",
+			"comment": "The regex above lets this rule filter out WordPress API links"
 		},
 		{
 			"element": "link",
