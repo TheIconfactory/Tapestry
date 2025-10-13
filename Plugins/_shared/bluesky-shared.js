@@ -5,6 +5,25 @@ const uriPrefix = "https://bsky.app";
 const uriPrefixContent = "https://cdn.bsky.app";
 const uriPrefixVideo = "https://video.bsky.app";
 
+function parentsForItem(item, includeActions) {
+	let results = [];
+	if (item.parent != null) {
+		parentPostForItem(item.parent, includeActions, results);
+	}
+	return results;
+}
+
+function parentPostForItem(item, includeActions, results) {
+	if (item.parent != null) {
+		parentPostForItem(item.parent, includeActions, results);
+	}
+
+	const post = postForItem(item, includeActions);
+	if (post != null) {
+		results.push(post);
+	}
+}
+
 function postForItem(item, includeActions = false, dateOverride = null) {
     let date = dateOverride ?? (new Date(item.post.indexedAt));
 
@@ -48,6 +67,14 @@ function postForItem(item, includeActions = false, dateOverride = null) {
             	actions["unsave"] = JSON.stringify(values);
             }
         }
+        if (item.post?.replyCount > 0) {
+            const values = { uri: item.post.uri, cid: item.post.cid };
+            actions["replies"] = JSON.stringify(values);
+		}
+		else {
+            const values = { uri: item.post.uri, cid: item.post.cid };
+			actions["thread"] = JSON.stringify(values);
+		}
     }
 
     let contentWarning = null;

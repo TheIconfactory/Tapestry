@@ -30,5 +30,17 @@
 			"name": "Remove Save",
 			"icon": "tapestry.bookmark.fill",
 		},
+		{
+			"id": "thread",
+			"name": "Thread",
+			"icon": "bubble",
+			"role": "context"
+		},
+		{
+			"id": "replies",
+			"name": "Thread",
+			"icon": "text.bubble",
+			"role": "context"
+		}
 	],
 }

@@ -233,6 +233,21 @@ async function performAction(actionId, actionValue, item) {
 			item.actions = actions;
 			actionComplete(item);
 		}
+		else if (actionId == "thread" || actionId == "replies") {
+			const uri = actionValues["uri"];
+			const response = await sendRequest(`${site}/xrpc/app.bsky.feed.getPostThread?uri=${uri}`);
+			const json = JSON.parse(response);
+			const item = json["thread"];
+			
+			let results = [];
+			let parents = parentsForItem(item, true);
+			results.push(...parents);
+			results.push(postForItem(item, true));
+			for (const reply of item.replies) {
+				results.push(postForItem(reply, true));
+			}
+			actionComplete(results);
+		}		
 		else {
 			let error = new Error(`actionId "${actionId}" not implemented`);
 			actionComplete(null, error);
