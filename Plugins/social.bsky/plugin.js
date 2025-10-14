@@ -305,7 +305,7 @@ function queryTimeline(endDate) {
 				const jsonObject = JSON.parse(text);
 				const items = jsonObject.feed
 				for (const item of items) {
-					const post = postForItem(item, true);
+					const post = postForItem(item, true, null, false);
 					if (post != null) {
 						results.push(post);
 						
