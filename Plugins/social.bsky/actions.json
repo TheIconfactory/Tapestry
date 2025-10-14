@@ -28,7 +28,7 @@
 		{
 			"id": "unsave",
 			"name": "Remove Save",
-			"icon": "tapestry.bookmark.fill",
+			"icon": "tapestry.bookmark.fill"
 		},
 		{
 			"id": "thread",
@@ -42,5 +42,5 @@
 			"icon": "text.bubble",
 			"role": "context"
 		}
-	],
+	]
 }
