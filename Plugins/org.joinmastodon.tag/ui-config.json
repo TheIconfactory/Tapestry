@@ -4,7 +4,7 @@
 			"name": "tag",
 			"type": "text",
 			"prompt": "Tag",
-			"placeholder": "TapestryApp",
+			"placeholder": "TapestryApp"
 		}
 	]
 }

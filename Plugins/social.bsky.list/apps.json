@@ -17,6 +17,6 @@
 			"name": "Skeets",
 			"template": "skeets://bskylink?link=__URL__",
 			"pattern": "https://bsky.app"
-		},
+		}
 	]
 }

@@ -6,7 +6,7 @@
  	"url": [
 		{
 			"extract": "/https://[^/]+/profile/([^/]+)/lists/([^/]+)/",
-			"variable": "account, listId",
+			"variable": "account, listId"
 		}
 	]
 }

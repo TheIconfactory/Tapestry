@@ -4,13 +4,13 @@
 			"name": "account",
 			"type": "text",
 			"prompt": "Account",
-			"placeholder": "iconfactory.com",
+			"placeholder": "iconfactory.com"
 		},
 		{
 			"name": "listId",
 			"type": "text",
 			"prompt": "List Identifier",
-			"placeholder": "3lng6ryhigk2a",
+			"placeholder": "3lng6ryhigk2a"
 		},
         {
             "name": "includeReposts",
@@ -21,6 +21,6 @@
             "name": "includeReplies",
             "type": "switch",
             "prompt": "Include Replies"
-        },
+        }
 	]
 }

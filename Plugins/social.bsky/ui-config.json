@@ -4,7 +4,7 @@
 			"name": "includeHome",
 			"type": "switch",
 			"prompt": "Include People You Follow",
-			"value": "on",
+			"value": "on"
 		},
 		{
 			"name": "includeReposts",
@@ -20,7 +20,7 @@
 			"name": "includeMentions",
 			"type": "switch",
 			"prompt": "Include Mentions From Others",
-			"value": "on",
-		},
+			"value": "on"
+		}
 	]
 }

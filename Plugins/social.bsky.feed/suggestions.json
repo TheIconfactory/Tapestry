@@ -4,12 +4,12 @@
 			"title": "Science",
 			"names": [
 				"account",
-				"feedId",
+				"feedId"
 			],
 			"values": [
 				"bossett.social",
-				"for-science",
-			],
-		},
+				"for-science"
+			]
+		}
 	]
 }
