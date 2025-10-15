@@ -53,7 +53,7 @@ async function load() {
 
 	let didSelf = getItem("didSelf");
 	if (didSelf == null) {
-		didSelf = await getDid();
+		didSelf = await getSessionDid();
 		setItem("didSelf", didSelf);
 	}
 
@@ -110,7 +110,7 @@ async function performAction(actionId, actionValue, item) {
 	try {
 		let did = getItem("did");
 		if (did == null) {
-			did = await getDid();
+			did = await getSessionDid();
 			setItem("did", did);
 		}
 
@@ -263,13 +263,6 @@ async function performAction(actionId, actionValue, item) {
 	catch (error) {
 		actionComplete(null, error);
 	}
-}
-
-async function getDid() {
-	const text = await sendRequest(site + "/xrpc/com.atproto.server.getSession");
-	const jsonObject = JSON.parse(text);
-	const did = jsonObject.did;
-	return did;
 }
 
 function queryTimeline(endDate) {

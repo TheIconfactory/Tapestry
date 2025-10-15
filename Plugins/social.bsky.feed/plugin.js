@@ -42,42 +42,22 @@ function verify() {
 	});
 }
 
-function load() {
+async function load() {
 	var did = getItem("did");
+	if (did == null) {
+		did = await getAccountDid(account);
+		setItem("did", did);
+	}
 
-	if (did != null) {
-		queryFeedForGenerator(did, feedId)
-		.then((results) =>  {
-			console.log(`finished (cached) feed`);
-			processResults(results, true);
-		})
-		.catch((requestError) => {
-			console.log(`error (cached) feed`);
-			processError(requestError);
-		});	
-	}
-	else {
-		sendRequest(`${site}/xrpc/app.bsky.actor.getProfile?actor=${account}`)
-		.then((text) => {
-			const jsonObject = JSON.parse(text);
-		
-			did = jsonObject.did;
-			setItem("did", did);
-		
-			queryFeedForGenerator(did, feedId)
-			.then((results) =>  {
-				console.log(`finished feed`);
-				processResults(results, true);
-			})
-			.catch((requestError) => {
-				console.log(`error feed`);
-				processError(requestError);
-			});	
-		})
-		.catch((requestError) => {
-			processError(requestError);
-		});
-	}
+	queryFeedForGenerator(did, feedId)
+	.then((results) =>  {
+		console.log(`finished did ${did}, feed ${feedId}`);
+		processResults(results, true);
+	})
+	.catch((requestError) => {
+		console.log(`error did ${did}, feed ${feedId}`);
+		processError(requestError);
+	});	
 }
 
 function queryFeedForGenerator(did, feedId) {

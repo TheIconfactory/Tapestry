@@ -5,6 +5,28 @@ const uriPrefix = "https://bsky.app";
 const uriPrefixContent = "https://cdn.bsky.app";
 const uriPrefixVideo = "https://video.bsky.app";
 
+async function getSessionDid() {
+	const text = await sendRequest(site + "/xrpc/com.atproto.server.getSession");
+	const jsonObject = JSON.parse(text);
+	const did = jsonObject.did;
+	return did;
+}
+
+async function getAccountDid(account) {
+	const text = await sendRequest(`${site}/xrpc/app.bsky.actor.getProfile?actor=${account}`)
+	const jsonObject = JSON.parse(text);	
+	const did = jsonObject.did;
+	return did;
+}
+
+function normalizeAccount(account) {
+	let result = account.trim();
+	if (result.length > 1 && result.startsWith("@")) {
+		result = result.slice(1);
+	}
+	return result;
+}
+
 function parentsForItem(item, includeActions) {
 	let results = [];
 	if (item.parent != null) {
