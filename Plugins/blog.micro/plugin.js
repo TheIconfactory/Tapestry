@@ -79,7 +79,6 @@ async function performAction(actionId, actionValue, item) {
 			const json = JSON.parse(response);
 			
 			let results = [];
-			//results.push(item);
 			let replies = json.items;
 			replies.reverse(); // the Micro.blog API returns most recent reply first, Tapestry needs opposite order
 			for (const reply of replies) {
