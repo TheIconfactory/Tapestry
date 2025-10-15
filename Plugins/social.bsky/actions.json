@@ -28,18 +28,18 @@
 		{
 			"id": "unsave",
 			"name": "Remove Save",
-			"icon": "tapestry.bookmark.fill",
+			"icon": "tapestry.bookmark.fill"
 		},
 		{
 			"id": "thread",
 			"name": "Thread",
-			"icon": "bubble",
+			"icon": "bubble.left.and.bubble.right",
 			"role": "context"
 		},
 		{
 			"id": "replies",
 			"name": "Thread",
-			"icon": "text.bubble",
+			"icon": "bubble.left.and.text.bubble.right",
 			"role": "context"
 		}
 	]
