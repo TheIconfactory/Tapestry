@@ -42,36 +42,10 @@ async function load() {
 		const items = jsonObject["items"];
 		var results = [];
 		for (const item of items) {
-			if (filterMentions) {
-				if (item["_microblog"].is_mention) {
-					continue;
-				}
+			const post = postForItem(item, filterMentions);
+			if (post != null) {
+				results.push(post);
 			}
-			
-			let actions = {};
-			let actionValue = item.id;
-			if (item["_microblog"].is_bookmark) {
-				actions["unbookmark"] = actionValue;
-			}
-			else {
-				actions["bookmark"] = actionValue;
-			}
-		
-			const author = item.author; 
-			const identity = Identity.createWithName(author.name);
-			identity.uri = author.url;
-			identity.avatar = author.avatar;
-			identity.username = "@" + author._microblog.username
-			
-			const url = item.url;
-			const date = new Date(item.date_published);
-			const content = item.content_html;
-			const resultItem = Item.createWithUriDate(url, date);
-			resultItem.body = content;
-			resultItem.author = identity;
-			resultItem.actions = actions;
-			
-			results.push(resultItem);
 		}
 		processResults(results);
 	}
@@ -100,6 +74,19 @@ async function performAction(actionId, actionValue, item) {
 			item.actions = actions;
 			actionComplete(item, null);
 		}
+		else if (actionId == "replies" || actionId == "thread") {
+			const response = await sendRequest(`${site}/posts/conversation?id=${actionValue}`)
+			const json = JSON.parse(response);
+			
+			let results = [];
+			//results.push(item);
+			let replies = json.items;
+			replies.reverse(); // the Micro.blog API returns most recent reply first, Tapestry needs opposite order
+			for (const reply of replies) {
+				results.push(postForItem(reply, false));
+			}
+			actionComplete(results);
+		}
 		else {
 			let error = new Error(`actionId "${actionId}" not implemented`);
 			actionComplete(null, error);
@@ -108,4 +95,43 @@ async function performAction(actionId, actionValue, item) {
 	catch (error) {
 		actionComplete(null, error);
 	}
+}
+
+function postForItem(item, filterMentions) {
+	if (filterMentions) {
+		if (item["_microblog"].is_mention) {
+			return null;
+		}
+	}
+	
+	let actions = {};
+	let actionValue = item.id;
+	if (item["_microblog"].is_bookmark) {
+		actions["unbookmark"] = actionValue;
+	}
+	else {
+		actions["bookmark"] = actionValue;
+	}
+	if (item["_microblog"].is_conversation) {
+		actions["replies"] = actionValue;
+	}
+	else {
+		actions["thread"] = actionValue;
+	}
+
+	const author = item.author; 
+	const identity = Identity.createWithName(author.name);
+	identity.uri = author.url;
+	identity.avatar = author.avatar;
+	identity.username = "@" + author._microblog.username
+	
+	const url = item.url;
+	const date = new Date(item.date_published);
+	const content = item.content_html;
+	const post = Item.createWithUriDate(url, date);
+	post.body = content;
+	post.author = identity;
+	post.actions = actions;
+	
+	return post;
 }
