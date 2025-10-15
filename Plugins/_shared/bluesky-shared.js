@@ -59,7 +59,7 @@ function postForItem(item, includeActions = false, dateOverride = null, allowRep
     
     if (item.reply != null) {
     	if (! allowRepliesFromOthers) {
-			if (item.reply.parent?.author.viewer.following == null) {
+			if (item.reply.parent?.author?.viewer.following == null) {
 				return null;
 			}
 		}
@@ -97,15 +97,15 @@ function postForItem(item, includeActions = false, dateOverride = null, allowRep
             	actions["unsave"] = JSON.stringify(values);
             }
         }
-        if (item.post?.replyCount > 0) {
-            const values = { uri: item.post.uri, cid: item.post.cid };
-            actions["replies"] = JSON.stringify(values);
-		}
-		else {
-            const values = { uri: item.post.uri, cid: item.post.cid };
-			actions["thread"] = JSON.stringify(values);
-		}
     }
+	if (item.post?.replyCount > 0) {
+		const values = { uri: item.post.uri, cid: item.post.cid };
+		actions["replies"] = JSON.stringify(values);
+	}
+	else {
+		const values = { uri: item.post.uri, cid: item.post.cid };
+		actions["thread"] = JSON.stringify(values);
+	}
 
     let contentWarning = null;
     if (item.post.labels != null && item.post.labels.length > 0) {
@@ -678,3 +678,168 @@ function bytesToString(bytes) {
     return resultString;
 }
 
+// By being in bluesky-shared.js, all of the Bluesky connectors get this.
+// However, most actions will not work unless authenticated! So be sure to
+// edit the actions.json file for each connector and only include the ones
+// that can actually work for the non-authorized connector variants!
+async function performAction(actionId, actionValue, item) {
+	let actions = item.actions;
+	let actionValues = JSON.parse(actionValue);
+	
+	try {
+		let did = getItem("did");
+		if (did == null) {
+			did = await getSessionDid();
+			setItem("did", did);
+		}
+
+		let date = new Date().toISOString();
+		if (actionId == "like") {
+			const body = {
+				collection: "app.bsky.feed.like",
+				repo: did,
+				record : {
+					"$type": "app.bsky.feed.like",
+					subject: {
+						uri: actionValues["uri"],
+						cid: actionValues["cid"]
+					},
+					createdAt: date,
+				}
+			};
+			
+			const url = `${site}/xrpc/com.atproto.repo.createRecord`;
+			const parameters = JSON.stringify(body);
+			const extraHeaders = { "content-type": "application/json" };
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			const jsonObject = JSON.parse(text);
+			const rkey = jsonObject.uri.split("/").pop();
+			
+			delete actions["like"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"], rkey: rkey };
+			actions["unlike"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item, null);
+		}
+		else if (actionId == "unlike") {
+			const body = {
+				collection: "app.bsky.feed.like",
+				repo: did,
+				rkey: actionValues["rkey"]
+			};
+			
+			const url = `${site}/xrpc/com.atproto.repo.deleteRecord`;
+			const parameters = JSON.stringify(body);
+			const extraHeaders = { "content-type": "application/json" };
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			const jsonObject = JSON.parse(text);
+
+			delete actions["unlike"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"] };
+			actions["like"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item, null);
+		}
+		else if (actionId == "repost") {
+			const body = {
+				collection: "app.bsky.feed.repost",
+				repo: did,
+				record : {
+					"$type": "app.bsky.feed.repost",
+					subject: {
+						uri: actionValues["uri"],
+						cid: actionValues["cid"]
+					},
+					createdAt: date,
+				}
+			};
+			
+			const url = `${site}/xrpc/com.atproto.repo.createRecord`;
+			const parameters = JSON.stringify(body);
+			const extraHeaders = { "content-type": "application/json" };
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			const jsonObject = JSON.parse(text);
+			const rkey = jsonObject.uri.split("/").pop();
+			
+			delete actions["repost"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"], rkey: rkey };
+			actions["unrepost"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item, null);
+		}
+		else if (actionId == "unrepost") {
+			const body = {
+				collection: "app.bsky.feed.repost",
+				repo: did,
+				rkey: actionValues["rkey"]
+			};
+			
+			const url = `${site}/xrpc/com.atproto.repo.deleteRecord`;
+			const parameters = JSON.stringify(body);
+			const extraHeaders = { "content-type": "application/json" };
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			const jsonObject = JSON.parse(text);
+			
+			delete actions["unrepost"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"] };
+			actions["repost"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item, null);
+		}
+		else if (actionId == "save") {
+			const body = {
+				uri: actionValues["uri"],
+				cid: actionValues["cid"]
+			};
+			
+			const url = `${site}/xrpc/app.bsky.bookmark.createBookmark`;
+			const parameters = JSON.stringify(body);
+			const extraHeaders = { "content-type": "application/json" };
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+
+			delete actions["save"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"] };
+			actions["unsave"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item);
+		}
+		else if (actionId == "unsave") {
+			const body = {
+				uri: actionValues["uri"]
+			};
+
+			const url = `${site}/xrpc/app.bsky.bookmark.deleteBookmark`;
+			const parameters = JSON.stringify(body);
+			const extraHeaders = { "content-type": "application/json" };
+			const text = await sendRequest(url, "POST", parameters, extraHeaders);
+			
+			delete actions["unsave"];
+			const values = { uri: actionValues["uri"], cid: actionValues["cid"] };
+			actions["save"] = JSON.stringify(values);
+			item.actions = actions;
+			actionComplete(item);
+		}
+		else if (actionId == "thread" || actionId == "replies") {
+			const uri = actionValues["uri"];
+			const response = await sendRequest(`${site}/xrpc/app.bsky.feed.getPostThread?uri=${uri}`);
+			const json = JSON.parse(response);
+			const item = json["thread"];
+			
+			let results = [];
+			let parents = parentsForItem(item, true);
+			results.push(...parents);
+			results.push(postForItem(item, true));
+			for (const reply of item.replies) {
+				results.push(postForItem(reply, true));
+			}
+			actionComplete(results);
+		}		
+		else {
+			let error = new Error(`actionId "${actionId}" not implemented`);
+			actionComplete(null, error);
+		}
+	}
+	catch (error) {
+		actionComplete(null, error);
+	}
+}
