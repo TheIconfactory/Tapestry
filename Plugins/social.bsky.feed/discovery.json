@@ -6,7 +6,7 @@
  	"url": [
 		{
 			"extract": "/https://[^/]+/profile/([^/]+)/feed/([^/]+)/",
-			"variable": "account, feedId",
+			"variable": "account, feedId"
 		}
 	]
 }

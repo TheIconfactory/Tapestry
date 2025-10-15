@@ -4,18 +4,18 @@
 			"name": "includeHome",
 			"type": "switch",
 			"prompt": "Include People You Follow",
-			"value": "on",
+			"value": "on"
 		},
 		{
 			"name": "includeStatuses",
 			"type": "switch",
 			"prompt": "Include Your Own Posts",
-			"value": "on",
+			"value": "on"
 		},
 		{
 			"name": "includeMentions",
 			"type": "switch",
 			"prompt": "Include Mentions From Others"
-		},
+		}
 	]
 }

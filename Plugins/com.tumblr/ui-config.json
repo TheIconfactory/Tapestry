@@ -4,13 +4,13 @@
 			"name": "includeReblogs",
 			"type": "switch",
 			"prompt": "Include Reblogs",
-			"value": "on",
+			"value": "on"
 		},
 		{
 			"name": "includeTags",
 			"type": "switch",
 			"prompt": "Include Tags",
-			"value": "on",
+			"value": "on"
 		}
 	]
 }

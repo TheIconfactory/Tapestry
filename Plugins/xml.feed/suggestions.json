@@ -10,16 +10,16 @@
 		},
 		{
 			"value": "https://blog.iconfactory.com/feed/",
-			"title": "Iconfactory Breakroom",
+			"title": "Iconfactory Breakroom"
 		},
 		{
 			"value": "https://mjtsai.com/blog/feed/",
-			"title": "Michael Tsai",
+			"title": "Michael Tsai"
 		},
 		{
 			"value": "https://www.smithsonianmag.com/rss/latest_articles/",
 			"title": "Smithsonian Magazine"
-		},
+		}
 	]
 }
 
