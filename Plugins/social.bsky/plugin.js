@@ -13,6 +13,7 @@ function verify() {
 		const did = jsonObject.did;
 
 		setItem("did", did);
+		setItem("didSelf", did);
 		
 		sendRequest(site + `/xrpc/app.bsky.actor.getProfile?actor=${did}`)
 		.then((text) => {
@@ -42,12 +43,18 @@ function verify() {
 // NOTE: This reference counter tracks loading so we can let the app know when all async loading work is complete.
 var loadCounter = 0;
 
-function load() {
+async function load() {
 	// NOTE: The timeline will be filled up to the endDate, if possible.
 	let endDate = null;
 	let endDateTimestamp = getItem("endDateTimestamp");
 	if (endDateTimestamp != null) {
 		endDate = new Date(parseInt(endDateTimestamp));
+	}
+
+	let didSelf = getItem("didSelf");
+	if (didSelf == null) {
+		didSelf = await getDid();
+		setItem("didSelf", didSelf);
 	}
 
 	loadCounter = 0;

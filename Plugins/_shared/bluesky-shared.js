@@ -97,7 +97,7 @@ function postForItem(item, includeActions = false, dateOverride = null, allowRep
     if (item.reply != null) {
         annotation = annotationForReply(item);
 		if (item.post.author.handle != item.reply.parent?.author?.handle) {					
-			const replyContent = contentForReply(item.reply);
+			replyContent = contentForReply(item.reply);
 			if (replyContent != null) {
 				content = replyContent + content;
 			}
@@ -222,6 +222,11 @@ function nameForAccount(account) {
         return null;
     }
 
+	const did = getItem("didSelf");
+	if (did != null && did == account.did) {
+		return "you";
+	}
+	
     if (account.displayName != null && account.displayName.length > 0) {
         return account.displayName;
     }
