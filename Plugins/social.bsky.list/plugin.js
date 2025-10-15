@@ -51,42 +51,22 @@ function verify() {
 	});
 }
 
-function load() {
+async function load() {
 	var did = getItem("did");
+	if (did == null) {
+		did = await getAccountDid(account);
+		setItem("did", did);
+	}
 
-	if (did != null) {
-		queryList(did, listId)
-		.then((results) =>  {
-			console.log(`finished (cached) feed`);
-			processResults(results, true);
-		})
-		.catch((requestError) => {
-			console.log(`error (cached) feed`);
-			processError(requestError);
-		});	
-	}
-	else {
-		sendRequest(`${site}/xrpc/app.bsky.actor.getProfile?actor=${account}`)
-		.then((text) => {
-			const jsonObject = JSON.parse(text);
-		
-			did = jsonObject.did;
-			setItem("did", did);
-		
-			queryList(did, listId)
-			.then((results) =>  {
-				console.log(`finished feed`);
-				processResults(results, true);
-			})
-			.catch((requestError) => {
-				console.log(`error feed`);
-				processError(requestError);
-			});	
-		})
-		.catch((requestError) => {
-			processError(requestError);
-		});
-	}
+	queryList(did, listId)
+	.then((results) =>  {
+		console.log(`finished did ${did}, list ${listId}`);
+		processResults(results, true);
+	})
+	.catch((requestError) => {
+		console.log(`error did ${did}, list ${listId}`);
+		processError(requestError);
+	});	
 }
 
 function queryList(did, listId) {

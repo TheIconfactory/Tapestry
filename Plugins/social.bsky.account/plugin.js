@@ -39,51 +39,23 @@ function verify() {
 	});
 }
 
-function load() {
+async function load() {
 	var did = getItem("did");
+	if (did == null) {
+		const loadAccount = normalizeAccount(account);
+		did = await getAccountDid(loadAccount);
+		setItem("did", did);
+	}
 
-	if (did != null) {
-		queryFeedForUser(did)
-		.then((results) =>  {
-			console.log(`finished (cached) feed`);
-			processResults(results, true);
-		})
-		.catch((requestError) => {
-			console.log(`error (cached) feed`);
-			processError(requestError);
-		});	
-	}
-	else {
-		let loadAccount = normalizeAccount(account);
-		sendRequest(site + `/xrpc/app.bsky.actor.getProfile?actor=${loadAccount}`)
-		.then((text) => {
-			const jsonObject = JSON.parse(text);
-		
-			did = jsonObject.did;
-			setItem("did", did);
-		
-			queryFeedForUser(did)
-			.then((results) =>  {
-				console.log(`finished feed`);
-				processResults(results, true);
-			})
-			.catch((requestError) => {
-				console.log(`error feed`);
-				processError(requestError);
-			});	
-		})
-		.catch((requestError) => {
-			processError(requestError);
-		});
-	}
-}
-
-function normalizeAccount(account) {
-	let result = account.trim();
-	if (result.length > 1 && result.startsWith("@")) {
-		result = result.slice(1);
-	}
-	return result;
+	queryFeedForUser(did)
+	.then((results) =>  {
+		console.log(`finished feed for ${did}`);
+		processResults(results, true);
+	})
+	.catch((requestError) => {
+		console.log(`error feed for ${did}`);
+		processError(requestError);
+	});	
 }
 
 function queryFeedForUser(did) {
