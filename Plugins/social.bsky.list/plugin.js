@@ -61,7 +61,6 @@ function load() {
 			processResults(results, true);
 		})
 		.catch((requestError) => {
-			loadCounter -= 1;
 			console.log(`error (cached) feed`);
 			processError(requestError);
 		});	
@@ -80,7 +79,6 @@ function load() {
 				processResults(results, true);
 			})
 			.catch((requestError) => {
-				loadCounter -= 1;
 				console.log(`error feed`);
 				processError(requestError);
 			});	

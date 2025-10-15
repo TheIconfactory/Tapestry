@@ -5,7 +5,26 @@ const uriPrefix = "https://bsky.app";
 const uriPrefixContent = "https://cdn.bsky.app";
 const uriPrefixVideo = "https://video.bsky.app";
 
-function postForItem(item, includeActions = false, dateOverride = null) {
+function parentsForItem(item, includeActions) {
+	let results = [];
+	if (item.parent != null) {
+		parentPostForItem(item.parent, includeActions, results);
+	}
+	return results;
+}
+
+function parentPostForItem(item, includeActions, results) {
+	if (item.parent != null) {
+		parentPostForItem(item.parent, includeActions, results);
+	}
+
+	const post = postForItem(item, includeActions);
+	if (post != null) {
+		results.push(post);
+	}
+}
+
+function postForItem(item, includeActions = false, dateOverride = null, allowRepliesFromOthers = true) {
     let date = dateOverride ?? (new Date(item.post.indexedAt));
 
     const author = item.post.author;
@@ -15,9 +34,17 @@ function postForItem(item, includeActions = false, dateOverride = null) {
     const inReplyToRecord = item.reply && item.reply.record
     const reason = item.reason
     const record = item.post.record;
-                
-    let content = contentForRecord(item.post.record);
     
+    if (item.reply != null) {
+    	if (! allowRepliesFromOthers) {
+			if (item.reply.parent?.author.viewer.following == null) {
+				return null;
+			}
+		}
+	}
+            
+    let content = contentForRecord(item.post.record);
+        
     let actions = {};
     if (includeActions) {
         if (item.post.viewer?.like != null) {
@@ -48,6 +75,14 @@ function postForItem(item, includeActions = false, dateOverride = null) {
             	actions["unsave"] = JSON.stringify(values);
             }
         }
+        if (item.post?.replyCount > 0) {
+            const values = { uri: item.post.uri, cid: item.post.cid };
+            actions["replies"] = JSON.stringify(values);
+		}
+		else {
+            const values = { uri: item.post.uri, cid: item.post.cid };
+			actions["thread"] = JSON.stringify(values);
+		}
     }
 
     let contentWarning = null;
@@ -58,12 +93,17 @@ function postForItem(item, includeActions = false, dateOverride = null) {
     
     let annotation = null;
     
-    const replyContent = contentForReply(item.reply);
-    if (replyContent != null) {
-        annotation = annotationForReply(item.reply);
-        content = replyContent + content;
-    }
-
+    let replyContent = null;
+    if (item.reply != null) {
+        annotation = annotationForReply(item);
+		if (item.post.author.handle != item.reply.parent?.author?.handle) {					
+			replyContent = contentForReply(item.reply);
+			if (replyContent != null) {
+				content = replyContent + content;
+			}
+		}
+	}
+	
     const repostContent = contentForRepost(item.reason);
     if (repostContent != null) {
         if (item.reason.indexedAt != null) {
@@ -182,6 +222,11 @@ function nameForAccount(account) {
         return null;
     }
 
+	const did = getItem("didSelf");
+	if (did != null && did == account.did) {
+		return "you";
+	}
+	
     if (account.displayName != null && account.displayName.length > 0) {
         return account.displayName;
     }
@@ -232,15 +277,22 @@ function contentForRepost(reason) {
     return content;
 }
 
-function annotationForReply(reply) {
+function annotationForReply(item) {
     let annotation = null;
 
-    if (reply != null && reply.parent != null) {
-        let name = nameForAccount(reply.parent.author);
-        if (name != null) {
-            const text = `In reply to ${name}`;
-            annotation = Annotation.createWithText(text);
-            annotation.uri = uriForAccount(reply.parent.author);
+    if (item.reply != null && item.reply.parent != null) {
+    	if (item.post.author.handle == item.reply.parent.author?.handle) {
+			const text = "Replying to self";
+			annotation = Annotation.createWithText(text);
+			annotation.uri = uriForAccount(item.post.author);
+    	}
+    	else {
+			let name = nameForAccount(item.reply.parent.author);
+			if (name != null) {
+				const text = `In reply to ${name}`;
+				annotation = Annotation.createWithText(text);
+				annotation.uri = uriForAccount(item.reply.parent.author);
+			}
         }
     }
     
