@@ -117,6 +117,45 @@ async function performAction(actionId, actionValue, item) {
  			// the unreblog action is ignored (the post needs to be removed on the Tumblr site)
 			actionComplete(null, null);
  		}
+ 		else if (actionId == "replies") {
+ 			//GET https://api.tumblr.com/v2/blog/YOUR-BLOG.tumblr.com/notes?id=1234567890000&mode=all&before_timestamp=1234567890
+			//const url = `${site}/v2/blog/${blogName}/notes?id=${actionValues["id"]}`;
+			//let url = "https://api.tumblr.com/v2/blog/cognitiveinequality.tumblr.com/notes?id=797584353531215872&mode=conversation";
+			// https://www.tumblr.com/cognitiveinequality/797586024730705920/yekaterina-lisina-the-face-of-a-changed
+			// https://www.tumblr.com/eyezehuhh/647452773491867650/yekaterina-lisina
+			//let url = "https://api.tumblr.com/v2/blog/eyezehuhh.tumblr.com/notes?id=647452773491867650&mode=conversation";
+			let url = "https://api.tumblr.com/v2/blog/eyezehuhh.tumblr.com/notes?id=647452773491867650&mode=all";
+			const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
+			const response = await sendRequest(url, "GET", null, extraHeaders);
+			const json = JSON.parse(response);
+
+			const notes = json?.response.notes;
+			for (const note of notes) {
+				let identity = Identity.createWithName(note.blog_name);
+				identity.uri = note.blog_url;
+				if (note.avatar_url != null && note.avatar_url.length > 0) {
+					identity.avatar = note.avatar_url["64"];
+				}
+				
+				let text = note.reply_text;
+				let textFormats = note.formatting;
+				if (textFormats != null && textFormats.length > 0) {
+					let formattedText = formatText(text, textFormats);
+					//console.log(`    formattedText = ${formattedText}`);
+					text = formattedText;
+				}
+
+				// https://www.tumblr.com/cognitiveinequality/797586024730705920/yekaterina-lisina-the-face-of-a-changed/replies/794716532688175104
+				
+// 				const post = Item.createWithUriDate(contentUrl, date);
+// 				post.body = text;
+// 				if (identity != null) {
+// 					post.author = identity;
+// 				}
+			}
+			
+			actionComplete(null, null);
+ 		}
 		else {
 			let error = new Error(`actionId "${actionId}" not implemented`);
 			actionComplete(null, error);
@@ -217,6 +256,7 @@ function postForItem(item) {
 		}
 	}
 	
+	let identity = null;
 	if (contentItem.blog != null) {
 		const blog = contentItem.blog;
 		identity = Identity.createWithName(blog.name);
@@ -407,6 +447,10 @@ function postForItem(item) {
 	}
 	else {
 		actions["like"] = JSON.stringify(actionValues);
+	}
+	// TODO: Test for replies existing...
+	{
+		actions["replies"] = JSON.stringify(actionValues);
 	}
 	post.actions = actions;
 
