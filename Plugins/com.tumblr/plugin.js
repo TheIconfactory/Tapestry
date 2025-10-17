@@ -121,10 +121,11 @@ async function performAction(actionId, actionValue, item) {
  			//GET https://api.tumblr.com/v2/blog/YOUR-BLOG.tumblr.com/notes?id=1234567890000&mode=all&before_timestamp=1234567890
 			//const url = `${site}/v2/blog/${blogName}/notes?id=${actionValues["id"]}`;
 			//let url = "https://api.tumblr.com/v2/blog/cognitiveinequality.tumblr.com/notes?id=797584353531215872&mode=conversation";
-			const itemUriElements = item.uri.split("/");
-			let itemId = itemUriElements.slice(-1);
-			let itemBlogName = itemUriElements[2];
-			let url = `${site}/v2/blog/${itemBlogName}/notes?id=${actionValues["id"]}&mode=conversation`;
+// 			const itemUriElements = item.uri.split("/");
+// 			let itemId = itemUriElements.slice(-1);
+// 			let itemBlogName = itemUriElements[2];
+			const notesUrl = `${site}/v2/blog/${actionValues["blog_name"]}/notes?id=${actionValues["id"]}&mode=all`;
+			const postUrl = `${site}/v2/blog/${actionValues["blog_name"]}/posts/${actionValues["id"]}`;
 			// https://www.tumblr.com/cognitiveinequality/797586024730705920/yekaterina-lisina-the-face-of-a-changed
 			// https://www.tumblr.com/eyezehuhh/647452773491867650/yekaterina-lisina
 			//let url = "https://api.tumblr.com/v2/blog/eyezehuhh.tumblr.com/notes?id=647452773491867650&mode=conversation";
@@ -135,16 +136,19 @@ async function performAction(actionId, actionValue, item) {
 //			let url = "https://www.tumblr.com/api/v2/blog/wuggen/post/691984290450489344/replies?mode=replies&sort=asc&fields%5Bblogs%5D=%3Favatar%2C%3Ftheme%2Cname";
 			//let url = "https://api.tumblr.com/api/v2/blog/wuggen/notes?id=691984290450489344";
 			const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
-			const response = await sendRequest(url, "GET", null, extraHeaders);
-			const json = JSON.parse(response);
+
+			const postResponse = await sendRequest(postUrl, "GET", null, extraHeaders);
+			const postJson = JSON.parse(postResponse);
+
+			const notesResponse = await sendRequest(notesUrl, "GET", null, extraHeaders);
+			const notesJson = JSON.parse(notesResponse);
 
 			let results = [];
-			const notes = json?.response.notes;
+			let post = postForItem(postJson.response);
+			results.push(post);
+
+			const notes = notesJson?.response.notes;
 			for (const note of notes) {
-				if (note.reply_text == null) {
-					continue;
-				}
-				
 				let identity = Identity.createWithName(note.blog_name);
 				identity.uri = note.blog_url;
 				if (note.avatar_url != null) {
@@ -156,26 +160,56 @@ async function performAction(actionId, actionValue, item) {
 					}
 				}
 				
-				let text = note.reply_text;
-				let textFormats = note.formatting;
-				if (textFormats != null && textFormats.length > 0) {
-					let formattedText = formatText(text, textFormats);
-					//console.log(`    formattedText = ${formattedText}`);
-					text = formattedText;
+				let text = null;
+				switch (note.type) {
+					case "like":
+						if (includeAllNotes == "on") {
+							text = "Liked post";
+						}
+						break;
+					case "reblog":
+						if (includeAllNotes == "on") {
+							text = `Reblogged from <em>${note.reblog_parent_blog_name}</em>`;
+						}
+						break;
+					case "reply":
+						if (note.reply_text != null) {
+							text = note.reply_text;
+							let textFormats = note.formatting;
+							if (textFormats != null && textFormats.length > 0) {
+								let formattedText = formatText(text, textFormats);
+								//console.log(`    formattedText = ${formattedText}`);
+								text = formattedText;
+							}
+						}
+						else {
+							text = "Replied";
+						}
+						break;
+					case "posted":
+						if (includeAllNotes == "on") {
+							text = "Posted";
+						}
+						break;
+					default:
+						if (includeAllNotes == "on") {
+							text = `Unknown type: ${note.type}`;
+						}
+						break;
 				}
-
-				// https://www.tumblr.com/cognitiveinequality/797586024730705920/yekaterina-lisina-the-face-of-a-changed/replies/794716532688175104
 				
-				const hackyUrl = `${item.uri}/replies?ts=${note.timestamp}`;
-				const date = new Date(note.timestamp * 1000); // timestamp is seconds since the epoch, convert to milliseconds
-
- 				const post = Item.createWithUriDate(hackyUrl, date);
- 				post.body = text;
- 				if (identity != null) {
- 					post.author = identity;
+				if (text != null) {
+					const uniqueBlogUrl = `${note.blog_url}?${note.timestamp}`;
+					const date = new Date(note.timestamp * 1000); // timestamp is seconds since the epoch, convert to milliseconds
+	
+					const post = Item.createWithUriDate(uniqueBlogUrl, date);
+					post.body = text;
+					if (identity != null) {
+						post.author = identity;
+					}
+					
+					results.push(post);
  				}
- 				
- 				results.push(post);
 			}
 			
 			actionComplete(results);
@@ -244,10 +278,16 @@ function postForItem(item) {
 	let isReblogged = false;
 	let isLiked = item.liked;
 	
+	let noteId = item.id_string;
+	let noteBlogName = item.blog_name;
+	
 	let annotation = null;
 	if (isReblog) {
 		if (item.trail != null && item.trail.length > 0) {
 			let trailOrigin = item.trail[0];
+			
+			noteId = trailOrigin.post.id;
+			noteBlogName = trailOrigin.blog.name;
 			
 			const itemBlog = item.blog;
 			const itemBlogName = itemBlog.name;
@@ -474,7 +514,8 @@ function postForItem(item) {
 	}
 	// item.note_count is available, but doesn't reflect what the API will return
 	{
-		actions["notes"] = JSON.stringify(actionValues);
+		let noteActionValues = { id: noteId, blog_name: noteBlogName };
+		actions["notes"] = JSON.stringify(noteActionValues);
 	}
 	post.actions = actions;
 

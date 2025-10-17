@@ -11,6 +11,12 @@
 			"type": "switch",
 			"prompt": "Include Tags",
 			"value": "on"
+		},
+		{
+			"name": "includeAllNotes",
+			"type": "switch",
+			"prompt": "Include All Notes",
+			"value": "on"
 		}
 	]
 }
