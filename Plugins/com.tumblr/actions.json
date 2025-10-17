@@ -21,9 +21,9 @@
 			"icon": "heart.fill"
 		},
 		{
-			"id": "replies",
-			"name": "Thread",
-			"icon": "bubble.left.and.text.bubble.right",
+			"id": "notes",
+			"name": "Notes",
+			"icon": "bubble.left.and.bubble.right",
 			"role": "context"
 		}
 	]
