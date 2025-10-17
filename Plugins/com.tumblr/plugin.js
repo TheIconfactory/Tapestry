@@ -118,99 +118,64 @@ async function performAction(actionId, actionValue, item) {
 			actionComplete(null, null);
  		}
  		else if (actionId == "notes") {
- 			//GET https://api.tumblr.com/v2/blog/YOUR-BLOG.tumblr.com/notes?id=1234567890000&mode=all&before_timestamp=1234567890
-			//const url = `${site}/v2/blog/${blogName}/notes?id=${actionValues["id"]}`;
-			//let url = "https://api.tumblr.com/v2/blog/cognitiveinequality.tumblr.com/notes?id=797584353531215872&mode=conversation";
-// 			const itemUriElements = item.uri.split("/");
-// 			let itemId = itemUriElements.slice(-1);
-// 			let itemBlogName = itemUriElements[2];
-			const notesUrl = `${site}/v2/blog/${actionValues["blog_name"]}/notes?id=${actionValues["id"]}&mode=all`;
 			const postUrl = `${site}/v2/blog/${actionValues["blog_name"]}/posts/${actionValues["id"]}`;
-			// https://www.tumblr.com/cognitiveinequality/797586024730705920/yekaterina-lisina-the-face-of-a-changed
-			// https://www.tumblr.com/eyezehuhh/647452773491867650/yekaterina-lisina
-			//let url = "https://api.tumblr.com/v2/blog/eyezehuhh.tumblr.com/notes?id=647452773491867650&mode=conversation";
+			const notesUrl = `${site}/v2/blog/${actionValues["blog_name"]}/notes?id=${actionValues["id"]}&mode=all`;
+			const originalPostUrl = `${site}/v2/blog/${actionValues["original_blog_name"]}/posts/${actionValues["original_id"]}`;
 
-//https://www.tumblr.com/api/v2/blog/eyezehuhh/post/647452773491867650/replies?mode=replies&sort=asc&fields%5Bblogs%5D=%3Favatar%2C%3Ftheme%2Cname
-			
-			//let url = "https://www.tumblr.com/v2/blog/cognitiveinequality/post/797586024730705920/replies?mode=replies&sort=asc&fields%5Bblogs%5D=%3Favatar%2C%3Ftheme%2Cname";
-//			let url = "https://www.tumblr.com/api/v2/blog/wuggen/post/691984290450489344/replies?mode=replies&sort=asc&fields%5Bblogs%5D=%3Favatar%2C%3Ftheme%2Cname";
-			//let url = "https://api.tumblr.com/api/v2/blog/wuggen/notes?id=691984290450489344";
 			const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
 
-			const postResponse = await sendRequest(postUrl, "GET", null, extraHeaders);
-			const postJson = JSON.parse(postResponse);
+			let trailPosts = [];
+			try {
+				const postResponse = await sendRequest(postUrl, "GET", null, extraHeaders);
+				const postJson = JSON.parse(postResponse);
+				if (postJson.response.trail != null && postJson.response.trail.length > 1) {
+					let trails = postJson.response.trail.slice(1);
+					for (const trail of trails) {
+						const post = postForTrail(trail);
+						if (post != null) {
+							trailPosts.push(post);
+						}
+					}
+				}
+			}
+			catch (error) {
+				console.log(`notes: post error = ${error}`);
+			}
 
-			const notesResponse = await sendRequest(notesUrl, "GET", null, extraHeaders);
-			const notesJson = JSON.parse(notesResponse);
+			let notePosts = [];
+			try {
+				const notesResponse = await sendRequest(notesUrl, "GET", null, extraHeaders);
+				const notesJson = JSON.parse(notesResponse);
+				const notes = notesJson?.response.notes;
+				for (const note of notes) {
+					const post = postForNote(note);
+					if (post != null) {
+						notePosts.push(post);
+					}
+				}
+			}
+			catch (error) {
+				console.log(`notes: notes error = ${error}`);
+			}
+			
+			let originalPost = null;
+			try {
+				const originalPostResponse = await sendRequest(originalPostUrl, "GET", null, extraHeaders);
+				const originalPostJson = JSON.parse(originalPostResponse);
+				originalPost = postForItem(originalPostJson.response);
+			}
+			catch (error) {
+				console.log(`notes: original error = ${error}`);
+			}
 
 			let results = [];
-			let post = postForItem(postJson.response);
-			results.push(post);
 
-			const notes = notesJson?.response.notes;
-			for (const note of notes) {
-				let identity = Identity.createWithName(note.blog_name);
-				identity.uri = note.blog_url;
-				if (note.avatar_url != null) {
-					if (note.avatar_url["64"] != null) {
-						identity.avatar = note.avatar_url["64"];
-					}
-					else if (note.avatar_url["128"] != null) {
-						identity.avatar = note.avatar_url["128"];
-					}
-				}
-				
-				let text = null;
-				switch (note.type) {
-					case "like":
-						if (includeAllNotes == "on") {
-							text = "Liked post";
-						}
-						break;
-					case "reblog":
-						if (includeAllNotes == "on") {
-							text = `Reblogged from <em>${note.reblog_parent_blog_name}</em>`;
-						}
-						break;
-					case "reply":
-						if (note.reply_text != null) {
-							text = note.reply_text;
-							let textFormats = note.formatting;
-							if (textFormats != null && textFormats.length > 0) {
-								let formattedText = formatText(text, textFormats);
-								//console.log(`    formattedText = ${formattedText}`);
-								text = formattedText;
-							}
-						}
-						else {
-							text = "Replied";
-						}
-						break;
-					case "posted":
-						if (includeAllNotes == "on") {
-							text = "Posted";
-						}
-						break;
-					default:
-						if (includeAllNotes == "on") {
-							text = `Unknown type: ${note.type}`;
-						}
-						break;
-				}
-				
-				if (text != null) {
-					const uniqueBlogUrl = `${note.blog_url}?${note.timestamp}`;
-					const date = new Date(note.timestamp * 1000); // timestamp is seconds since the epoch, convert to milliseconds
-	
-					const post = Item.createWithUriDate(uniqueBlogUrl, date);
-					post.body = text;
-					if (identity != null) {
-						post.author = identity;
-					}
-					
-					results.push(post);
- 				}
+			if (originalPost != null) {
+				results.push(originalPost);
 			}
+			results.push(...trailPosts);
+			results.push(...notePosts);
+
 			
 			actionComplete(results);
  		}
@@ -278,16 +243,16 @@ function postForItem(item) {
 	let isReblogged = false;
 	let isLiked = item.liked;
 	
-	let noteId = item.id_string;
-	let noteBlogName = item.blog_name;
+	let originalId = item.id_string;
+	let originalBlogName = item.blog_name;
 	
 	let annotation = null;
 	if (isReblog) {
 		if (item.trail != null && item.trail.length > 0) {
 			let trailOrigin = item.trail[0];
 			
-			noteId = trailOrigin.post.id;
-			noteBlogName = trailOrigin.blog.name;
+			originalId = trailOrigin.post.id;
+			originalBlogName = trailOrigin.blog.name;
 			
 			const itemBlog = item.blog;
 			const itemBlogName = itemBlog.name;
@@ -342,9 +307,273 @@ function postForItem(item) {
 		}
 	}
 	
+	let contentResults = processContentBlocks(contentBlocks, contentLayouts);
+	let body = contentResults[0];
+	let attachments = contentResults[1];
+	
+	if (includeTags == "on") {
+		if (contentItem.tags != null && contentItem.tags.length > 0) {
+			body += "<p>";
+			for (const tag of contentItem.tags) {
+				body += `<a href="https://www.tumblr.com/tagged/${encodeURIComponent(tag)}">#${tag}</a> `;
+			}
+			body += "</p>";
+		}
+	}
+
+	const post = Item.createWithUriDate(contentUrl, date);
+	post.body = body;
+	if (identity != null) {
+		post.author = identity;
+	}
+	if (attachments.length != 0) {
+		post.attachments = attachments;
+	}
+	if (annotation != null) {
+		post.annotations = [annotation];
+	}
+	
+	let actionValues = { id: item.id_string, reblog_key: item.reblog_key };
+
+	let actions = {};
+	if (!isReblogged) {
+		actions["reblog"] = JSON.stringify(actionValues);
+	}
+	if (isLiked) {
+		actions["unlike"] = JSON.stringify(actionValues);
+	}
+	else {
+		actions["like"] = JSON.stringify(actionValues);
+	}
+	// item.note_count is available, but doesn't reflect what the API will return
+	{
+		let noteActionValues = { id: item.id_string, blog_name: item.blog_name, original_id: originalId, original_blog_name: originalBlogName };
+		actions["notes"] = JSON.stringify(noteActionValues);
+	}
+	post.actions = actions;
+
+	return post;
+}
+
+function postForNote(note) {
+	let identity = Identity.createWithName(note.blog_name);
+	identity.uri = note.blog_url;
+	if (note.avatar_url != null) {
+		if (note.avatar_url["64"] != null) {
+			identity.avatar = note.avatar_url["64"];
+		}
+		else if (note.avatar_url["128"] != null) {
+			identity.avatar = note.avatar_url["128"];
+		}
+	}
+	
+	let text = null;
+	switch (note.type) {
+		case "like":
+			if (includeAllNotes == "on") {
+				text = "Liked post";
+			}
+			break;
+		case "reblog":
+			if (includeAllNotes == "on") {
+				text = `Reblogged from <em>${note.reblog_parent_blog_name}</em>`;
+			}
+			break;
+		case "reply":
+			if (note.reply_text != null) {
+				text = note.reply_text;
+				let textFormats = note.formatting;
+				if (textFormats != null && textFormats.length > 0) {
+					let formattedText = formatText(text, textFormats);
+					//console.log(`    formattedText = ${formattedText}`);
+					text = formattedText;
+				}
+			}
+			else {
+				text = "Replied";
+			}
+			break;
+		case "posted":
+			if (includeAllNotes == "on") {
+				text = "Posted";
+			}
+			break;
+		default:
+			if (includeAllNotes == "on") {
+				text = `Unknown type: ${note.type}`;
+			}
+			break;
+	}
+	
+	if (text != null) {
+		const uniqueBlogUrl = `${note.blog_url}?${note.timestamp}`;
+		const date = new Date(note.timestamp * 1000); // timestamp is seconds since the epoch, convert to milliseconds
+
+		const post = Item.createWithUriDate(uniqueBlogUrl, date);
+		post.body = text;
+		if (identity != null) {
+			post.author = identity;
+		}
+		
+		return post;
+	}
+	
+	return null;
+}
+
+function postForTrail(trail) {
+	if (trail.blog != null) {
+		const blog = trail.blog;
+		let identity = Identity.createWithName(blog.name);
+		identity.uri = blog.url;
+		identity.username = blog.title;
+		if (blog.avatar != null && blog.avatar.length > 0) {
+			identity.avatar = blog.avatar[0].url;
+		}
+		else {
+			identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
+		}
+
+		
+		let contentResults = processContentBlocks(trail.content, trail.layout);
+		let body = contentResults[0];
+		let attachments = contentResults[1];
+	
+		if (body != null && body.length > 0) {
+			const trailUrl = `${trail.blog.url}/post/${trail.post.id}`;
+			const date = new Date(); // no trail timestamp!
+	
+			const post = Item.createWithUriDate(trailUrl, date);
+			post.body = body;
+			post.author = identity;
+			if (attachments.length != 0) {
+				post.attachments = attachments;
+			}
+			
+			return post;
+		}
+	}
+		
+	return null;
+}
+
+async function queryDashboard(endDate) {
+
+	// NOTE: These constants are related to the feed limits within Tapestry - it doesn't store more than
+	// 3,000 items or things older than 30 days.
+	// In use, the Tumblr API returns a limited number of items (300-ish) over a shorter timespan. Paging back
+	// through results (using offset) is fairly slow, and these requests have a 30 second timeout, so the
+	// the maxInterval is shorter than on other platforms.
+	const maxInterval = 1.5 * 24 * 60 * 60 * 1000; // days in milliseconds (approximately)
+	const maxItems = 300;
+
+	let newestItemDate = null;
+	let oldestItemDate = null;
+	
+	return new Promise((resolve, reject) => {
+
+		// this function is called recursively to load & process batches of posts into a single list of results
+		function requestBatch(id, endDate, pass, resolve, reject, results = []) {
+			let url = null
+			if (id == null) {
+				//console.log("offset = none");
+				url = `${site}/v2/user/dashboard?npf=true&reblog_info=true&notes_info=true&limit=20`;
+			}
+			else {
+				const offset = pass * 20;
+				//console.log(`offset = ${offset}`);
+				url = `${site}/v2/user/dashboard?npf=true&reblog_info=true&notes_info=true&limit=20&offset=${offset}`;
+			}
+			
+			console.log(`==== REQUEST id = ${id}, pass = ${pass}`);
+			
+			sendRequest(url, "GET")
+			.then((text) => {
+				//console.log(text);
+				let firstId = null;
+				let firstDate = null;
+				let lastId = null;
+				let lastDate = null;
+				let endUpdate = false;
+				
+				const jsonObject = JSON.parse(text);
+				const items = jsonObject.response.posts;
+				for (const item of items) {
+					const post = postForItem(item);
+					if (post != null) {
+						results.push(post);
+
+						const date = post.date;
+
+						const currentId = item["id"];
+						if (firstId == null) {
+							firstId = currentId;
+							firstDate = date;
+						}
+						lastId = currentId;						
+						lastDate = date;
+						
+						if (!endUpdate && date < endDate) {
+							console.log(`>>>> END date = ${date}`);
+							endUpdate = true;
+						}
+						if (date > newestItemDate) {
+							console.log(`>>>> NEW date = ${date}`);
+							newestItemDate = date;
+						}
+						if (date < oldestItemDate) {
+							console.log(`>>>> OLD date = ${date}`);
+							endUpdate = true;
+						}
+					}
+				}
+				
+				if (id == lastId) {
+					console.log(`>>>> ID MATCH`);
+					endUpdate = true;
+				}
+				if (pass >= 20) {
+					console.log(`>>>> PASS OVERFLOW`);
+					endUpdate = true;
+				}
+				if (results.length > maxItems) {
+					console.log(`>>>> MAX`);
+					endUpdate = true;
+				}
+				
+				console.log(`>>>> BATCH results = ${results.length}, lastId = ${lastId}, endUpdate = ${endUpdate}`);
+				console.log(`>>>>       first  = ${firstDate}`);
+				console.log(`>>>>       last   = ${lastDate}`);
+				console.log(`>>>>       newest = ${newestItemDate}`);
+				
+				if (!endUpdate && lastId != null) {
+					requestBatch(lastId, endDate, pass + 1, resolve, reject, results);
+				}
+				else {
+					resolve([results, newestItemDate]);
+				}
+			})
+			.catch((error) => {
+				reject(error);
+			});	
+		}
+
+		console.log(`>>>> START endDate = ${endDate}`);
+		
+		let nowTimestamp = (new Date()).getTime();
+		let pastTimestamp = (nowTimestamp - maxInterval);
+		oldestItemDate = new Date(pastTimestamp);
+		console.log(`>>>> OLD date = ${oldestItemDate}`);
+			
+		requestBatch(null, endDate, 0, resolve, reject);
+	});
+	
+}
+
+function processContentBlocks(contentBlocks, contentLayouts) {
 	let body = "";
 	let attachments = [];
-	//console.log(`contentBlocks.length = ${contentBlocks.length}`);
+
 	let blockIndex = 0;
 	for (const contentBlock of contentBlocks) {
 		//console.log(`  [${blockIndex}] contentBlock.type = ${contentBlock.type}`);
@@ -478,161 +707,7 @@ function postForItem(item) {
 		blockIndex += 1;
 	}
 	
-	if (includeTags == "on") {
-		if (contentItem.tags != null && contentItem.tags.length > 0) {
-			body += "<p>";
-			for (const tag of contentItem.tags) {
-				body += `<a href="https://www.tumblr.com/tagged/${encodeURIComponent(tag)}">#${tag}</a> `;
-			}
-			body += "</p>";
-		}
-	}
-
-	const post = Item.createWithUriDate(contentUrl, date);
-	post.body = body;
-	if (identity != null) {
-		post.author = identity;
-	}
-	if (attachments.length != 0) {
-		post.attachments = attachments
-	}
-	if (annotation != null) {
-		post.annotations = [annotation];
-	}
-	
-	let actionValues = { id: item.id_string, reblog_key: item.reblog_key };
-
-	let actions = {};
-	if (!isReblogged) {
-		actions["reblog"] = JSON.stringify(actionValues);
-	}
-	if (isLiked) {
-		actions["unlike"] = JSON.stringify(actionValues);
-	}
-	else {
-		actions["like"] = JSON.stringify(actionValues);
-	}
-	// item.note_count is available, but doesn't reflect what the API will return
-	{
-		let noteActionValues = { id: noteId, blog_name: noteBlogName };
-		actions["notes"] = JSON.stringify(noteActionValues);
-	}
-	post.actions = actions;
-
-	return post;
-}
-
-async function queryDashboard(endDate) {
-
-	// NOTE: These constants are related to the feed limits within Tapestry - it doesn't store more than
-	// 3,000 items or things older than 30 days.
-	// In use, the Tumblr API returns a limited number of items (300-ish) over a shorter timespan. Paging back
-	// through results (using offset) is fairly slow, and these requests have a 30 second timeout, so the
-	// the maxInterval is shorter than on other platforms.
-	const maxInterval = 1.5 * 24 * 60 * 60 * 1000; // days in milliseconds (approximately)
-	const maxItems = 300;
-
-	let newestItemDate = null;
-	let oldestItemDate = null;
-	
-	return new Promise((resolve, reject) => {
-
-		// this function is called recursively to load & process batches of posts into a single list of results
-		function requestBatch(id, endDate, pass, resolve, reject, results = []) {
-			let url = null
-			if (id == null) {
-				//console.log("offset = none");
-				url = `${site}/v2/user/dashboard?npf=true&reblog_info=true&notes_info=true&limit=20`;
-			}
-			else {
-				const offset = pass * 20;
-				//console.log(`offset = ${offset}`);
-				url = `${site}/v2/user/dashboard?npf=true&reblog_info=true&notes_info=true&limit=20&offset=${offset}`;
-			}
-			
-			console.log(`==== REQUEST id = ${id}, pass = ${pass}`);
-			
-			sendRequest(url, "GET")
-			.then((text) => {
-				//console.log(text);
-				let firstId = null;
-				let firstDate = null;
-				let lastId = null;
-				let lastDate = null;
-				let endUpdate = false;
-				
-				const jsonObject = JSON.parse(text);
-				const items = jsonObject.response.posts;
-				for (const item of items) {
-					const post = postForItem(item);
-					if (post != null) {
-						results.push(post);
-
-						const date = post.date;
-
-						const currentId = item["id"];
-						if (firstId == null) {
-							firstId = currentId;
-							firstDate = date;
-						}
-						lastId = currentId;						
-						lastDate = date;
-						
-						if (!endUpdate && date < endDate) {
-							console.log(`>>>> END date = ${date}`);
-							endUpdate = true;
-						}
-						if (date > newestItemDate) {
-							console.log(`>>>> NEW date = ${date}`);
-							newestItemDate = date;
-						}
-						if (date < oldestItemDate) {
-							console.log(`>>>> OLD date = ${date}`);
-							endUpdate = true;
-						}
-					}
-				}
-				
-				if (id == lastId) {
-					console.log(`>>>> ID MATCH`);
-					endUpdate = true;
-				}
-				if (pass >= 20) {
-					console.log(`>>>> PASS OVERFLOW`);
-					endUpdate = true;
-				}
-				if (results.length > maxItems) {
-					console.log(`>>>> MAX`);
-					endUpdate = true;
-				}
-				
-				console.log(`>>>> BATCH results = ${results.length}, lastId = ${lastId}, endUpdate = ${endUpdate}`);
-				console.log(`>>>>       first  = ${firstDate}`);
-				console.log(`>>>>       last   = ${lastDate}`);
-				console.log(`>>>>       newest = ${newestItemDate}`);
-				
-				if (!endUpdate && lastId != null) {
-					requestBatch(lastId, endDate, pass + 1, resolve, reject, results);
-				}
-				else {
-					resolve([results, newestItemDate]);
-				}
-			})
-			.catch((error) => {
-				reject(error);
-			});	
-		}
-
-		console.log(`>>>> START endDate = ${endDate}`);
-		
-		let nowTimestamp = (new Date()).getTime();
-		let pastTimestamp = (nowTimestamp - maxInterval);
-		oldestItemDate = new Date(pastTimestamp);
-		console.log(`>>>> OLD date = ${oldestItemDate}`);
-			
-		requestBatch(null, endDate, 0, resolve, reject);
-	});
-	
+	return [body, attachments];
 }
 
 function formatText(text, textFormats) {

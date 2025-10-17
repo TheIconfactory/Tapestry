@@ -23,7 +23,7 @@
 		{
 			"id": "notes",
 			"name": "Notes",
-			"icon": "bubble.left.and.bubble.right",
+			"icon": "list.bullet.clipboard",
 			"role": "context"
 		}
 	]
