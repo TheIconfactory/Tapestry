@@ -15,7 +15,7 @@
 		{
 			"name": "includeAllNotes",
 			"type": "switch",
-			"prompt": "Include All Notes",
+			"prompt": "Include Like/Reblog Notes",
 			"value": "on"
 		}
 	]

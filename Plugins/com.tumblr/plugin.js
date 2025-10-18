@@ -124,14 +124,28 @@ async function performAction(actionId, actionValue, item) {
 
 			const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
 
+			// try to get the original post to replace the reblogged post			
+			let originalPost = null;
+			try {
+				const originalPostResponse = await sendRequest(originalPostUrl, "GET", null, extraHeaders);
+				const originalPostJson = JSON.parse(originalPostResponse);
+				originalPost = postForItem(originalPostJson.response);
+			}
+			catch (error) {
+				console.log(`notes: original error = ${error}`);
+			}
+
 			let trailPosts = [];
 			try {
 				const postResponse = await sendRequest(postUrl, "GET", null, extraHeaders);
 				const postJson = JSON.parse(postResponse);
+				if (originalPost == null) {
+					originalPost = postForItem(postJson.response);
+				}
 				if (postJson.response.trail != null && postJson.response.trail.length > 1) {
 					let trails = postJson.response.trail.slice(1);
 					for (const trail of trails) {
-						const post = postForTrail(trail);
+						const post = postForTrail(trail, originalPost.date);
 						if (post != null) {
 							trailPosts.push(post);
 						}
@@ -156,16 +170,6 @@ async function performAction(actionId, actionValue, item) {
 			}
 			catch (error) {
 				console.log(`notes: notes error = ${error}`);
-			}
-			
-			let originalPost = null;
-			try {
-				const originalPostResponse = await sendRequest(originalPostUrl, "GET", null, extraHeaders);
-				const originalPostJson = JSON.parse(originalPostResponse);
-				originalPost = postForItem(originalPostJson.response);
-			}
-			catch (error) {
-				console.log(`notes: original error = ${error}`);
 			}
 
 			let results = [];
@@ -421,7 +425,7 @@ function postForNote(note) {
 	return null;
 }
 
-function postForTrail(trail) {
+function postForTrail(trail, date) {
 	if (trail.blog != null) {
 		const blog = trail.blog;
 		let identity = Identity.createWithName(blog.name);
@@ -441,7 +445,6 @@ function postForTrail(trail) {
 	
 		if (body != null && body.length > 0) {
 			const trailUrl = `${trail.blog.url}/post/${trail.post.id}`;
-			const date = new Date(); // no trail timestamp!
 	
 			const post = Item.createWithUriDate(trailUrl, date);
 			post.body = body;
