@@ -28,7 +28,7 @@
 		},
 		{
 			"id": "trail",
-			"name": "Notes",
+			"name": "Reblogs & Notes",
 			"icon": "list.bullet.clipboard",
 			"role": "context"
 		}
