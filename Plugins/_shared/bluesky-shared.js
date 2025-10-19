@@ -823,13 +823,25 @@ async function performAction(actionId, actionValue, item) {
 			const uri = actionValues["uri"];
 			const response = await sendRequest(`${site}/xrpc/app.bsky.feed.getPostThread?uri=${uri}`);
 			const json = JSON.parse(response);
-			const item = json["thread"];
+			const firstItem = json["thread"];
 			
 			let results = [];
-			let parents = parentsForItem(item, true);
+			let parents = parentsForItem(firstItem, true);
 			results.push(...parents);
-			results.push(postForItem(item, true));
-			for (const reply of item.replies) {
+			
+			// NOTE: This is a workaround for a problem with the media attachments on Bluesky. The paths for videos end
+			// in .m3u8, which is a container format that can contain audio or video. This connector explicitly sets the
+			// MIME type to video/mp4, but that's converted to a .movie UTType internally by Tapestry. The item that's provided
+			// to this action gets a MIME type that's generated from the path extension, and that's returned as audio. The
+			// result is that the videos no longer play.
+			//
+			// To fix this, we create a new post for the item returned by the API, and patch the attachments (preserving other
+			// attributes like annotations and dates).
+			const patchPost = postForItem(firstItem, true);
+			item.attachments = patchPost.attachments;
+			results.push(item);
+			
+			for (const reply of firstItem.replies) {
 				results.push(postForItem(reply, true));
 			}
 			actionComplete(results);
