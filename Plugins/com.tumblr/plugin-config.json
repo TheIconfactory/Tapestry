@@ -18,5 +18,5 @@
 	"provides_attachments": true,
 	"check_interval": 300,
 	"minimum_app_version": "1.4",
-	"version": 7
+	"version": 8
 }

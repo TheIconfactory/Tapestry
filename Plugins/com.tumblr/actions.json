@@ -23,6 +23,12 @@
 		{
 			"id": "notes",
 			"name": "Notes",
+			"icon": "clipboard",
+			"role": "context"
+		},
+		{
+			"id": "trail",
+			"name": "Notes",
 			"icon": "list.bullet.clipboard",
 			"role": "context"
 		}

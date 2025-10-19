@@ -117,7 +117,7 @@ async function performAction(actionId, actionValue, item) {
  			// the unreblog action is ignored (the post needs to be removed on the Tumblr site)
 			actionComplete(null, null);
  		}
- 		else if (actionId == "notes") {
+ 		else if (actionId == "notes" || actionId == "trail") {
 			const postUrl = `${site}/v2/blog/${actionValues["blog_name"]}/posts/${actionValues["id"]}`;
 			const notesUrl = `${site}/v2/blog/${actionValues["blog_name"]}/notes?id=${actionValues["id"]}&mode=all`;
 			const originalPostUrl = `${site}/v2/blog/${actionValues["original_blog_name"]}/posts/${actionValues["original_id"]}`;
@@ -352,7 +352,12 @@ function postForItem(item) {
 	// item.note_count is available, but doesn't reflect what the API will return
 	{
 		let noteActionValues = { id: item.id_string, blog_name: item.blog_name, original_id: originalId, original_blog_name: originalBlogName };
-		actions["notes"] = JSON.stringify(noteActionValues);
+		if (isReblog && item.trail != null && item.trail.length > 1) {
+			actions["trail"] = JSON.stringify(noteActionValues);
+		}
+		else {
+			actions["notes"] = JSON.stringify(noteActionValues);
+		}
 	}
 	post.actions = actions;
 
