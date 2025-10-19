@@ -145,7 +145,7 @@ async function performAction(actionId, actionValue, item) {
 				if (postJson.response.trail != null && postJson.response.trail.length > 1) {
 					let trails = postJson.response.trail.slice(1);
 					for (const trail of trails) {
-						const post = postForTrail(trail, originalPost.date);
+						const post = await postForTrail(trail, originalPost.date);
 						if (post != null) {
 							trailPosts.push(post);
 						}
@@ -430,8 +430,24 @@ function postForNote(note) {
 	return null;
 }
 
-function postForTrail(trail, date) {
+async function postForTrail(trail, fallbackDate) {
 	if (trail.blog != null) {
+
+		// try to get the post for the trail item and record its date	
+		let trailDate = null;
+		try {
+			const postUrl = `${site}/v2/blog/${trail.blog.name}/posts/${trail.post.id}`;
+			const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
+			const response = await sendRequest(postUrl, "GET", null, extraHeaders);
+			const json = JSON.parse(response);
+			if (json.response.timestamp != null) {
+				trailDate = new Date(json.response.timestamp * 1000);
+			}
+		}
+		catch (error) {
+			console.log(`postForTrail: error = ${error}`);
+		}
+
 		const blog = trail.blog;
 		let identity = Identity.createWithName(blog.name);
 		identity.uri = blog.url;
@@ -448,18 +464,16 @@ function postForTrail(trail, date) {
 		let body = contentResults[0];
 		let attachments = contentResults[1];
 	
-		if (body != null && body.length > 0) {
-			const trailUrl = `${trail.blog.url}/post/${trail.post.id}`;
-	
-			const post = Item.createWithUriDate(trailUrl, date);
-			post.body = body;
-			post.author = identity;
-			if (attachments.length != 0) {
-				post.attachments = attachments;
-			}
-			
-			return post;
+		const trailUrl = `${trail.blog.url}/post/${trail.post.id}`;
+
+		const post = Item.createWithUriDate(trailUrl, trailDate ?? fallbackDate);
+		post.body = body;
+		post.author = identity;
+		if (attachments.length != 0) {
+			post.attachments = attachments;
 		}
+		
+		return post;
 	}
 		
 	return null;
