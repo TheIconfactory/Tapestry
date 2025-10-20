@@ -19,6 +19,18 @@
 			"id": "unlike",
 			"name": "Remove Like",
 			"icon": "heart.fill"
+		},
+		{
+			"id": "notes",
+			"name": "Notes",
+			"icon": "clipboard",
+			"role": "context"
+		},
+		{
+			"id": "trail",
+			"name": "Reblogs & Notes",
+			"icon": "list.bullet.clipboard",
+			"role": "context"
 		}
 	]
 }
