@@ -1,0 +1,11 @@
+{
+ 	"sites": [
+ 		"tumblr.com"
+ 	],
+ 	"url": [
+		{
+			"extract": "/https://[^/]+/communities/([^/]+)/",
+			"variable": "communityHandle"
+		}
+	]
+}
