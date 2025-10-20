@@ -418,11 +418,14 @@ function postForNote(note) {
 		const uniqueBlogUrl = `${note.blog_url}?${note.timestamp}`;
 		const date = new Date(note.timestamp * 1000); // timestamp is seconds since the epoch, convert to milliseconds
 
+		const annotation = Annotation.createWithText("NOTE");
+
 		const post = Item.createWithUriDate(uniqueBlogUrl, date);
 		post.body = text;
 		if (identity != null) {
 			post.author = identity;
 		}
+		post.annotations = [annotation];
 		
 		return post;
 	}
