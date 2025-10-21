@@ -30,70 +30,23 @@ async function verify() {
 async function load() {
 	let nowTimestamp = (new Date()).getTime();
 
-	try {
-		const response = await sendRequest(`${site}/v2/communities/${communityHandle}/timeline`);
-		const json = JSON.parse(response);
-		
-		const timeline = json.response.timeline;
-		const elements = timeline.elements;
-		//const links = timeline._links;
-		
-		let results = [];
-		for (const element of elements) {
-			const post = await postForElement(element);
-			if (post != null) {
-	
-				if (element.reblogged_from_name == null) {
-					const community = element.community;
-					const blog = element.author_blog;
-					
-					let identity = Identity.createWithName(blog.name);
-					identity.uri = blog.url;
-					identity.username = blog.title;
-					if (blog.avatar != null && blog.avatar.length > 0) {
-						identity.avatar = blog.avatar[0].url;
-					}
-					else {
-						identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
-					}
-					post.author = identity;
-				}
-				else {
-					const text = `Reblogged by ${element.post_author}`;
-					let annotation = Annotation.createWithText(text);
-					annotation.icon = "https://api.tumblr.com/v2/blog/" + element.post_author + "/avatar/96";
-					annotation.uri = element.post_url;
-					post.annotations = [annotation];
-				}
-			
-				results.push(post);
-			}
+	try {		
+		// NOTE: The timeline will be filled up to the endDate, if possible.
+		let endDate = null;
+		let endDateTimestamp = getItem("endDateTimestamp");
+		if (endDateTimestamp != null) {
+			endDate = new Date(parseInt(endDateTimestamp));
 		}
-
-		processResults(results, true);
+	
+		let startTimestamp = (new Date()).getTime();
 		
-// 		let blogName = getItem("blogName");
-// 		if (blogName == null) {
-// 			blogName = await getBlogName();
-// 			setItem("blogName", blogName);
-// 		}
-// 	
-// 		// NOTE: The dashboard will be filled up to the endDate, if possible.
-// 		let endDate = null;
-// 		let endDateTimestamp = getItem("endDateTimestamp");
-// 		if (endDateTimestamp != null) {
-// 			endDate = new Date(parseInt(endDateTimestamp));
-// 		}
-// 	
-// 		let startTimestamp = (new Date()).getTime();
-// 		
-// 		const parameters = await queryTimeline(endDate);
-// 		const results = parameters[0];
-// 		const newestItemDate = parameters[1];
-// 		processResults(results, true);
-// 		setItem("endDateTimestamp", String(newestItemDate.getTime()));
-// 		let endTimestamp = (new Date()).getTime();
-// 		console.log(`finished dashboard: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
+		const parameters = await queryTimeline(endDate);
+		const results = parameters[0];
+		const newestItemDate = parameters[1];
+		processResults(results, true);
+		setItem("endDateTimestamp", String(newestItemDate.getTime()));
+		let endTimestamp = (new Date()).getTime();
+		console.log(`finished dashboard: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
 	}
 	catch (error) {
 		console.log(`error dashboard`);
@@ -567,110 +520,120 @@ async function queryTimeline(endDate) {
 	// In use, the Tumblr API returns a limited number of items (300-ish) over a shorter timespan. Paging back
 	// through results (using offset) is fairly slow, and these requests have a 30 second timeout, so the
 	// the maxInterval is shorter than on other platforms.
-	const maxInterval = 1.5 * 24 * 60 * 60 * 1000; // days in milliseconds (approximately)
+	const maxInterval = 3 * 24 * 60 * 60 * 1000; // days in milliseconds (approximately)
 	const maxItems = 300;
 
-	let newestItemDate = null;
-	let oldestItemDate = null;
-	
-	return new Promise((resolve, reject) => {
 
-		// this function is called recursively to load & process batches of posts into a single list of results
-		function requestBatch(id, endDate, pass, resolve, reject, results = []) {
-			let url = null
-			if (id == null) {
-				//console.log("offset = none");
-				url = `${site}/v2/user/dashboard?npf=true&reblog_info=true&notes_info=true&limit=20`;
-			}
-			else {
-				const offset = pass * 20;
-				//console.log(`offset = ${offset}`);
-				url = `${site}/v2/user/dashboard?npf=true&reblog_info=true&notes_info=true&limit=20&offset=${offset}`;
-			}
-			
-			console.log(`==== REQUEST id = ${id}, pass = ${pass}`);
-			
-			sendRequest(url, "GET")
-			.then((text) => {
-				//console.log(text);
-				let firstId = null;
-				let firstDate = null;
-				let lastId = null;
-				let lastDate = null;
-				let endUpdate = false;
-				
-				const jsonObject = JSON.parse(text);
-				const items = jsonObject.response.posts;
-				for (const item of items) {
-					const post = postForItem(item);
-					if (post != null) {
-						results.push(post);
-
-						const date = post.date;
-
-						const currentId = item["id"];
-						if (firstId == null) {
-							firstId = currentId;
-							firstDate = date;
-						}
-						lastId = currentId;						
-						lastDate = date;
-						
-						if (!endUpdate && date < endDate) {
-							console.log(`>>>> END date = ${date}`);
-							endUpdate = true;
-						}
-						if (date > newestItemDate) {
-							console.log(`>>>> NEW date = ${date}`);
-							newestItemDate = date;
-						}
-						if (date < oldestItemDate) {
-							console.log(`>>>> OLD date = ${date}`);
-							endUpdate = true;
-						}
-					}
-				}
-				
-				if (id == lastId) {
-					console.log(`>>>> ID MATCH`);
-					endUpdate = true;
-				}
-				if (pass >= 20) {
-					console.log(`>>>> PASS OVERFLOW`);
-					endUpdate = true;
-				}
-				if (results.length > maxItems) {
-					console.log(`>>>> MAX`);
-					endUpdate = true;
-				}
-				
-				console.log(`>>>> BATCH results = ${results.length}, lastId = ${lastId}, endUpdate = ${endUpdate}`);
-				console.log(`>>>>       first  = ${firstDate}`);
-				console.log(`>>>>       last   = ${lastDate}`);
-				console.log(`>>>>       newest = ${newestItemDate}`);
-				
-				if (!endUpdate && lastId != null) {
-					requestBatch(lastId, endDate, pass + 1, resolve, reject, results);
-				}
-				else {
-					resolve([results, newestItemDate]);
-				}
-			})
-			.catch((error) => {
-				reject(error);
-			});	
+	// this function is called recursively to load & process batches of posts into a single list of results
+	async function requestBatch(endDate, href, newestItemDate, oldestItemDate, results = []) {
+		let url = null
+		if (href == null) {
+			console.log("href = none");
+			url = `${site}/v2/communities/${communityHandle}/timeline`;
+		}
+		else {
+			console.log(`href = ${href}`);
+			url = `${site}${href}`;
 		}
 
-		console.log(`>>>> START endDate = ${endDate}`);
+		console.log(`==== REQUEST communityHandle = ${communityHandle}`);
 		
-		let nowTimestamp = (new Date()).getTime();
-		let pastTimestamp = (nowTimestamp - maxInterval);
-		oldestItemDate = new Date(pastTimestamp);
-		console.log(`>>>> OLD date = ${oldestItemDate}`);
+		const text = await sendRequest(url, "GET");
+
+		//console.log(text);
+		let firstDate = null;
+		let lastDate = null;
+		let endUpdate = false;
+
+		
+		const jsonObject = JSON.parse(text);
+		const timeline = jsonObject.response.timeline;
+		const elements = timeline.elements;
+		const nextHref = timeline._links.next.href;
+
+		for (const element of elements) {
+			if (element.is_pinned) {
+				// ignore pinned posts since their date is often far in the past and will mess up endUpdate calculation
+				continue;
+			}
+			const post = await postForElement(element);
+			if (post != null) {
+				if (element.reblogged_from_name == null) {
+					const community = element.community;
+					const blog = element.author_blog;
+					
+					let identity = Identity.createWithName(blog.name);
+					identity.uri = blog.url;
+					identity.username = blog.title;
+					if (blog.avatar != null && blog.avatar.length > 0) {
+						identity.avatar = blog.avatar[0].url;
+					}
+					else {
+						identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
+					}
+					post.author = identity;
+				}
+				else {
+					const text = `Reblogged by ${element.post_author}`;
+					let annotation = Annotation.createWithText(text);
+					annotation.icon = "https://api.tumblr.com/v2/blog/" + element.post_author + "/avatar/96";
+					annotation.uri = element.post_url;
+					post.annotations = [annotation];
+				}
 			
-		requestBatch(null, endDate, 0, resolve, reject);
-	});
+				results.push(post);
+				
+				const date = post.date;
+
+				if (href == null) {
+					firstDate = date;
+				}
+				lastDate = date;
+				
+				if (!endUpdate && date < endDate) {
+					console.log(`>>>> END date = ${date}`);
+					endUpdate = true;
+				}
+				if (date > newestItemDate) {
+					console.log(`>>>> NEW date = ${date}`);
+					newestItemDate = date;
+				}
+				if (date < oldestItemDate) {
+					console.log(`>>>> OLD date = ${date}`);
+					endUpdate = true;
+				}
+			}
+		}
+						
+		if (results.length > maxItems) {
+			console.log(`>>>> MAX`);
+			endUpdate = true;
+		}
+		
+		console.log(`>>>> BATCH results = ${results.length}, endUpdate = ${endUpdate}`);
+		console.log(`>>>>       first  = ${firstDate}`);
+		console.log(`>>>>       last   = ${lastDate}`);
+		console.log(`>>>>       newest = ${newestItemDate}`);
+		
+		if (!endUpdate && nextHref != null) {
+			return await requestBatch(endDate, nextHref, newestItemDate, oldestItemDate, results);
+		}
+		else {
+			return([results, newestItemDate]);
+		}
+	}
+
+	console.log(`>>>> START endDate = ${endDate}`);
 	
+	let nowTimestamp = (new Date()).getTime();
+	let pastTimestamp = (nowTimestamp - maxInterval);
+	oldestItemDate = new Date(pastTimestamp);
+	console.log(`>>>> OLD date = ${oldestItemDate}`);
+	
+	const parameters = await requestBatch(endDate, null, null, oldestItemDate);
+	const results = parameters[0];
+	const newestItemDate = parameters[1];
+	return([results, newestItemDate]);	
 }
 
 function processContentBlocks(contentBlocks, contentLayouts) {
