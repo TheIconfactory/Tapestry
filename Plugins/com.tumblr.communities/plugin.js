@@ -42,19 +42,19 @@ async function load() {
 		let results = [];
 		for (const element of elements) {
 			const post = await postForElement(element);
-			
-			let prefix = "Posted";
-			if (element.reblogged_from_name != null) {
-				prefix = "Reblogged";
-			}
-			
-			const text = `${prefix} by ${element.post_author}`;
-			annotation = Annotation.createWithText(text);
-			annotation.icon = "https://api.tumblr.com/v2/blog/" + element.post_author + "/avatar/96";
-			annotation.uri = element.post_url;
-			post.annotations = [annotation];
-			
 			if (post != null) {
+	
+				let prefix = "Posted";
+				if (element.reblogged_from_name != null) {
+					prefix = "Reblogged";
+				}
+				
+				const text = `${prefix} by ${element.post_author}`;
+				let annotation = Annotation.createWithText(text);
+				annotation.icon = "https://api.tumblr.com/v2/blog/" + element.post_author + "/avatar/96";
+				annotation.uri = element.post_url;
+				post.annotations = [annotation];
+			
 				results.push(post);
 			}
 		}
