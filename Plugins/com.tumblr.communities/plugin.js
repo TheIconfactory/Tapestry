@@ -49,7 +49,7 @@ async function load() {
 		console.log(`finished dashboard: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
 	}
 	catch (error) {
-		console.log(`error dashboard`);
+		console.log(`error timeline`);
 		processError(error);
 	}
 }
@@ -552,10 +552,6 @@ async function queryTimeline(endDate) {
 		const nextHref = timeline._links.next.href;
 
 		for (const element of elements) {
-			if (element.is_pinned) {
-				// ignore pinned posts since their date is often far in the past and will mess up endUpdate calculation
-				continue;
-			}
 			const post = await postForElement(element);
 			if (post != null) {
 				if (element.reblogged_from_name == null) {
@@ -582,6 +578,11 @@ async function queryTimeline(endDate) {
 				}
 			
 				results.push(post);
+				
+				if (element.is_pinned) {
+					// ignore pinned posts since their date is often far in the past and will mess up endUpdate calculation
+					continue;
+				}
 				
 				const date = post.date;
 
@@ -625,10 +626,10 @@ async function queryTimeline(endDate) {
 
 	console.log(`>>>> START endDate = ${endDate}`);
 	
-	let nowTimestamp = (new Date()).getTime();
-	let pastTimestamp = (nowTimestamp - maxInterval);
-	oldestItemDate = new Date(pastTimestamp);
-	console.log(`>>>> OLD date = ${oldestItemDate}`);
+	const nowTimestamp = (new Date()).getTime();
+	const pastTimestamp = (nowTimestamp - maxInterval);
+	const oldestItemDate = new Date(pastTimestamp);
+	console.log(`>>>> OLDEST date = ${oldestItemDate}`);
 	
 	const parameters = await requestBatch(endDate, null, null, oldestItemDate);
 	const results = parameters[0];
