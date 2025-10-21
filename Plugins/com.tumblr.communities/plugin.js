@@ -42,6 +42,18 @@ async function load() {
 		let results = [];
 		for (const element of elements) {
 			const post = await postForElement(element);
+			
+			let prefix = "Posted";
+			if (element.reblogged_from_name != null) {
+				prefix = "Reblogged";
+			}
+			
+			const text = `${prefix} by ${element.post_author}`;
+			annotation = Annotation.createWithText(text);
+			annotation.icon = "https://api.tumblr.com/v2/blog/" + element.post_author + "/avatar/96";
+			annotation.uri = element.post_url;
+			post.annotations = [annotation];
+			
 			if (post != null) {
 				results.push(post);
 			}
@@ -95,7 +107,11 @@ async function postForElement(element) {
 		const response = await sendRequest(postUrl, "GET", null, extraHeaders);
 		const json = JSON.parse(response);
 		const item = json.response;
-		return postForItem(item);
+		let post = postForItem(item);
+		
+		post.date = new Date(element.timestamp * 1000);
+		
+		return post;
 	}
 	catch (error) {
 		console.log(`postForElement: error = ${error}`);
