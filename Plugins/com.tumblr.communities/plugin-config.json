@@ -1,7 +1,7 @@
 {
 	"id": "com.tumblr.communities",
-	"display_name": "Tumblr",
-	"service_name": "Tumblr",
+	"display_name": "Tumblr - Follow Community",
+	"service_name": "Tumblr Community",
 	"default_color": "green",
 	"icon": "https://usetapestry.com/icons/tumblr.png",
 	"item_style": "post",

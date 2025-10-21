@@ -6,9 +6,8 @@ async function verify() {
 		const response = await sendRequest(`${site}/v2/communities/${communityHandle}`);
 		const json = JSON.parse(response);
 
-// TODO: Is this check needed? Any account can access the community, but reblogs and likes may not work - TBD.
 		if (json.response.is_member == false) {
-//			processError("You are not a member of this community. Join it on Tumblr.");
+			throw new Error("You are not a member of this community. Join it on Tumblr.");
 		}
 		
 		const displayName = json.response.title ?? communityHandle;
@@ -44,23 +43,34 @@ async function load() {
 			const post = await postForElement(element);
 			if (post != null) {
 	
-				let prefix = "Posted";
-				if (element.reblogged_from_name != null) {
-					prefix = "Reblogged";
+				if (element.reblogged_from_name == null) {
+					const community = element.community;
+					const blog = element.author_blog;
+					
+					let identity = Identity.createWithName(blog.name);
+					identity.uri = blog.url;
+					identity.username = blog.title;
+					if (blog.avatar != null && blog.avatar.length > 0) {
+						identity.avatar = blog.avatar[0].url;
+					}
+					else {
+						identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
+					}
+					post.author = identity;
 				}
-				
-				const text = `${prefix} by ${element.post_author}`;
-				let annotation = Annotation.createWithText(text);
-				annotation.icon = "https://api.tumblr.com/v2/blog/" + element.post_author + "/avatar/96";
-				annotation.uri = element.post_url;
-				post.annotations = [annotation];
+				else {
+					const text = `Reblogged by ${element.post_author}`;
+					let annotation = Annotation.createWithText(text);
+					annotation.icon = "https://api.tumblr.com/v2/blog/" + element.post_author + "/avatar/96";
+					annotation.uri = element.post_url;
+					post.annotations = [annotation];
+				}
 			
 				results.push(post);
 			}
 		}
 
 		processResults(results, true);
-		return;
 		
 // 		let blogName = getItem("blogName");
 // 		if (blogName == null) {
@@ -97,9 +107,10 @@ async function postForElement(element) {
 		let postId = element.reblogged_from_id ?? element.id_string;
 		if (element.trail != null && element.trail.length > 0) {
 			let trailOrigin = element.trail[0];
-			
-			postId = trailOrigin.post.id;
-			blogName = trailOrigin.blog.name;
+			if (trailOrigin.blog.active) {
+				postId = trailOrigin.post.id;
+				blogName = trailOrigin.blog.name;
+			}
 		}
 		
 		const postUrl = `${site}/v2/blog/${blogName}/posts/${postId}`;
