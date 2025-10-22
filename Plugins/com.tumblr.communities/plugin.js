@@ -56,17 +56,17 @@ async function load() {
 
 async function postForElement(element) {
 	try {
-		let blogName = element.reblogged_from_name ?? element.author;
-		let postId = element.reblogged_from_id ?? element.id_string;
-		if (element.trail != null && element.trail.length > 0) {
-			let trailOrigin = element.trail[0];
-			if (trailOrigin.blog.active) {
-				postId = trailOrigin.post.id;
-				blogName = trailOrigin.blog.name;
-			}
-		}
-		blogName = element.blog.name;
-		postId = element.id_string;
+// 		let blogName = element.reblogged_from_name ?? element.author;
+// 		let postId = element.reblogged_from_id ?? element.id_string;
+// 		if (element.trail != null && element.trail.length > 0) {
+// 			let trailOrigin = element.trail[0];
+// 			if (trailOrigin.blog.active) {
+// 				postId = trailOrigin.post.id;
+// 				blogName = trailOrigin.blog.name;
+// 			}
+// 		}
+		const blogName = element.blog.name;
+		const postId = element.id_string;
 		
 		const postUrl = `${site}/v2/blog/${blogName}/posts/${postId}`;
 		const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
@@ -81,6 +81,9 @@ async function postForElement(element) {
 	}
 	catch (error) {
 		console.log(`postForElement: error = ${error}`);
+		if (! element.community.is_member) {
+			throw new Error("You are no longer a member of this community. Join it on Tumblr.");
+		}
 	}
 
 	return null;
@@ -569,7 +572,7 @@ async function queryTimeline(endDate) {
 	// In use, the Tumblr API returns a limited number of items (300-ish) over a shorter timespan. Paging back
 	// through results (using offset) is fairly slow, and these requests have a 30 second timeout, so the
 	// the maxInterval is shorter than on other platforms.
-	const maxInterval = 3 * 24 * 60 * 60 * 1000; // days in milliseconds (approximately)
+	const maxInterval = 2 * 24 * 60 * 60 * 1000; // days in milliseconds (approximately)
 	const maxItems = 300;
 
 
