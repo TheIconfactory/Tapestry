@@ -74,6 +74,9 @@ function postForItem(item) {
 	if (spoilerText != null && spoilerText.length > 0) {
 		post.contentWarning = spoilerText;
 	}
+	else if (item["sensitive"] == true) {
+		post.contentWarning = "Sensitive content";
+	}
 		
 	if (annotation == null) {
 		const visibility = item["visibility"] ?? "public";
