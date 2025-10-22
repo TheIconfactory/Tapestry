@@ -65,6 +65,8 @@ async function postForElement(element) {
 				blogName = trailOrigin.blog.name;
 			}
 		}
+		blogName = element.blog.name;
+		postId = element.id_string;
 		
 		const postUrl = `${site}/v2/blog/${blogName}/posts/${postId}`;
 		const extraHeaders = { "content-type": "application/json; charset=utf8", "accept": "application/json" };
@@ -323,14 +325,35 @@ function postForItem(item) {
 	let identity = null;
 	if (contentItem.blog != null) {
 		const blog = contentItem.blog;
-		identity = Identity.createWithName(blog.name);
-		identity.uri = blog.url;
-		identity.username = blog.title;
-		if (blog.avatar != null && blog.avatar.length > 0) {
-			identity.avatar = blog.avatar[0].url;
+		if (blog.name.startsWith("@@")) {
+			// community post
+			const blogName = item.author;
+			const communityTitle = item.community.title;
+// 			let postId = element.reblogged_from_id ?? element.id_string;
+// 			if (element.trail != null && element.trail.length > 0) {
+// 				let trailOrigin = element.trail[0];
+// 				if (trailOrigin.blog.active) {
+// 					postId = trailOrigin.post.id;
+// 					blogName = trailOrigin.blog.name;
+// 				}
+// 			}
+			const text = `${blogName} posted in ${communityTitle}`;
+			annotation = Annotation.createWithText(text);
+			annotation.icon = "https://api.tumblr.com/v2/blog/" + blogName + "/avatar/96";
+			annotation.uri = item.author_blog.url;
+			post.annotations = [annotation];
 		}
 		else {
-			identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
+			// blog post
+			identity = Identity.createWithName(blog.name);
+			identity.uri = blog.url;
+			identity.username = blog.title;
+			if (blog.avatar != null && blog.avatar.length > 0) {
+				identity.avatar = blog.avatar[0].url;
+			}
+			else {
+				identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
+			}
 		}
 	}
 	else {
@@ -554,6 +577,7 @@ async function queryTimeline(endDate) {
 		for (const element of elements) {
 			const post = await postForElement(element);
 			if (post != null) {
+			/*
 				if (element.reblogged_from_name == null) {
 					const community = element.community;
 					const blog = element.author_blog;
@@ -576,7 +600,7 @@ async function queryTimeline(endDate) {
 					annotation.uri = element.post_url;
 					post.annotations = [annotation];
 				}
-			
+			*/
 				results.push(post);
 				
 				if (element.is_pinned) {
