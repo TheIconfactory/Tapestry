@@ -302,10 +302,21 @@ function postForItem(item) {
 				isReblogged = true;
 			}
 			else {
-				const text = "Reblogged by " + itemBlogName;
-				annotation = Annotation.createWithText(text);
-				annotation.icon = "https://api.tumblr.com/v2/blog/" + itemBlog.name + "/avatar/96";
-				annotation.uri = item.post_url;
+				if (itemBlogName.startsWith("@@")) {
+					const authorBlog = item.author_blog;
+					const communityTitle = item.community.title;
+
+					const text = `${authorBlog.name} reblogged to ${communityTitle}`;
+					annotation = Annotation.createWithText(text);
+					annotation.icon = "https://api.tumblr.com/v2/blog/" + authorBlog.name + "/avatar/96";
+					annotation.uri = authorBlog.url;
+				}
+				else {
+					const text = "Reblogged by " + itemBlogName;
+					annotation = Annotation.createWithText(text);
+					annotation.icon = "https://api.tumblr.com/v2/blog/" + itemBlog.name + "/avatar/96";
+					annotation.uri = item.post_url;
+				}
 			}
 			
 			contentItem = trailOrigin;
@@ -337,11 +348,26 @@ function postForItem(item) {
 // 					blogName = trailOrigin.blog.name;
 // 				}
 // 			}
-			const text = `${blogName} posted in ${communityTitle}`;
+// 			const text = `${blogName} posted in ${communityTitle}`;
+// 			annotation = Annotation.createWithText(text);
+// 			annotation.icon = "https://api.tumblr.com/v2/blog/" + blogName + "/avatar/96";
+// 			annotation.uri = item.author_blog.url;
+
+			const text = `Posted in ${communityTitle}`;
 			annotation = Annotation.createWithText(text);
-			annotation.icon = "https://api.tumblr.com/v2/blog/" + blogName + "/avatar/96";
-			annotation.uri = item.author_blog.url;
-			post.annotations = [annotation];
+			//annotation.icon = "https://api.tumblr.com/v2/blog/" + blogName + "/avatar/96";
+			//annotation.uri = item.author_blog.url;
+
+            const blog = item.author_blog;
+			identity = Identity.createWithName(blog.name);
+			identity.uri = blog.url;
+			identity.username = blog.title;
+			if (blog.avatar != null && blog.avatar.length > 0) {
+				identity.avatar = blog.avatar[0].url;
+			}
+			else {
+				identity.avatar = "https://api.tumblr.com/v2/blog/" + blog.name + "/avatar/96";
+			}
 		}
 		else {
 			// blog post
