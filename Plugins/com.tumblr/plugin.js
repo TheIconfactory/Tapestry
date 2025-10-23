@@ -99,7 +99,7 @@ async function queryDashboard(endDate) {
 				const jsonObject = JSON.parse(text);
 				const items = jsonObject.response.posts;
 				for (const item of items) {
-					const post = postForItem(item, true);
+					const post = postForItem(item);
 					if (post != null) {
 						results.push(post);
 

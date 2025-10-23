@@ -78,7 +78,7 @@ async function performAction(actionId, actionValue, item) {
 				const originalPostResponse = await sendRequest(originalPostUrl, "GET", null, extraHeaders);
 				const originalPostJson = JSON.parse(originalPostResponse);
 				const originalPostItem = originalPostJson.response;
-				originalPost = postForItem(originalPostItem, true);
+				originalPost = postForItem(originalPostItem);
 			}
 			catch (error) {
 				console.log(`notes: original error = ${error}`);
@@ -90,7 +90,7 @@ async function performAction(actionId, actionValue, item) {
 				const postJson = JSON.parse(postResponse);
 				const postItem = postJson.response;
 				if (originalPost == null) {
-					originalPost = postForItem(postItem, true);
+					originalPost = postForItem(postItem);
 				}
 				if (postItem.trail != null && postItem.trail.length > 1) {
 					let trails = postItem.trail.slice(1);
@@ -251,7 +251,6 @@ function postForNote(note) {
 
 async function postForTrail(trail, fallbackDate) {
 	if (trail.blog != null) {
-
 		// try to get the post for the trail item and record its date	
 		let trailDate = null;
 		try {
@@ -294,6 +293,25 @@ async function postForTrail(trail, fallbackDate) {
 		
 		return post;
 	}
+	else if (trail.broken_blog_name != null) {
+		let identity = Identity.createWithName(trail.broken_blog_name);
+		identity.avatar = "https://api.tumblr.com/v2/blog/" + trail.broken_blog_name + "/avatar/96";
+		
+		let contentResults = processContentBlocks(trail.content, trail.layout);
+		let body = contentResults[0];
+		let attachments = contentResults[1];
+	
+		const trailUrl = `https://www.tumblr.com/blog/${trail.broken_blog_name}`;
+
+		const post = Item.createWithUriDate(trailUrl, fallbackDate);
+		post.body = body;
+		post.author = identity;
+		if (attachments.length != 0) {
+			post.attachments = attachments;
+		}
+		
+		return post;
+	}
 		
 	return null;
 }
@@ -308,7 +326,7 @@ async function postForElement(element) {
 		const response = await sendRequest(postUrl, "GET", null, extraHeaders);
 		const json = JSON.parse(response);
 		const item = json.response;
-		let post = postForItem(item, false);
+		let post = postForItem(item);
 		
 		return post;
 	}
@@ -322,7 +340,7 @@ async function postForElement(element) {
 	return null;
 }
 
-function postForItem(item, includeActions = false) {
+function postForItem(item) {
 	if (item.type != "blocks") {
 		return null;
 	}
@@ -452,6 +470,7 @@ function postForItem(item, includeActions = false) {
 	else {
 		if (contentItem.broken_blog_name != null) {
 			identity = Identity.createWithName(contentItem.broken_blog_name);
+			identity.avatar = "https://api.tumblr.com/v2/blog/" + contentItem.broken_blog_name + "/avatar/96";
 		}
 		else {
 			console.log(`**** no blog for '${item.summary}' ${item.post_url}`);
@@ -487,7 +506,7 @@ function postForItem(item, includeActions = false) {
 	let actionValues = { id: item.id_string, reblog_key: item.reblog_key };
 
 	let actions = {};
-    if (includeActions) {
+    if (item.community == null) { // community posts can't be liked or reblogged
 		if (!isReblogged) {
 			actions["reblog"] = JSON.stringify(actionValues);
 		}
