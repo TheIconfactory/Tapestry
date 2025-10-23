@@ -77,7 +77,8 @@ async function performAction(actionId, actionValue, item) {
 			try {
 				const originalPostResponse = await sendRequest(originalPostUrl, "GET", null, extraHeaders);
 				const originalPostJson = JSON.parse(originalPostResponse);
-				originalPost = postForItem(originalPostJson.response, true);
+				const originalPostItem = originalPostJson.response;
+				originalPost = postForItem(originalPostItem, true);
 			}
 			catch (error) {
 				console.log(`notes: original error = ${error}`);
@@ -87,11 +88,12 @@ async function performAction(actionId, actionValue, item) {
 			try {
 				const postResponse = await sendRequest(postUrl, "GET", null, extraHeaders);
 				const postJson = JSON.parse(postResponse);
+				const postItem = postJson.response;
 				if (originalPost == null) {
-					originalPost = postForItem(postJson.response. true);
+					originalPost = postForItem(postItem, true);
 				}
-				if (postJson.response.trail != null && postJson.response.trail.length > 1) {
-					let trails = postJson.response.trail.slice(1);
+				if (postItem.trail != null && postItem.trail.length > 1) {
+					let trails = postItem.trail.slice(1);
 					for (const trail of trails) {
 						const post = await postForTrail(trail, originalPost.date);
 						if (post != null) {
@@ -125,6 +127,9 @@ async function performAction(actionId, actionValue, item) {
 			if (originalPost != null) {
 				results.push(originalPost);
 			}
+			else {
+				results.push(item);
+			}
 			results.push(...trailPosts);
 			results.push(...notePosts);
 
@@ -139,6 +144,11 @@ async function performAction(actionId, actionValue, item) {
 	catch (error) {
 		actionComplete(null, error);
 	}
+}
+
+function test(item)
+{
+	console.log(`item = ${item}`);
 }
 
 async function sendAction(url, parameters) {
