@@ -19,19 +19,17 @@ function verify() {
 		.then((text) => {
 			const jsonObject = JSON.parse(text);
 		
-			const avatar = jsonObject.view.avatar;
-			const feedAvatar = jsonObject.view.displayName;
-			const feedUrl = uriPrefix + "/profile/" + profileHandle + "/feed/" + feedId;
+			const feedName = jsonObject.view.displayName;
+			const feedAvatar = jsonObject.view.avatar;
 			const displayName = `${feedName} by ${profileHandle}`;
 
 			setItem("feedName", feedName);
 			setItem("feedAvatar", feedAvatar);
-			setItem("feedUrl", feedUrl);
 
-			if (avatar != null) {
+			if (feedAvatar != null) {
 				const verification = {
 					displayName: displayName,
-					icon: avatar
+					icon: feedAvatar
 				};
 				processVerification(verification);
 			}
