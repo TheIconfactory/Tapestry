@@ -1,0 +1,28 @@
+{
+	"inputs": [
+		{
+			"name": "includeReblogs",
+			"type": "switch",
+			"prompt": "Include Reblogs",
+			"value": "on"
+		},
+		{
+			"name": "includeTags",
+			"type": "switch",
+			"prompt": "Include Tags",
+			"value": "on"
+		},
+		{
+			"name": "includeAllNotes",
+			"type": "switch",
+			"prompt": "Include Like/Reblog Notes",
+			"value": "on"
+		},
+		{
+			"name": "communityHandle",
+			"type": "text",
+			"prompt": "Community Name",
+			"placeholder": "art-history-academy"
+		}
+	]
+}
