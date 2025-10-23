@@ -50,7 +50,7 @@ async function load() {
 		processResults(results, true);
 		setItem("endDateTimestamp", String(newestItemDate.getTime()));
 		let endTimestamp = (new Date()).getTime();
-		console.log(`finished dashboard: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
+		console.log(`finished timeline: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
 	}
 	catch (error) {
 		console.log(`error timeline`);

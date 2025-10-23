@@ -310,8 +310,6 @@ async function postForElement(element) {
 		const item = json.response;
 		let post = postForItem(item, false);
 		
-		post.date = new Date(element.timestamp * 1000);
-		
 		return post;
 	}
 	catch (error) {
