@@ -19,6 +19,14 @@ async function getAccountDid(account) {
 	return did;
 }
 
+async function getFeedInfo(did, feedId) {
+	const text = await sendRequest(`${site}/xrpc/app.bsky.feed.getFeedGenerator?feed=at://${did}/app.bsky.feed.generator/${feedId}`)
+	const jsonObject = JSON.parse(text);	
+	const feedName = jsonObject.view.displayName;
+	const avatar = jsonObject.view.avatar;
+	return [feedName, avatar];
+}
+
 function normalizeAccount(account) {
 	let result = account.trim();
 	if (result.length > 1 && result.startsWith("@")) {
