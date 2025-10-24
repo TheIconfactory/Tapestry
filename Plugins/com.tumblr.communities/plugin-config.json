@@ -1,6 +1,6 @@
 {
-	"id": "com.tumblr",
-	"display_name": "Tumblr",
+	"id": "com.tumblr.communities",
+	"display_name": "Tumblr - Follow Community",
 	"service_name": "Tumblr",
 	"default_color": "green",
 	"icon": "https://usetapestry.com/icons/tumblr.png",
@@ -15,8 +15,10 @@
 	"oauth_http_redirect": true,
     "synchronizable_credentials": false,
 	"fail_status_code": 401,
+	"needs_verification": true,
+	"verify_variables": true,
 	"provides_attachments": true,
 	"check_interval": 300,
 	"minimum_app_version": "1.4",
-	"version": 9
+	"version": 2
 }

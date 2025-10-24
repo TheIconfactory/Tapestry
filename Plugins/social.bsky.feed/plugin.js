@@ -19,13 +19,17 @@ function verify() {
 		.then((text) => {
 			const jsonObject = JSON.parse(text);
 		
-			const avatar = jsonObject.view.avatar;
 			const feedName = jsonObject.view.displayName;
+			const feedAvatar = jsonObject.view.avatar;
 			const displayName = `${feedName} by ${profileHandle}`;
-			if (avatar != null) {
+
+			setItem("feedName", feedName);
+			setItem("feedAvatar", feedAvatar);
+
+			if (feedAvatar != null) {
 				const verification = {
 					displayName: displayName,
-					icon: avatar
+					icon: feedAvatar
 				};
 				processVerification(verification);
 			}
@@ -49,7 +53,15 @@ async function load() {
 		setItem("did", did);
 	}
 
-	queryFeedForGenerator(did, feedId)
+	var feedName = getItem("feedName");
+	var feedAvatar = getItem("feedAvatar");
+	if (feedName == null || feedAvatar == null) {
+		const results = await getFeedInfo(did, feedId);
+		setItem("feedName", results[0]);
+		setItem("feedAvatar", results[1]);
+	}
+
+	queryFeedForGenerator(did, feedId, feedName, feedAvatar)
 	.then((results) =>  {
 		console.log(`finished did ${did}, feed ${feedId}`);
 		processResults(results, true);
@@ -60,7 +72,7 @@ async function load() {
 	});	
 }
 
-function queryFeedForGenerator(did, feedId) {
+function queryFeedForGenerator(did, feedId, feedName, feedAvatar) {
 	return new Promise((resolve, reject) => {
 		sendRequest(`${site}/xrpc/app.bsky.feed.getFeed?feed=at://${did}/app.bsky.feed.generator/${feedId}`)
 		.then((text) => {
@@ -71,9 +83,13 @@ function queryFeedForGenerator(did, feedId) {
 			// the list of items. Yuck.
 			let lastTimestamp = (new Date()).getTime();
 
+			let annotation = Annotation.createWithText(`Posted in ${feedName}`);
+			annotation.icon = feedAvatar;
+
 			let results = [];
 			for (const item of jsonObject.feed) { 
 				let post = postForItem(item, false, new Date(lastTimestamp));
+				post.annotations = [annotation];
 				results.push(post);
 				lastTimestamp -= 1000;
 			}
