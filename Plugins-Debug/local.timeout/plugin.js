@@ -13,6 +13,10 @@ function verify() {
 }
 
 function load() {
+	if (loadCondition == "on") {
+		raiseCondition("disable", "Always Broken", "For testing.");
+	}
+	
 	const timeout = (onLoad == "on");
 	if (timeout) {
 		// do nothing
@@ -20,7 +24,7 @@ function load() {
 	else {
 		let date = new Date();
 		let uri = `https://example.com/?timestamp=${date.getTime()}`;
-		let content = `<p>Results for ${date}</p>`
+		let content = `<p>Results for ${date}</p><p>loadCondition = ${loadCondition}</p>`
 		
 		const resultItem = Item.createWithUriDate(uri, date);
 		resultItem.body = content;

@@ -10,5 +10,10 @@
 			"type": "switch",
 			"prompt": "Timeout on Load",
 		},
+		{
+			"name": "loadCondition",
+			"type": "switch",
+			"prompt": "Raise Condition on Load",
+		},
 	]
 }
