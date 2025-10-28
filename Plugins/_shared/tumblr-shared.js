@@ -373,8 +373,10 @@ function postForItem(item) {
 		if (item.trail != null && item.trail.length > 0) {
 			let trailOrigin = item.trail[0];
 			
-			originalId = trailOrigin.post.id;
-			originalBlogName = trailOrigin.blog.name;
+			if (trailOrigin.post != null) { // not a broken blog
+				originalId = trailOrigin.post.id;
+				originalBlogName = trailOrigin.blog.name;
+			}
 			
 			const itemBlog = item.blog;
 			const itemBlogName = itemBlog.name;
