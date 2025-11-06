@@ -133,7 +133,7 @@ Shortcode tokens must not contain spaces or additional colons: using `:my fancy 
 ---
 ### Identity
 
-An `Item` can have a author that indicates how the content was created. It can be a person, a woman, a man, a camera, or a TV. The information is used to present an avatar and header in the timeline.
+An `Item` can have a author that indicates how the content was created. It can be a person, a woman, a man, a camera, or a TV. The information is used to present an avatar and display name in the timeline. Feed verification can also optionally return an `accountIdentity`.
 
 ```javascript
 const name = "CHOCK OF THE LOCK";
@@ -144,6 +144,12 @@ identity.avatar = "https://chocklock.com/favicon.ico";
 item.author = identity;
 ```
 
+An `Identity` instance can also be constructed with the `create()` function which takes each of the properties in order:
+
+```javascript
+item.author = Identity.create("CHOCK OF THE LOCK", null /* username */, "https://chocklock.com/favicon.ico", "https://chocklock.com");
+```
+
 #### name: String (required)
 
 The name of the creator. Can be an account’s full name, a bot name, or anything to identify the data and source.
@@ -152,13 +158,13 @@ The name of the creator. Can be an account’s full name, a bot name, or anythin
 
 The name of the creator. Can be an account’s full name, a bot name, or anything to identify the data and source.
 
-#### uri: String
-
-A unique URI for the creator on the Internet. Can be an individual’s account page, bot, or other type of creator. Will be used to show details for the creator if the URI can be converted to a browsable URL.
-
 #### avatar: String
 
 A string containing the URL for the creator’s avatar on the Internet. A Base64 encoded data URL can be used, if needed. If no avatar is specified a generic image will be displayed in the timeline.
+
+#### uri: String
+
+A unique URI for the creator on the Internet. Can be an individual’s account page, bot, or other type of creator. Will be used to show details for the creator if the URI can be converted to a browsable URL.
 
 ---
 ### Annotation
@@ -363,15 +369,24 @@ All actions are performed asynchronously (using one or more JavaScript Promise o
 
 Determines if a site is reachable and gathers properties for the feed. After `processVerification` is called a feed can be saved by a user.
 
+This function will only be called if `needs_verification` is set to true in the connectors’s configuration.
+
 The properties returned can be user visible or used internally. An example of the former case is a display name will be used identify the feed. The latter case is a base URL that will be used to handle relative paths in the feed.
 
-When you call `processVerification` you can supply an object with these properties:
+To return the results of verification, you must call `processVerification()`.
+
+When you call `processVerification()` you can supply an object with these properties (all are optional):
 
   * displayName: `String` with a suggested name for a feed (e.g. an account name, blog name, etc.).
   * icon: `String` with a URL to an image that can be used as a graphic attached to the feed (e.g. an avatar).
   * baseUrl: `String` with a URL prefix for relative paths.
+  * accountIdentity: `Identity` object that represents the logged in account for the feed.
 
-This function will only be called if `needs_verification` is set to true in the connectors’s configuration.
+For authenticated feeds (such as social media accounts), we suggest supplying an `accountIdentity` object (created with `Identity.create()`) that is configured with the user's display name, username, and avatar.
+
+When a Tapestry user adds multiple feeds for the same connector that requires authentication (such as multiple Mastodon accounts), the information in `accountIdentity` can help the user tell the items from each feed apart in their timelines. For feeds without any associated user authentication, an `accountIdentity` will have little effect and isn't necessary.
+
+If `icon` or `displayName` are omitted, then the ones supplied by `accountIdentity` will be used instead, if possible.
 
 ---
 ### load()
