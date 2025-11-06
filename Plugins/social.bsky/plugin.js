@@ -9,7 +9,7 @@ function verify() {
 	sendRequest(site + "/xrpc/com.atproto.server.getSession")
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
-		const displayName = "@" + jsonObject.handle;
+		const username = "@" + jsonObject.handle;
 		const did = jsonObject.did;
 
 		setItem("did", did);
@@ -18,18 +18,11 @@ function verify() {
 		sendRequest(site + `/xrpc/app.bsky.actor.getProfile?actor=${did}`)
 		.then((text) => {
 			const jsonObject = JSON.parse(text);
-			
-			if (jsonObject.avatar != null) {
-				const icon = jsonObject.avatar
-				const verification = {
-					displayName: displayName,
-					icon: icon
-				};
-				processVerification(verification);
-			}
-			else {
-				processVerification(displayName);
-			}
+			const verification = {
+				displayName: username,
+				accountIdentity: Identity.create(jsonObject.displayName, username, jsonObject.avatar)
+			};
+			processVerification(verification);
 		})
 		.catch((requestError) => {
 			processError(requestError);
