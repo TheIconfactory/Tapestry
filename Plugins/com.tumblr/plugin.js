@@ -7,15 +7,17 @@ if (require('tumblr-shared.js') === false) {
 
 async function verify() {
 	try {
-		const blogName = await getBlogName();
+		const user = await getUserInfo();
+		const blogName = getBlogName(user);
 		setItem("blogName", blogName);
 		
-		const displayName = blogName;
-		const icon = "https://api.tumblr.com/v2/blog/" + blogName + "/avatar/96";
+		const blogIcon = "https://api.tumblr.com/v2/blog/" + blogName + "/avatar/96";
+		const userIcon = "https://api.tumblr.com/v2/blog/" + user.name + "/avatar/96";
 
 		const verification = {
-			displayName: displayName,
-			icon: icon
+			displayName: blogName,
+			icon: blogIcon,
+			accountIdentity: Identity.create(user.name, null, userIcon)
 		};
 		processVerification(verification);
 	}
@@ -30,7 +32,7 @@ async function load() {
 	try {
 		let blogName = getItem("blogName");
 		if (blogName == null) {
-			blogName = await getBlogName();
+			blogName = getBlogName(await getUserInfo());
 			setItem("blogName", blogName);
 		}
 	
