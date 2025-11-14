@@ -15,14 +15,18 @@ async function verify() {
 		}
 		
 		const displayName = json.response.title ?? communityHandle;
-		let icon = null
+		let communityIcon = null
 		if (json.response.avatar_image != null && json.response.avatar_image.length > 0) {
-			icon = json.response.avatar_image[0].url;
+			communityIcon = json.response.avatar_image[0].url;
 		}
-		
+
+		const user = await getUserInfo();
+		const userIcon = "https://api.tumblr.com/v2/blog/" + user.name + "/avatar/96";
+
 		const verification = {
 			displayName: displayName,
-			icon: icon
+			icon: communityIcon,
+			accountIdentity: Identity.create(user.name, null, userIcon)
 		};
 		processVerification(verification);
 	}

@@ -11,15 +11,16 @@ function verify() {
 		const jsonObject = JSON.parse(text);
 		
 		const instance = site.split("/")[2] ?? "";
-		const displayName = "@" + jsonObject["username"] + "@" + instance;
+		const accountName = jsonObject["display_name"];
+		const fullUsername = "@" + jsonObject["username"] + "@" + instance;
 		const icon = jsonObject["avatar"];
 
 		const userId = jsonObject["id"];
 		setItem("userId", userId);
-		
+
 		const verification = {
-			displayName: displayName,
-			icon: icon
+			displayName: fullUsername,
+			accountIdentity: Identity.create(accountName, fullUsername, icon)
 		};
 		processVerification(verification);
 	})

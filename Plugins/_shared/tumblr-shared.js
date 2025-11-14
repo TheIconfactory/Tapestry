@@ -8,7 +8,7 @@ async function performAction(actionId, actionValue, item) {
 	try {
 		let blogName = getItem("blogName");
 		if (blogName == null) {
-			blogName = await getBlogName();
+			blogName = getBlogName(await getUserInfo());
 			setItem("blogName", blogName);
 		}
 
@@ -171,12 +171,15 @@ function raiseAuthorizationUpdate() {
 	raiseCondition("authorize", "Authorization needs update", `Tumblr feed **${blogName}** needs to be reauthorized to use actions.`)
 }
 
-async function getBlogName() {
+async function getUserInfo() {
 	const text = await sendRequest(site + "/v2/user/info");
 	const jsonObject = JSON.parse(text);
-	const blogs = jsonObject.response.user.blogs;
+	return jsonObject.response.user;
+}
+
+function getBlogName(user) {
+	const blogs = user.blogs;
 	const blog = blogs[0];
-		
 	return blog.name;
 }
 
