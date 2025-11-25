@@ -181,44 +181,6 @@ function postForItem(item, includeActions = false, dateOverride = null, allowRep
     return null;
 }
 
-function postForNotification(notification) {
-    let date = new Date(notification.indexedAt);
-
-    const author = notification.author;
-    
-    const identity = identityForAccount(author);
-    
-    let content = contentForRecord(notification.record);
-    
-    let contentWarning = null;
-    if (notification.labels != null && notification.labels.length > 0) {
-        const labels = notification.labels.map((label) => { return label?.val ?? "" }).join(", ");
-        contentWarning = labels; //`Labeled: ${ labels }`;
-    }
-    
-    let annotation = Annotation.createWithText("MENTION");
-        
-    let attachments = attachmentsForEmbed(notification.record.embed, encodeURIComponent(author.did));
-                
-    const itemIdentifier = notification.uri.split("/").pop();
-    const postUri = uriPrefix + "/profile/" + author.handle + "/post/" + itemIdentifier;
-        
-    const post = Item.createWithUriDate(postUri, date);
-    post.body = content;
-    post.author = identity;
-    if (attachments != null) {
-        post.attachments = attachments
-    }
-    if (annotation != null) {
-        post.annotations = [annotation];
-    }
-    if (contentWarning != null) {
-        post.contentWarning = contentWarning;
-    }
-        
-    return post;
-}
-
 function identityForAccount(account) {
     const name = nameForAccount(account);
     if (name == null) {
