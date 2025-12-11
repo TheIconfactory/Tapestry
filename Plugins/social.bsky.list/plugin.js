@@ -78,7 +78,9 @@ function queryList(did, listId) {
 			let results = [];
 			for (const item of jsonObject.feed) { 
 				let post = postForItem(item, false);
-				results.push(post);
+				if (post != null) {
+					results.push(post);
+				}
 			}
 			resolve(results);
 		})

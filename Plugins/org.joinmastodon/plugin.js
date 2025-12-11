@@ -123,7 +123,9 @@ function queryHomeTimeline(endDate) {
 						endUpdate = true;
 					}
 					
-					results.push(post);
+					if (post != null) {
+						results.push(post);
+					}
 		
 					lastId = item["id"];
 					lastDate = date;
