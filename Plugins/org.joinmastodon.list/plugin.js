@@ -113,8 +113,10 @@ function queryStatusesForList(listId) {
 
 			for (const item of jsonObject) {
 				let post = postForItem(item);
-				post.annotations = [annotation];
-				results.push(post);
+				if (post != null) {
+					post.annotations = [annotation];
+					results.push(post);
+				}
 			}
 			resolve(results);
 		})

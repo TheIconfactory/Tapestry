@@ -29,7 +29,7 @@ function verify() {
 			icon = jsonObject?.data?.icon_img;
 		}
 		const verification = {
-			displayName: "/r/" + subreddit,
+			displayName: "r/" + subreddit,
 			icon: icon
 		};	
 		processVerification(verification);
@@ -71,7 +71,7 @@ function load() {
 
 function itemForData(item) {
 	const author = item["author"];
-	var identity = Identity.createWithName(author);
+	var identity = Identity.createWithName("u/" + author);
 	identity.url = "https://www.reddit.com/user/" + author;
 	identity.avatar = "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png";
 

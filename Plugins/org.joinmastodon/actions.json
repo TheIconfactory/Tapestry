@@ -1,6 +1,12 @@
 {
 	"items": [
 		{
+			"id": "reply",
+			"name": "Reply",
+			"icon": "arrow.turn.up.left",
+			"role": "compose"
+		},
+		{
 			"id": "boost",
 			"name": "Boost",
 			"icon": "tapestry.boost"

@@ -1,16 +1,14 @@
 {
 	"variables": [
 		{
-			"name": "tag",
-			"value": "TapestryApp",
 			"title": "#TapestryApp",
-			"site": "https://mastodon.social"
+			"names": ["tag", "site"],
+			"values": ["TapestryApp", "https://mastodon.social"]
 		},
 		{
-			"name": "tag",
-			"value": "Apple",
 			"title": "#Apple",
-			"site": "https://mastodon.social"
+			"names": ["tag", "site"],
+			"values": ["Apple", "https://mastodon.social"]
 		}
 	]
 }

@@ -89,9 +89,11 @@ function queryFeedForGenerator(did, feedId, feedName, feedAvatar) {
 			let results = [];
 			for (const item of jsonObject.feed) { 
 				let post = postForItem(item, false, new Date(lastTimestamp));
-				post.annotations = [annotation];
-				results.push(post);
-				lastTimestamp -= 1000;
+				if (post != null) {
+					post.annotations = [annotation];
+					results.push(post);
+					lastTimestamp -= 1000;
+				}
 			}
 			resolve(results);
 		})
