@@ -5,6 +5,5 @@
   "site": "https://kickstarter.com",
   "needs_verification": true,
   "verify_variables": true,
-  "check_interval": 86400,
   "version": 1
 }

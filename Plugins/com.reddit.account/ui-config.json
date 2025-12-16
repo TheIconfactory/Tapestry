@@ -7,10 +7,16 @@
 			"placeholder": "ReallyRickAstley"
 		},
 		{
+			"name": "includeSubreddit",
+			"type": "switch",
+			"prompt": "Include Subreddit Annotation",
+			"value": "on"
+		},
+		{
 			"name": "includeFlair",
 			"type": "switch",
-			"prompt": "Include Annotation for Flair",
-			"value": "on"
+			"prompt": "Include Flair Annotation",
+			"value": "off"
 		}
 	]
 }

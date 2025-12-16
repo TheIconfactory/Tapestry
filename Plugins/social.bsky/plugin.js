@@ -33,9 +33,6 @@ function verify() {
 	});
 }
 
-// NOTE: This reference counter tracks loading so we can let the app know when all async loading work is complete.
-var loadCounter = 0;
-
 async function load() {
 	// NOTE: The timeline will be filled up to the endDate, if possible.
 	let endDate = null;
@@ -50,50 +47,21 @@ async function load() {
 		setItem("didSelf", didSelf);
 	}
 
-	loadCounter = 0;
 	if (includeHome == "on") {
-		loadCounter += 1;
-	}
-	if (includeMentions == "on") {
-		loadCounter += 1;
-	}
-	if (loadCounter == 0) {
-		processResults([]);
-		return;
+		const parameters = await queryTimeline(endDate);
+		const results = parameters[0];
+		const newestItemDate = parameters[1];
+		processResults(results, false);
+		setItem("endDateTimestamp", String(newestItemDate.getTime()));
 	}
 	
-	if (includeHome == "on") {
-		let startTimestamp = (new Date()).getTime();
-	
-		queryTimeline(endDate)
-		.then((parameters) =>  {
-			results = parameters[0];
-			newestItemDate = parameters[1];
-  			loadCounter -= 1;
-			processResults(results, loadCounter == 0);
-			setItem("endDateTimestamp", String(newestItemDate.getTime()));
-			let endTimestamp = (new Date()).getTime();
-			console.log(`finished timeline: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
-		})
-		.catch((requestError) => {
-			console.log(`error timeline`);
-			processError(requestError);
-		});
+	if (includeMentions == "on" || includeReplies == "on") {
+		const results = await queryMentions();
+		processResults(results, false);
 	}
-	
-	if (includeMentions == "on") {
-		queryMentions()
-		.then((results) =>  {
-			loadCounter -= 1;
-			console.log(`finished mentions, loadCounter = ${loadCounter}`);
-			processResults(results, loadCounter == 0);
-		})
-		.catch((requestError) => {
-			loadCounter -= 1;
-			console.log(`error mentions, loadCounter = ${loadCounter}`);
-			processError(requestError);
-		});	
-	}
+
+	// All done.
+	processResults([], true);
 }
 
 function queryTimeline(endDate) {
@@ -205,30 +173,63 @@ function queryTimeline(endDate) {
 	
 }
 
-function queryMentions() {
+async function queryMentions() {
+	const url = `${site}/xrpc/app.bsky.notification.listNotifications?limit=100`;
+	const text = await sendRequest(url);
+	const jsonObject = JSON.parse(text);
 
-	return new Promise((resolve, reject) => {
-		const url = `${site}/xrpc/app.bsky.notification.listNotifications?limit=100`;
-		sendRequest(url)
-		.then((text) => {
-			const jsonObject = JSON.parse(text);
-
-			let results = [];
-			
-			if (jsonObject.notifications != null) {
-				for (const notification of jsonObject.notifications) {
-					if (notification.reason != null && notification.reason == "mention") {
-						const post = postForNotification(notification);
-						results.push(post);
-					}
+	let results = [];
+	
+	if (jsonObject.notifications != null) {
+		for (const notification of jsonObject.notifications) {
+			if (notification.reason != null) {
+				if (includeMentions == "on" && notification.reason == "mention") {
+					results.push(postForNotification(notification, "MENTION"));
+				}
+				if (includeReplies == "on" && notification.reason == "reply") {
+					results.push(postForNotification(notification, "REPLY"));
 				}
 			}
-			
-			resolve(results);
-		})
-		.catch((error) => {
-			reject(error);
-		});
-	});
-	
+		}
+	}
+
+	return results;
+}
+
+function postForNotification(notification, annotationLabel) {
+    let date = new Date(notification.indexedAt);
+
+    const author = notification.author;
+    
+    const identity = identityForAccount(author);
+    
+    let content = contentForRecord(notification.record);
+    
+    let contentWarning = null;
+    if (notification.labels != null && notification.labels.length > 0) {
+        const labels = notification.labels.map((label) => { return label?.val ?? "" }).join(", ");
+        contentWarning = labels; //`Labeled: ${ labels }`;
+    }
+    
+    let annotation = Annotation.createWithText(annotationLabel);
+        
+    let attachments = attachmentsForEmbed(notification.record.embed, encodeURIComponent(author.did));
+                
+    const itemIdentifier = notification.uri.split("/").pop();
+    const postUri = uriPrefix + "/profile/" + author.handle + "/post/" + itemIdentifier;
+        
+    const post = Item.createWithUriDate(postUri, date);
+    post.body = content;
+    post.author = identity;
+    if (attachments != null) {
+        post.attachments = attachments
+    }
+    if (annotation != null) {
+        post.annotations = [annotation];
+    }
+    if (contentWarning != null) {
+        post.contentWarning = contentWarning;
+    }
+        
+    return post;
 }

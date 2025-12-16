@@ -8,7 +8,7 @@ function verify() {
 		
 		if (jsonObject.status == 200) {
 			const verification = {
-				displayName: "/u/" + account,
+				displayName: "u/" + account,
 				icon: "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png"
 			};	
 			processVerification(verification);
@@ -53,7 +53,7 @@ function load() {
 
 function itemForData(item) {
 	const author = item["author"];
-	var identity = Identity.createWithName(author);
+	var identity = Identity.createWithName("u/" + author);
 	identity.url = "https://www.reddit.com/user/" + author;
 	identity.avatar = "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png";
 
@@ -252,24 +252,30 @@ function itemForData(item) {
 		}
 	}
 	
-	let annotation = null;
-	let shortcodes = null;
+	let annotations = [];
+	let shortcodes = {};
+
+	if (includeSubreddit == "on") {
+		if (item["subreddit_name_prefixed"] != null) {
+			annotations.push(Annotation.createWithText(item["subreddit_name_prefixed"]));
+		}
+	}
+
 	if (includeFlair == "on") {
 		if (item["link_flair_type"] != null) {
 			if (item["link_flair_type"] == "text") {
 				if (item["link_flair_text"]?.length > 0) {
 					const linkFlairText = item["link_flair_text"];
-					annotation = Annotation.createWithText(linkFlairText);
+					annotations.push(Annotation.createWithText(linkFlairText));
 				}
 			}
 			else if (item["link_flair_type"] == "richtext") {
 				if (item["link_flair_text"]?.length > 0) {
 					const linkFlairText = item["link_flair_text"];
-					annotation = Annotation.createWithText(linkFlairText);
+					annotations.push(Annotation.createWithText(linkFlairText));
 					
 					const itemLinkFlairRichText = item["link_flair_richtext"];
 					if (itemLinkFlairRichText instanceof Array) {
-						shortcodes = {};
 						for (const linkFlairRichText of itemLinkFlairRichText) {
 							if (linkFlairRichText?.e == "emoji") {
 								let name = linkFlairRichText?.a.slice(1, -1);
@@ -290,15 +296,14 @@ function itemForData(item) {
 	const resultItem = Item.createWithUriDate(uri, date);
 	resultItem.title = title;
 	resultItem.body = content;
-	resultItem.author = identity;
+	resultItem.annotations = annotations;
+	resultItem.shortcodes = shortcodes;
+
+	// Commenting out the author - It's redundant on the single-account connector IMO and clutters the timeline.
+	// resultItem.author = identity;
+
 	if (attachments != null) {
 		resultItem.attachments = attachments;
-	}
-	if (annotation != null) {
-		resultItem.annotations = [annotation];
-	}
-	if (shortcodes != null) {
-		resultItem.shortcodes = shortcodes;
 	}
 	
 	return resultItem;
