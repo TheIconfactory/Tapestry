@@ -1,12 +1,6 @@
 {
 	"apps": [
 		{
-			"id": "cx.c3.toot",
-			"name": "Toot!",
-			"template": "cx-c3-toot://__HOST_PATH__",
-			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
-		},
-		{
 			"id": "com.github.feditext",
 			"name": "Feditext",
 			"template": "feditext://__HOST_PATH__",
@@ -40,6 +34,12 @@
 			"id": "org.joinmastodon",
 			"name": "Mastodon",
 			"template": "mastodon://__HOST_PATH__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
+		},
+		{
+			"id": "cx.c3.toot",
+			"name": "Toot!",
+			"template": "cx-c3-toot://__HOST_PATH__",
 			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
 		}
 	]
