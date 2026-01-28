@@ -17,6 +17,12 @@
 			"name": "Skeets",
 			"template": "skeets://bskylink?link=__URL__",
 			"pattern": "https://bsky.app"
+		},
+		{
+			"id": "com.getskyscraper",
+			"name": "Skyscraper",
+			"template": "skyscraper://open?url=__URL_ENCODED__",
+			"pattern": "https://bsky.app"
 		}
 	]
 }
