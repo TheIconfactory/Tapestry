@@ -10,5 +10,5 @@
 	"verify_variables": true,
 	"provides_attachments": true,
     "minimum_app_version": "1.4",
-    "version": 9
+    "version": 10
 }

@@ -324,7 +324,7 @@ function attachmentsForEmbed(embed, did = null) {
                     if (isBlob) {
                         if (did != null && image.image?.ref?.$link != null) {
                             const ref = image.image.ref.$link;
-                            const suffix = image.image.mimeType.split("/")[1] ?? "";
+                            const suffix = image.image.mimeType?.split("/")[1] ?? "";
                             media = `${uriPrefixContent}/img/feed_fullsize/plain/${did}/${ref}@${suffix}`;
                         }
                     }
@@ -342,7 +342,7 @@ function attachmentsForEmbed(embed, did = null) {
                         if (isBlob) {
                             if (did != null && image.image?.ref?.$link != null) {
                                 const ref = image.image.ref.$link;
-                                const suffix = image.image.mimeType.split("/")[1] ?? "";
+                                const suffix = image.image.mimeType?.split("/")[1] ?? "";
                                 attachment.thumbnail = `${uriPrefixContent}/img/feed_thumbnail/plain/${did}/${ref}@${suffix}`;
                             }
                         }

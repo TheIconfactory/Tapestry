@@ -265,7 +265,7 @@ function itemForData(item) {
 				attachments.push(attachment);
 			}
 		}
-		else if (item["secure_media_embed"].content != null) {
+		else if (item["secure_media_embed"]?.content != null) {
 			content = content + `<p>${item["secure_media_embed"].content}</p>`;
 		}
 	}

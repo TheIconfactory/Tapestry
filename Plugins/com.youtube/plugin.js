@@ -3,6 +3,7 @@
 
 const avatarRegex = /<link rel="image_src" href="([^"]*)">/;
 const urlRegex = /(https?:[^\s]*)/g;
+const defaultIcon = "https://www.youtube.com/s/desktop/905763c7/img/favicon_144x144.png";
 
 async function verify() {
 	let xml = await sendRequest(site);
@@ -31,7 +32,7 @@ async function verify() {
         sendRequest(baseUrl, "GET", null, extraHeaders)
         .then((html) => {
             const match = html.match(avatarRegex);
-            const icon = match[1];
+            const icon = match ? match[1] : defaultIcon;
 
             const verification = {
                 displayName: feedName,
@@ -43,7 +44,7 @@ async function verify() {
         .catch((requestError) => {
             const verification = {
                 displayName: feedName,
-                icon: "https://www.youtube.com/s/desktop/905763c7/img/favicon_144x144.png",
+                icon: defaultIcon,
                 baseUrl: baseUrl
             };
             processVerification(verification);

@@ -25,8 +25,8 @@ async function verify() {
                 icon = jsonObject.rss.channel.image.url;
             }
             if (icon === null) {
-                let baseUrl = baseUrl.split("/").splice(0,3).join("/");
-                icon = lookupUrl(baseUrl);
+                let siteUrl = baseUrl.split("/").splice(0,3).join("/");
+                icon = lookupUrl(siteUrl);
             }
         }
         

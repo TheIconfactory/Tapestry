@@ -52,7 +52,9 @@ async function load() {
 		const results = parameters[0];
 		const newestItemDate = parameters[1];
 		processResults(results, false);
-		setItem("endDateTimestamp", String(newestItemDate.getTime()));
+		if (newestItemDate != null) {
+			setItem("endDateTimestamp", String(newestItemDate.getTime()));
+		}
 	}
 	
 	if (includeMentions == "on" || includeReplies == "on") {
