@@ -310,7 +310,6 @@ async function load() {
                 .map(link => {
                     const attachment = MediaAttachment.createWithUrl(link.href);
                     attachment.text = link.title || link.text;
-                    attachment.mimeType = "image";
                     return attachment;
                 })
                 if (attachments.length > 0) {
@@ -560,7 +559,6 @@ function attachmentForAttributes(mediaAttributes) {
 			let height = mediaAttributes.height;
 			attachment.aspectSize = { width: width, height: height };
 		}
-		attachment.mimeType = "image";
 	}
 	return attachment;
 }
