@@ -1305,9 +1305,12 @@ This example extracts two capture groups from `https://mastodon.social/tags/Tape
 
 #### html
 
-The content at the URL provided by the user can also be checked. The strategy is to collect all elements of a specific type, check an attribute of those elements, see if it matches, and then optionally save all or part of a match in a variable.
+The content at the URL provided by the user can also be checked. HTML rules operate in one of two modes:
 
-This approach allows your connector to check things like `<link>` or `<meta>` tags for things that it needs. For example, a page that has the following HTML markup can be used with a connector that handles RSS feeds:
+  * **Attribute mode** (when `check` is provided): Collects all elements of a specific type, checks an attribute of those elements against `match`, and optionally extracts a value from another attribute.
+  * **Content mode** (when `check` is omitted): Collects all elements of a specific type and applies `match` against the element's text content. This is useful for matching data embedded inside `<script>` tags or other elements where the relevant data is in the body text rather than an attribute.
+
+This approach allows your connector to check things like `<link>` or `<meta>` tags as well as `<script>` tag contents. For example, a page that has the following HTML markup can be used with a connector that handles RSS feeds:
 
 ```html
 <link rel="alternate" type="application/atom+xml" href="/feeds/main" />
@@ -1315,29 +1318,37 @@ This approach allows your connector to check things like `<link>` or `<meta>` ta
 
 The `html` rules use the following properties:
 
-  * element (required): the elements in the HTML to check: "link", "meta", or any other tag.
-  * check (required): the attribute in the element to check
-  * match (required): a string _or_ regex pattern that will be used to find matching attribute values
-  * use (optional): the attribute in the element that contains a value to use with the connector
-  * extract (optional): a string _or_ regex pattern that will be used on the value specified by `use` and passed to the `variable`.
-  * variable (optional): `site` or any variable defined in `ui-config.json` that will be set using `extract`.
+  * `element` (required): the elements in the HTML to check: "link", "meta", "script", or any other tag.
+  * `check` (optional): the attribute in the element to check. If omitted, the rule operates in content mode and `match` is applied to the element's text content instead.
+  * `match` (required): a string _or_ regex pattern that will be used to find matching values.
+  * `use` (optional, attribute mode only): the attribute in the element that contains a value to use with the connector.
+  * `extract` (optional, attribute mode only): a string _or_ regex pattern that will be used on the value specified by `use` and passed to the `variable`.
+  * `transform` (optional): a template string applied as the final step before assigning to `variable`. Uses `$0` for the full match and `$1`, `$2`, etc. for capture groups from the `match` regex.
+  * `variable` (optional): `site` or any variable defined in `ui-config.json` that will be set.
 
 Both `match` and `extract` can be:
 
   * a string to match (e.g. "Mastodon" or "application/rss+xml")
   * a regex pattern that begins and ends with a single slash ("/") (e.g. "/example.com/([^/]+)/"
 
-The HTML rule will fail if any of the following are true:
+An HTML rule will fail if any of the following are true:
 
   * The HTML contains no `element` tags.
-  * If no `check` attribute exists, or if the `match` is not satisfied.
+  * In attribute mode: the `check` attribute doesn't exist on any element, or `match` is not satisfied.
+  * In content mode: no element's text content satisfies `match`.
   * If `use` is specified and no `extract` match is found.
 
-Finally, the "href" attribute value in a `use` property will always return an absolute URL, even if there is a relative URL in the document. Variables, specifically `site`, will need a fully qualified domain name to access data since the connector has no notion of a base URL.
+The "href" attribute value in a `use` property will always return an absolute URL, even if there is a relative URL in the document. Variables, specifically `site`, will need a fully qualified domain name to access data since the connector has no notion of a base URL.
 
-A picture is worth a thousand words, so the remainder of this section are examples.
+##### Rule evaluation
 
-The first example shows how to get the URL for an RSS feed. Note the use of a `match` pattern with a non-capturing group that allows both the RSS and Atom formats:
+When multiple rules target **different** variables (or have no variable), they must **all** pass — this is AND logic.
+
+When multiple rules target the **same** variable, they are treated as **alternatives** — the first rule that succeeds wins. If none succeed, the check fails. This allows a connector to define multiple strategies for discovering the same value.
+
+##### Attribute mode examples
+
+Get the URL for an RSS feed. Note the use of a `match` pattern with a non-capturing group that allows both the RSS and Atom formats:
 
 ```json
 	"html": [
@@ -1351,7 +1362,7 @@ The first example shows how to get the URL for an RSS feed. Note the use of a `m
 	]
 ```
 
-Also note that the example above shows that backslashes need to be escaped because they are passed as strings to Swift's Regex framework. Forward slashes do not need to be escaped.
+Also note that backslashes need to be escaped because they are passed as strings to Swift's Regex framework. Forward slashes do not need to be escaped.
 
 A simpler example just checks if there is a subscribe URL for Micro.blog without setting a variable:
 
@@ -1367,7 +1378,7 @@ A simpler example just checks if there is a subscribe URL for Micro.blog without
 	]
 ```
 
-If there are multiple rules, they must all pass. For example, the first rule below checks if there is an Open Graph `og:site_name` meta property that contains the word "Mastodon". If it does, there is another check for the `og:url` property where the `site` variable can be extracted:
+Multiple rules that must all pass. The first rule below checks if there is an Open Graph `og:site_name` meta property that contains the word "Mastodon". If it does, there is another check for the `og:url` property where the `site` variable can be extracted:
 
 ```json
 	"html": [
@@ -1376,7 +1387,7 @@ If there are multiple rules, they must all pass. For example, the first rule bel
 			"check": "property",
 			"match": "og:site_name",
 			"use": "content",
-			"extract": "/.*Mastodon.*/" 
+			"extract": "/.*Mastodon.*/"
 		},
 		{
 			"element": "meta",
@@ -1389,7 +1400,7 @@ If there are multiple rules, they must all pass. For example, the first rule bel
 	]
 ```
 
-Any HTML element can be used. For example the connector for podcasts uses these two rules:
+The connector for podcasts uses two rules that must both pass — the second rule has no `variable`, making it a filter that narrows the match to podcast sites specifically:
 
 ```json
 		{
@@ -1406,7 +1417,31 @@ Any HTML element can be used. For example the connector for podcasts uses these 
 		}
 ```
 
-The first rule checks that there is an RSS feed while the second rule checks if there is a link on the page to Apple's podcast directory. 
+The first rule checks that there is an RSS feed while the second rule checks if there is a link on the page to Apple's podcast directory.
+
+##### Content mode example
+
+YouTube channel pages have an RSS `<link>` tag, but watch pages do not. Instead the channel ID is embedded in a `<script>` tag's JSON. Using content mode and same-variable alternatives, both cases can be handled:
+
+```json
+	"html": [
+		{
+			"element": "link",
+			"check": "type",
+			"match": "application/rss+xml",
+			"use": "href",
+			"variable": "site"
+		},
+		{
+			"element": "script",
+			"match": "/\"channelId\"\\s*:\\s*\"(UC[A-Za-z0-9_-]+)\"/",
+			"transform": "https://www.youtube.com/channel/$1",
+			"variable": "site"
+		}
+	]
+```
+
+Both rules target `site`, so they are alternatives. On a channel page, the first rule matches the RSS link and the second rule is skipped. On a watch page, the first rule fails (no RSS link), so the second rule matches `"channelId"` in a script's text content and uses `transform` to build a channel URL from the captured group.
 
 #### xml
 

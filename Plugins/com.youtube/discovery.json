@@ -11,6 +11,12 @@
 			"match": "application/rss+xml",
 			"use": "href",
 			"variable": "site"
+		},
+		{
+			"element": "script",
+			"match": "/\"channelId\"\\s*:\\s*\"(UC[A-Za-z0-9_-]+)\"/",
+			"transform": "https://www.youtube.com/channel/$1",
+			"variable": "site"
 		}
 	],
 	"xml": [
