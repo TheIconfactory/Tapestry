@@ -1,6 +1,24 @@
 {
 	"inputs": [
 		{
+			"name": "includeVideos",
+			"type": "switch",
+			"prompt": "Include Videos",
+			"value": "on"
+		},
+		{
+			"name": "includeShorts",
+			"type": "switch",
+			"prompt": "Include Shorts",
+			"value": "on"
+		},
+		{
+			"name": "includeLiveStreams",
+			"type": "switch",
+			"prompt": "Include Live Streams",
+			"value": "on"
+		},
+		{
 			"name": "includeDescription",
 			"type": "switch",
 			"prompt": "Include Video Description",

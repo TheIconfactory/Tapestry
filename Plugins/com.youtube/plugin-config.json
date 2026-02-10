@@ -4,11 +4,11 @@
 	"service_name": "YouTube",
 	"default_color": "orange",
 	"icon": "https://www.youtube.com/s/desktop/905763c7/img/favicon_144x144.png",
-	"site_prompt": "Feed URL",
-	"site_placeholder": "https://youtube.com/feeds/video.xml",
-	"site_help": "Enter the path for the channel’s XML file, not the page where you viewed the video.\n\nIf you don’t know this URL, use the [Feed Finder](tapestry://feedfinder) and enter a value like `youtube.com/@iJustine`",
+	"site_prompt": "YouTube URL",
+	"site_placeholder": "youtube.com/@TheIconfactory",
+	"site_help": "Enter any YouTube URL. Examples:\n\n`youtube.com/@TechnologyConnections`\n`youtube.com/channel/UCxxxxxx`\n\nA video URL also works — the channel will be detected automatically.",
 	"needs_verification": true,
 	"provides_attachments": true,
     "minimum_app_version": "1.3",
-	"version": 6
+	"version": 8
 }
