@@ -1,10 +1,1 @@
-{
-	"apps": [
-		{
-			"id": "com.tumblr",
-			"name": "Tumblr",
-			"template": "__URL__",
-			"pattern": "https://[^/]+/post/[\\d]+"
-		}
-	]
-}
+../_shared/tumblr-apps.json

@@ -1,0 +1,46 @@
+{
+	"apps": [
+		{
+			"id": "com.github.feditext",
+			"name": "Feditext",
+			"template": "feditext://__HOST_PATH__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
+		},
+		{
+			"id": "com.github.Dimillian",
+			"name": "Ice Cubes",
+			"template": "icecubesapp://__HOST_PATH__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
+		},
+		{
+			"id": "com.tapbots",
+			"name": "Ivory",
+			"template": "ivory:///openURL?url=__URL_ENCODED__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
+		},
+		{
+			"id": "app.getmammoth",
+			"name": "Mammoth",
+			"template": "mammoth://__HOST_PATH__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
+		},
+		{
+			"id": "com.github.JunyuKuang",
+			"name": "Mona",
+			"template": "mona://__HOST_PATH__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
+		},
+		{
+			"id": "org.joinmastodon",
+			"name": "Mastodon",
+			"template": "mastodon://__HOST_PATH__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
+		},
+		{
+			"id": "cx.c3.toot",
+			"name": "Toot!",
+			"template": "cx-c3-toot://__HOST_PATH__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
+		}
+	]
+}
