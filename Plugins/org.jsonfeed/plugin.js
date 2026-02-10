@@ -102,7 +102,7 @@ async function load() {
         }
         
         const resultItem = Item.createWithUriDate(url, date);
-        if (title != null) {
+        if (title != null && includeTitles != "off") {
             resultItem.title = title;
         }
         resultItem.body = content;

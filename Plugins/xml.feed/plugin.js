@@ -288,7 +288,7 @@ async function load() {
             }
             
             const resultItem = Item.createWithUriDate(url, date);
-            if (title != null) {
+            if (title != null && includeTitles != "off") {
                 resultItem.title = title;
             }
             if (content != null) {
@@ -414,7 +414,7 @@ async function load() {
             }
             
             const resultItem = Item.createWithUriDate(url, date);
-            if (title != null) {
+            if (title != null && includeTitles != "off") {
                 resultItem.title = title;
             }
             if (content != null) {
@@ -423,7 +423,7 @@ async function load() {
             if (identity != null) {
                 resultItem.author = identity;
             }
-        
+
             let attachments = []
             
             // extract any media from RSS: https://www.rssboard.org/media-rss
@@ -525,7 +525,7 @@ async function load() {
             }
             
             const resultItem = Item.createWithUriDate(url, date);
-            if (title != null) {
+            if (title != null && includeTitles != "off") {
                 resultItem.title = title;
             }
             if (content != null) {
@@ -534,7 +534,7 @@ async function load() {
             if (identity != null) {
                 resultItem.author = identity;
             }
-                
+
             results.push(resultItem);
         }
 
