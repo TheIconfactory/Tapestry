@@ -1,6 +1,12 @@
 {
 	"apps": [
 		{
+			"id": "dev.nixzhu.crowfi",
+			"name": "Crowfi",
+			"template": "crowfi://show-post?url=__URL_ENCODED__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
+		},
+		{
 			"id": "com.github.feditext",
 			"name": "Feditext",
 			"template": "feditext://__HOST_PATH__",

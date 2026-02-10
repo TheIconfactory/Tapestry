@@ -13,5 +13,5 @@
 	"provides_attachments": true,
     "hidden_tag_classes": ["quote-inline"],
     "minimum_app_version": "1.6",
-	"version": 11
+	"version": 12
 }
