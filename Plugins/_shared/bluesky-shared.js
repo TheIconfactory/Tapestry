@@ -186,6 +186,33 @@ function postForItem(item, includeActions = false, dateOverride = null, allowRep
     return null;
 }
 
+function postForEmbeddedRecord(record) {
+    if (record == null || record.author?.handle == null) {
+        return null;
+    }
+
+    const date = new Date(record.indexedAt);
+    const identity = identityForAccount(record.author);
+    const content = contentForRecord(record.value);
+    const attachments = attachmentsForEmbed(record.embeds?.[0]);
+
+    const itemIdentifier = record.uri.split("/").pop();
+    const postUri = uriPrefix + "/profile/" + record.author.handle + "/post/" + itemIdentifier;
+
+    const post = Item.createWithUriDate(postUri, date);
+    post.body = content;
+    post.author = identity;
+    if (attachments != null) {
+        post.attachments = attachments;
+    }
+    if (record.labels != null && record.labels.length > 0) {
+        const labels = record.labels.map((label) => { return label?.val ?? "" }).join(", ");
+        post.contentWarning = `Labeled: ${labels}`;
+    }
+
+    return post;
+}
+
 function identityForAccount(account) {
     const name = nameForAccount(account);
     if (name == null) {
@@ -428,112 +455,23 @@ function attachmentsForEmbed(embed, did = null) {
         }
         else if (embed.$type.startsWith("app.bsky.embed.recordWithMedia")) {
             if (embed.record != null && embed.media != null) {
-                const media = embed.media;
-                
-                attachments = attachmentsForEmbed(media);
-                
-                const record = embed.record.record;
-                if (record != null) {
-                    const handle = record.author?.handle;
-                    const title = nameForAccount(record.author);
-                    const description = record.value?.text;
-                    
-                    const embedUrl = record.uri.split("/").pop();
-                    if (handle != null) {
-                        const postUri = uriPrefix + "/profile/" + handle + "/post/" + embedUrl;
-        
-                        let attachment = LinkAttachment.createWithUrl(postUri);
-                        if (title != null && title.length > 0) {
-                            attachment.title = title;
-                        }
-                        if (description != null && description.length > 0) {
-                            attachment.subtitle = description;
-                        }
-                        
-                        if (record.embeds != null && record.embeds.length > 0) {
-                            const firstRecordEmbed = record.embeds[0];
-                            if (firstRecordEmbed.$type.startsWith("app.bsky.embed.images")) {
-                                if (firstRecordEmbed.images != null && firstRecordEmbed.images.length > 0) {
-                                    const image = firstRecordEmbed.images[0];
-                                    attachment.image = image.thumb;
-                                    if (image.aspectRatio != null) {
-                                        attachment.aspectSize = image.aspectRatio;
-                                    }
-                                }
-                            }
-                            else if (firstRecordEmbed.$type.startsWith("app.bsky.embed.video")) {
-                                if (firstRecordEmbed.thumbnail != null) {
-                                    attachment.image = firstRecordEmbed.thumbnail;
-                                    if (firstRecordEmbed.aspectRatio != null) {
-                                        attachment.aspectSize = firstRecordEmbed.aspectRatio;
-                                    }
-                                }
-                            }
-                            else if (firstRecordEmbed.$type.startsWith("app.bsky.embed.recordWithMedia")) {
-                                if (firstRecordEmbed.media != null) {
-                                    const firsRecordEmbedMedia = firstRecordEmbed.media;
-                                    if (firsRecordEmbedMedia.$type.startsWith("app.bsky.embed.images")) {
-                                        if (firsRecordEmbedMedia.images != null && firsRecordEmbedMedia.images.length > 0) {
-                                            const image = firsRecordEmbedMedia.images[0];
-                                            attachment.image = image.thumb;
-                                            if (image.aspectRatio != null) {
-                                                attachment.aspectSize = image.aspectRatio;
-                                            }
-                                        }
-                                    }
-                                    else if (firsRecordEmbedMedia.$type.startsWith("app.bsky.embed.video")) {
-                                        if (firsRecordEmbedMedia.thumbnail != null) {
-                                            attachment.image = firsRecordEmbedMedia.thumbnail;
-                                            if (firsRecordEmbedMedia.aspectRatio != null) {
-                                                attachment.aspectSize = firsRecordEmbedMedia.aspectRatio;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        if (attachments == null) {
-                            attachments = [attachment];
-                        }
-                        else {
-                            attachments.push(attachment);
-                        }
+                attachments = attachmentsForEmbed(embed.media);
+
+                const attachment = postForEmbeddedRecord(embed.record.record);
+                if (attachment != null) {
+                    if (attachments == null) {
+                        attachments = [attachment];
+                    }
+                    else {
+                        attachments.push(attachment);
                     }
                 }
             }
         }
         else if (embed.$type.startsWith("app.bsky.embed.record")) { // NOTE: This one needs to be after app.bsky.embed.recordWithMedia because of the lazy match
-            if (embed.record != null) {
-                const record = embed.record;
-                
-                const authorHandle = record.author?.handle;
-                const authorName = nameForAccount(record.author);
-                const recordText = record.value?.text;
-                
-                const embedUrl = record.uri.split("/").pop();
-                if (authorHandle != null) {
-                    const postUri = uriPrefix + "/profile/" + authorHandle + "/post/" + embedUrl;
-    
-                    let attachment = LinkAttachment.createWithUrl(postUri);
-                    if (authorName != null && authorName.length > 0) {
-                        attachment.title = authorName;
-                    }
-                    if (recordText != null && recordText.length > 0) {
-                        attachment.subtitle = recordText;
-                    }
-                    
-                    if (record.embeds != null && record.embeds.length > 0) {
-                        if (record.embeds[0].images != null && record.embeds[0].images.length > 0) {
-                            const image = record.embeds[0].images[0];
-                            attachment.image = image.thumb;
-                            if (image.aspectRatio != null) {
-                                attachment.aspectSize = image.aspectRatio;
-                            }
-                        }
-                    }
-                    
-                    attachments = [attachment];
-                }
+            const attachment = postForEmbeddedRecord(embed.record);
+            if (attachment != null) {
+                attachments = [attachment];
             }
         }
 

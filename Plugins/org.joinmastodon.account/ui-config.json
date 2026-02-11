@@ -9,7 +9,8 @@
 		{
 			"name": "includeBoosts",
 			"type": "switch",
-			"prompt": "Include Boosts"
+			"prompt": "Include Boosts",
+			"value": "on"
 		},
 		{
 			"name": "includeReplies",

@@ -9,7 +9,8 @@
 		{
 			"name": "includeReposts",
 			"type": "switch",
-			"prompt": "Include Reposts"
+			"prompt": "Include Reposts",
+			"value": "on"
 		},
 		{
 			"name": "includeQuotes",
@@ -25,8 +26,7 @@
 		{
 			"name": "includeMentions",
 			"type": "switch",
-			"prompt": "Include Mentions From Others",
-			"value": "on"
+			"prompt": "Include Mentions From Others"
 		}
 	]
 }
