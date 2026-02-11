@@ -1,4 +1,10 @@
 {
+	"input": [
+		{
+			"match": "/^@([a-zA-Z0-9._-]+)$/",
+			"url": "https://www.youtube.com/@$1"
+		}
+	],
  	"sites": [
  		"youtube.",
  		"youtu.be",

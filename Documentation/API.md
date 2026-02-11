@@ -1216,10 +1216,11 @@ The `pattern` is a case-insensitive regular expression. When a link’s URL matc
 
 This file helps the user find your connector when they have a URL to a page of HTML. The rules in this file will be checked and if all constraints match, the connector will be suggested to the user in an interface that simplifies set up.
 
-The file consists of three categories: one specifies a list of sites where the connector can be used, the other two specify a list of rules for the URL and HTML.
+The file consists of several categories: one rewrites raw user input into URLs, one specifies a list of sites where the connector can be used, and the others specify rules for the URL and content.
 
 ```json
 {
+	"input": [],
 	"sites": [],
 	"url": [],
 	"html": [],
@@ -1227,9 +1228,46 @@ The file consists of three categories: one specifies a list of sites where the c
 }
 ```
 
-All three categories must match in order to be displayed. If one of these category is not supplied, it has no constraints, so it is considered a match.
+The `input` category is special — it runs before the main discovery flow and rewrites raw user input (like handles) into proper URLs. The rewritten URLs are then processed through the normal discovery pipeline.
+
+For the remaining categories (`sites`, `url`, `html`, `xml`, `json`), all must match in order for the connector to be suggested. If one of these categories is not supplied, it has no constraints, so it is considered a match.
 
 The following sections describe each category.
+
+#### input
+
+The `input` category lets a connector recognize patterns in raw user input (before it becomes a URL) and rewrite them into proper URLs for discovery. This is useful for handle-style inputs like `@user@mastodon.social` or `@user.bsky.social` that aren't valid URLs.
+
+Each rule has two properties:
+
+  * `match` (required): a regex pattern (in `/pattern/` syntax) that will be tested against the trimmed user input. The match is applied to the entire input string (i.e. it must match the whole input, not just a substring).
+  * `url` (required): a URL template with `$1`, `$2`, etc. for capture group substitution.
+
+If a rule matches, the rewritten URL is fed into the normal discovery pipeline (where `sites`, `url`, `html`, etc. rules take over).
+
+This example recognizes Mastodon-style handles like `@user@instance` or `user@instance` and rewrites them to the profile URL:
+
+```json
+	"input": [
+		{
+			"match": "/^@?([a-zA-Z0-9_]+)@([a-zA-Z0-9._-]+\\.[a-zA-Z]{2,})$/",
+			"url": "https://$2/@$1"
+		}
+	]
+```
+
+With this rule, entering `@bigzaphod@mastodon.social` in the Feed Finder rewrites it to `https://mastodon.social/@bigzaphod`, which is then processed normally by the `url` and `html` rules.
+
+This example recognizes Bluesky handles like `@user.bsky.social`:
+
+```json
+	"input": [
+		{
+			"match": "/^@([a-zA-Z0-9._-]+\\.[a-zA-Z]{2,})$/",
+			"url": "https://bsky.app/profile/$1"
+		}
+	]
+```
 
 #### sites
 

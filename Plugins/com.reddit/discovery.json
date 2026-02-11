@@ -1,4 +1,10 @@
 {
+	"input": [
+		{
+			"match": "/^\\/?r\\/([a-zA-Z0-9_]+)$/",
+			"url": "https://www.reddit.com/r/$1"
+		}
+	],
 	"sites": [
 		"reddit.com"
 	],

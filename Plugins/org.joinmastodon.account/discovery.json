@@ -1,8 +1,23 @@
 {
+	"input": [
+		{
+			"match": "/^@?([a-zA-Z0-9_]+)@([a-zA-Z0-9._-]+\\.[a-zA-Z]{2,})$/",
+			"url": "https://$2/@$1"
+		}
+	],
 	"url": [
 		{
 			"extract": "/(https://[^:/\\s]+)(?:/@|/users/)([a-zA-Z0-9_]+.*)/",
 			"variable": "site, account"
+		}
+	],
+	"html": [
+		{
+			"element": "meta",
+			"check": "property",
+			"match": "og:site_name",
+			"use": "content",
+			"extract": "/.*Mastodon.*/"
 		}
 	]
 }
