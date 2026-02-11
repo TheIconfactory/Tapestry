@@ -74,11 +74,12 @@ async function load() {
             content = item['content_text'].replaceAll("\n", "<br/>")
         }
         
+        var tagAnnotation = null;
         if (includeTags == "on") {
             if (item['tags'] != null) {
                 let tags = item['tags'];
-                const tagsContent = tags.map(t=>`Tag: "${t}"`).join(', ')
-                content = `${content}<p>${tagsContent}</p>`
+                const tagsText = tags.join(", ");
+                tagAnnotation = Annotation.createWithText(tagsText);
             }
         }
 
@@ -110,7 +111,10 @@ async function load() {
         if (linkAttachment != null) {
             resultItem.attachments = [linkAttachment];
         }
-        
+        if (tagAnnotation != null) {
+            resultItem.annotations = [tagAnnotation];
+        }
+
         results.push(resultItem);
     }
 

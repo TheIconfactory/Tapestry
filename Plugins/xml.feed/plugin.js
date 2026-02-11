@@ -256,6 +256,7 @@ async function load() {
                 content = extractString((entry.content ?? entry.summary), true);
             }
 
+            var categoryAnnotation = null;
             if (includeCategories == "on") {
                 if (entry.category$attrs != null) {
                     let categories = null;
@@ -265,11 +266,11 @@ async function load() {
                     else {
                         categories = [entry.category$attrs];
                     }
-                    const categoriesContent = categories.map(c=>`Category: "${c["term"]}"`).join(', ')
-                    content = `${content}<p>${categoriesContent}</p>`
+                    const categoriesText = categories.map(c => c["term"]).join(", ");
+                    categoryAnnotation = Annotation.createWithText(categoriesText);
                 }
             }
-            
+
             var identity = null;
             if (entry.author != null) {
                 let authorName = entry.author.name;
@@ -343,6 +344,10 @@ async function load() {
                 }
             }
 
+            if (categoryAnnotation != null) {
+                resultItem.annotations = [categoryAnnotation];
+            }
+
             results.push(resultItem);
         }
 
@@ -388,6 +393,7 @@ async function load() {
             let title = extractString(item.title);
             let content = extractString((item["content:encoded"] ?? item.description), true);
             
+            var categoryAnnotation = null;
             if (includeCategories == "on" && item.category != null) {
                 let categories = null;
                 if (Array.isArray(item.category)){
@@ -396,8 +402,8 @@ async function load() {
                 else {
                     categories = [item.category]
                 }
-                const categoriesContent = categories.map(c=>`Category: "${c}"`).join(', ')
-                content = `${content}<p>${categoriesContent}</p>`
+                const categoriesText = categories.join(", ");
+                categoryAnnotation = Annotation.createWithText(categoriesText);
             }
 
             let identity = null;
@@ -472,7 +478,11 @@ async function load() {
             if (attachments.length > 0) {
                 resultItem.attachments = attachments;
             }
-            
+
+            if (categoryAnnotation != null) {
+                resultItem.annotations = [categoryAnnotation];
+            }
+
             results.push(resultItem);
         }
 
@@ -533,6 +543,18 @@ async function load() {
             }
             if (identity != null) {
                 resultItem.author = identity;
+            }
+
+            if (includeCategories == "on" && item["dc:subject"] != null) {
+                let categories = null;
+                if (Array.isArray(item["dc:subject"])) {
+                    categories = item["dc:subject"];
+                }
+                else {
+                    categories = [item["dc:subject"]];
+                }
+                const categoriesText = categories.join(", ");
+                resultItem.annotations = [Annotation.createWithText(categoriesText)];
             }
 
             results.push(resultItem);
