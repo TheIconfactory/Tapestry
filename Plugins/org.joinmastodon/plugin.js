@@ -110,7 +110,16 @@ function queryHomeTimeline(endDate) {
 				for (const item of jsonObject) {
 					const date = new Date(item["created_at"]);
 
-					const post = postForItem(item);
+					let post = null;
+					if (item.reblog != null && includeBoosts != "on") {
+						// skip boosts
+					}
+					else if (item.quote != null && includeQuotes != "on") {
+						// skip quotes
+					}
+					else {
+						post = postForItem(item);
+					}
 
 					if (!endUpdate && date < endDate) {
 						console.log(`>>>> END date = ${date}`);
@@ -187,6 +196,12 @@ async function queryStatusesForUser(id) {
 	const jsonObject = JSON.parse(text);
 	let results = [];
 	for (const item of jsonObject) {
+		if (item.reblog != null && includeBoosts != "on") {
+			continue;
+		}
+		if (item.quote != null && includeQuotes != "on") {
+			continue;
+		}
 		results.push(postForItem(item));
 	}
 	return results;

@@ -5,6 +5,12 @@
 			"type": "text",
 			"prompt": "Tag",
 			"placeholder": "TapestryApp"
+		},
+		{
+			"name": "includeQuotes",
+			"type": "switch",
+			"prompt": "Include Quotes",
+			"value": "on"
 		}
 	]
 }

@@ -18,6 +18,12 @@
             "prompt": "Include Reposts"
         },
         {
+            "name": "includeQuotes",
+            "type": "switch",
+            "prompt": "Include Quotes",
+            "value": "on"
+        },
+        {
             "name": "includeReplies",
             "type": "switch",
             "prompt": "Include Replies"

@@ -154,7 +154,12 @@ function postForItem(item, includeActions = false, dateOverride = null, allowRep
             showItem = false;
         }
     }
-    
+    if (includeQuotes != "on") {
+        if (item.post.embed?.$type?.startsWith("app.bsky.embed.record")) {
+            showItem = false;
+        }
+    }
+
     if (showItem) {
         let attachments = attachmentsForEmbed(item.post.embed);
                 

@@ -47,11 +47,14 @@ function queryStatusesForTag(tag) {
 			const jsonObject = JSON.parse(text);
 			let results = [];
 			for (const item of jsonObject) {
+				if (item.quote != null && includeQuotes != "on") {
+					continue;
+				}
 				let post = postForItem(item);
 				if (post != null) {
 					let annotation = Annotation.createWithText(`#${tag.toUpperCase()}`);
 					annotation.uri = `${site}/tags/${tag}`;
-					post.annotations = [annotation];
+					post.annotations = [annotation].concat(post.annotations ?? []);
 
 					results.push(post);
 				}
