@@ -3,7 +3,7 @@
 		{
 			"id": "dev.nixzhu.crowfi",
 			"name": "Crowfi",
-			"template": "crowfi://show-post?url=__URL_ENCODED__",
+			"template": "crowfi://open-url?url=__URL_ENCODED__",
 			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
 		},
 		{
