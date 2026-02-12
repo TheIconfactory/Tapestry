@@ -25,6 +25,12 @@
 			"value": "on"
 		},
 		{
+			"name": "includeFollowedHashtags",
+			"type": "switch",
+			"prompt": "Include Followed Hashtags",
+			"value": "on"
+		},
+		{
 			"name": "includeMentions",
 			"type": "switch",
 			"prompt": "Include Mentions From Others"

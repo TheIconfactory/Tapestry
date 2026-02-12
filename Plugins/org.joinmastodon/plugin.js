@@ -31,6 +31,18 @@ function verify() {
 
 var userId = getItem("userId");
 
+async function fetchFollowedTags() {
+	try {
+		const text = await sendRequest(`${site}/api/v1/followed_tags?limit=200`, "GET");
+		const jsonArray = JSON.parse(text);
+		return jsonArray.map(tag => tag.name.toLowerCase());
+	}
+	catch (error) {
+		console.log(`fetchFollowedTags failed: ${error}`);
+		return [];
+	}
+}
+
 async function load() {
 	// NOTE: The home timeline will be filled up to the endDate, if possible.
 	let endDate = null;
@@ -40,7 +52,8 @@ async function load() {
 	}
 	
 	if (includeHome == "on") {
-		const parameters = await queryHomeTimeline(endDate);
+		const followedTagNames = await fetchFollowedTags();
+		const parameters = await queryHomeTimeline(endDate, followedTagNames);
   		const results = parameters[0];
   		const newestItemDate = parameters[1];
 		processResults(results, false);
@@ -75,7 +88,7 @@ async function load() {
 	processResults([], true);
 }
 
-function queryHomeTimeline(endDate) {
+function queryHomeTimeline(endDate, followedTagNames) {
 
 	// NOTE: These constants are related to the feed limits within Tapestry - it doesn't store more than
 	// 3,000 items or things older than 30 days.
@@ -119,6 +132,24 @@ function queryHomeTimeline(endDate) {
 					}
 					else {
 						post = postForItem(item);
+					}
+
+					// Annotate or filter posts from followed hashtags
+					if (post != null && item.reblog == null && followedTagNames.length > 0) {
+						const itemTags = item.tags;
+						if (itemTags != null && itemTags.length > 0) {
+							const matchedTag = itemTags.find(t => followedTagNames.includes(t.name.toLowerCase()));
+							if (matchedTag != null) {
+								if (includeFollowedHashtags != "on") {
+									post = null;
+								}
+								else {
+									let annotation = Annotation.createWithText(`#${matchedTag.name.toUpperCase()}`);
+									annotation.uri = `${site}/tags/${matchedTag.name.toLowerCase()}`;
+									post.annotations = [annotation].concat(post.annotations ?? []);
+								}
+							}
+						}
 					}
 
 					if (!endUpdate && date < endDate) {
