@@ -1243,7 +1243,7 @@ Each rule has two properties:
   * `match` (required): a regex pattern (in `/pattern/` syntax) that will be tested against the trimmed user input. The match is applied to the entire input string (i.e. it must match the whole input, not just a substring).
   * `url` (required): a URL template with `$1`, `$2`, etc. for capture group substitution.
 
-If a rule matches, the rewritten URL is fed into the normal discovery pipeline (where `sites`, `url`, `html`, etc. rules take over).
+If a rule matches, the rewritten URL is fed into the normal discovery pipeline (where `sites`, `url`, `html`, etc. rules take over). If there are multiple input rules, the first to match wins.
 
 This example recognizes Mastodon-style handles like `@user@instance` or `user@instance` and rewrites them to the profile URL:
 
