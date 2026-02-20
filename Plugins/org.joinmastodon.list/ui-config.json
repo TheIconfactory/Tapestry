@@ -5,6 +5,18 @@
 			"type": "text",
 			"prompt": "List Identifier",
 			"placeholder": "Friends"
+		},
+		{
+			"name": "includeBoosts",
+			"type": "switch",
+			"prompt": "Include Boosts",
+			"value": "on"
+		},
+		{
+			"name": "includeQuotes",
+			"type": "switch",
+			"prompt": "Include Quotes",
+			"value": "on"
 		}
 	]
 }

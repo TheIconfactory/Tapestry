@@ -15,7 +15,14 @@
         {
             "name": "includeReposts",
             "type": "switch",
-            "prompt": "Include Reposts"
+            "prompt": "Include Reposts",
+            "value": "on"
+        },
+        {
+            "name": "includeQuotes",
+            "type": "switch",
+            "prompt": "Include Quotes",
+            "value": "on"
         },
         {
             "name": "includeReplies",

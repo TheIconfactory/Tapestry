@@ -1,19 +1,23 @@
 {
 	"sites": [
 		{
-			"value": "https://www.youtube.com/feeds/videos.xml?channel_id=UC7zt-GmwdxyqgSwhKmhSniQ",
+			"value": "https://www.youtube.com/@theiconfactory",
 			"title": "Iconfactory"
 		},
 		{
-			"value": "https://www.youtube.com/feeds/videos.xml?channel_id=UCI208kAmpJNUrLrBz77ZTAA",
+			"value": "https://www.youtube.com/@AnthonyPiraino",
+			"title": "Anthony Piraino"
+		},
+		{
+			"value": "https://www.youtube.com/@bigzaphod",
 			"title": "BigZaphod"
 		},
 		{
-			"value": "https://www.youtube.com/feeds/videos.xml?channel_id=UCy0tKL1T7wFoYcxCe0xjN6Q",
+			"value": "https://www.youtube.com/@TechnologyConnections",
 			"title": "Technology Connections"
 		},
 		{
-			"value": "https://www.youtube.com/feeds/videos.xml?channel_id=UC6IxnFzHofFJ5X2PycSMsww",
+			"value": "https://www.youtube.com/@xkcd_whatif",
 			"title": "xkcd's What If?"
 		}
 	]

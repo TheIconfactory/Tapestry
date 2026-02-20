@@ -31,6 +31,18 @@ function verify() {
 
 var userId = getItem("userId");
 
+async function fetchFollowedTags() {
+	try {
+		const text = await sendRequest(`${site}/api/v1/followed_tags?limit=200`, "GET");
+		const jsonArray = JSON.parse(text);
+		return jsonArray.map(tag => tag.name.toLowerCase());
+	}
+	catch (error) {
+		console.log(`fetchFollowedTags failed: ${error}`);
+		return [];
+	}
+}
+
 async function load() {
 	// NOTE: The home timeline will be filled up to the endDate, if possible.
 	let endDate = null;
@@ -40,11 +52,14 @@ async function load() {
 	}
 	
 	if (includeHome == "on") {
-		const parameters = await queryHomeTimeline(endDate);
+		const followedTagNames = await fetchFollowedTags();
+		const parameters = await queryHomeTimeline(endDate, followedTagNames);
   		const results = parameters[0];
   		const newestItemDate = parameters[1];
 		processResults(results, false);
-		setItem("endDateTimestamp", String(newestItemDate.getTime()));
+		if (newestItemDate) {
+			setItem("endDateTimestamp", String(newestItemDate.getTime()));
+		}
 	}
 	
 	if (includeMentions == "on") {
@@ -73,7 +88,7 @@ async function load() {
 	processResults([], true);
 }
 
-function queryHomeTimeline(endDate) {
+function queryHomeTimeline(endDate, followedTagNames) {
 
 	// NOTE: These constants are related to the feed limits within Tapestry - it doesn't store more than
 	// 3,000 items or things older than 30 days.
@@ -108,7 +123,34 @@ function queryHomeTimeline(endDate) {
 				for (const item of jsonObject) {
 					const date = new Date(item["created_at"]);
 
-					const post = postForItem(item);
+					let post = null;
+					if (item.reblog != null && includeBoosts != "on") {
+						// skip boosts
+					}
+					else if (item.quote != null && includeQuotes != "on") {
+						// skip quotes
+					}
+					else {
+						post = postForItem(item);
+					}
+
+					// Annotate or filter posts from followed hashtags
+					if (post != null && item.reblog == null && followedTagNames.length > 0) {
+						const itemTags = item.tags;
+						if (itemTags != null && itemTags.length > 0) {
+							const matchedTag = itemTags.find(t => followedTagNames.includes(t.name.toLowerCase()));
+							if (matchedTag != null) {
+								if (includeFollowedHashtags != "on") {
+									post = null;
+								}
+								else {
+									let annotation = Annotation.createWithText(`#${matchedTag.name.toUpperCase()}`);
+									annotation.uri = `${site}/tags/${matchedTag.name.toLowerCase()}`;
+									post.annotations = [annotation].concat(post.annotations ?? []);
+								}
+							}
+						}
+					}
 
 					if (!endUpdate && date < endDate) {
 						console.log(`>>>> END date = ${date}`);
@@ -185,6 +227,12 @@ async function queryStatusesForUser(id) {
 	const jsonObject = JSON.parse(text);
 	let results = [];
 	for (const item of jsonObject) {
+		if (item.reblog != null && includeBoosts != "on") {
+			continue;
+		}
+		if (item.quote != null && includeQuotes != "on") {
+			continue;
+		}
 		results.push(postForItem(item));
 	}
 	return results;

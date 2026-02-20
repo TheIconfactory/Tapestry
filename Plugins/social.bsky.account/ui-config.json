@@ -9,12 +9,19 @@
 		{
 			"name": "includeReposts",
 			"type": "switch",
-			"prompt": "Include Their Reposts"
+			"prompt": "Include Reposts",
+			"value": "on"
+		},
+		{
+			"name": "includeQuotes",
+			"type": "switch",
+			"prompt": "Include Quotes",
+			"value": "on"
 		},
 		{
 			"name": "includeReplies",
 			"type": "switch",
-			"prompt": "Include Their Replies"
+			"prompt": "Include Replies"
 		}
 	]
 }

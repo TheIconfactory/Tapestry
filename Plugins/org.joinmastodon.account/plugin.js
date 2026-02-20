@@ -90,7 +90,10 @@ function queryStatusesForUser(id) {
 			for (const item of jsonObject) {
 				let post = null;
 
-				if (item.reblog != null) {
+				if (item.quote != null && includeQuotes != "on") {
+					// skip quotes
+				}
+				else if (item.reblog != null) {
 					if (includeBoosts == "on") {
 						post = postForItem(item);
 					}

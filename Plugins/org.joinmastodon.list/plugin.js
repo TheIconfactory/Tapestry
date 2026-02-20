@@ -112,9 +112,15 @@ function queryStatusesForList(listId) {
 			let annotation = Annotation.createWithText(`Posted in ${list}`);
 
 			for (const item of jsonObject) {
+				if (item.reblog != null && includeBoosts != "on") {
+					continue;
+				}
+				if (item.quote != null && includeQuotes != "on") {
+					continue;
+				}
 				let post = postForItem(item);
 				if (post != null) {
-					post.annotations = [annotation];
+					post.annotations = [annotation].concat(post.annotations ?? []);
 					results.push(post);
 				}
 			}

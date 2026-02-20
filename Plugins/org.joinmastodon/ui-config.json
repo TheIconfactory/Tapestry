@@ -13,6 +13,24 @@
 			"value": "on"
 		},
 		{
+			"name": "includeBoosts",
+			"type": "switch",
+			"prompt": "Include Boosts",
+			"value": "on"
+		},
+		{
+			"name": "includeQuotes",
+			"type": "switch",
+			"prompt": "Include Quotes",
+			"value": "on"
+		},
+		{
+			"name": "includeFollowedHashtags",
+			"type": "switch",
+			"prompt": "Include Followed Hashtags",
+			"value": "on"
+		},
+		{
 			"name": "includeMentions",
 			"type": "switch",
 			"prompt": "Include Mentions From Others"

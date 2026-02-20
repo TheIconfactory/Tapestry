@@ -90,7 +90,7 @@ function queryFeedForGenerator(did, feedId, feedName, feedAvatar) {
 			for (const item of jsonObject.feed) { 
 				let post = postForItem(item, false, new Date(lastTimestamp));
 				if (post != null) {
-					post.annotations = [annotation];
+					post.annotations = [annotation].concat(post.annotations ?? []);
 					results.push(post);
 					lastTimestamp -= 1000;
 				}

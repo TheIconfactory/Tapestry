@@ -52,7 +52,9 @@ async function load() {
 		const results = parameters[0];
 		const newestItemDate = parameters[1];
 		processResults(results, true);
-		setItem("endDateTimestamp", String(newestItemDate.getTime()));
+		if (newestItemDate) {
+			setItem("endDateTimestamp", String(newestItemDate.getTime()));
+		}
 		let endTimestamp = (new Date()).getTime();
 		console.log(`finished timeline: ${results.length} items in ${(endTimestamp - startTimestamp) / 1000} seconds`);
 	}

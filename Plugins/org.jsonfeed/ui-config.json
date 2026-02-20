@@ -1,6 +1,13 @@
 {
 	"inputs": [
 		{
+			"name": "includeTitles",
+			"type": "switch",
+			"prompt": "Include Titles",
+			"value": "on",
+			"placeholder": "Turn off for feeds that duplicate the body text in the title"
+		},
+		{
 			"name": "includeTags",
 			"type": "switch",
 			"prompt": "Include Tags",
