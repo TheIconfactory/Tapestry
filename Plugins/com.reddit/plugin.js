@@ -270,6 +270,17 @@ function itemForData(item) {
 		}
 	}
 	
+	if (item["post_hint"] == "link") {
+		const externalURL = stripQueryParameters(item["url_overridden_by_dest"]);
+		if (externalURL != null) {
+			if (attachments == null) {
+				attachments = [];
+			}
+			const attachment = LinkAttachment.createWithUrl(externalURL);
+			attachments.push(attachment);
+		}
+	}
+
 	let annotation = null;
 	let shortcodes = null;
 	if (includeFlair == "on") {
