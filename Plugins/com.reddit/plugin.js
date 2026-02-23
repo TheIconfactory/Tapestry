@@ -51,7 +51,7 @@ function load() {
 			let item = child.data;
 			let resultItem = null;
 			if (item["crosspost_parent_list"] != null && item["crosspost_parent_list"][0] != null) {
-				resultItem = itemForData(item, item["crosspost_parent_list"][0]["subreddit"]);
+				resultItem = itemForData(item["crosspost_parent_list"][0], item["crosspost_parent_list"][0]["subreddit"]);
 			}
 			else {
 				resultItem = itemForData(item, null);
