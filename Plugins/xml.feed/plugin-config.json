@@ -11,8 +11,10 @@
 	"needs_verification": true,
     "hidden_tag_classes": [
 		"x-netnewswire-hide",
-		"share_submission"
+		"share_submission",
+		"wp-smiley",
+		"emoji"
 	],
     "minimum_app_version": "1.3",
-	"version": 16
+	"version": 17
 }
