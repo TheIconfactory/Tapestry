@@ -835,8 +835,9 @@ Recommended properties:
   	- The configured value or a value provided by the user will be used to control when Tapestry sends an "Authorization" HTTP header. If the request's scheme is "https" on the default port (443) and the same domain or subdomain of `site`, the header will be included. 
 
   * site\_prompt: `String` with a prompt for user input.
-  * site\_placeholder: 'String' with a placeholder for user input.
+  * site\_placeholder: `String` with a placeholder for user input.
     - If no `site` is configured, these properties are required.
+  * site\_default: `String` with a default value for user input. Unlike `site`, this value is editable by the user. Use this when there’s a sensible default server but the user may need to change it (e.g. a self-hosted instance).
   * site\_help: `String` with a short description of what’s required for `site`.
  
   * icon: `String` with a URL to an image that will be used as a default for this connector.
