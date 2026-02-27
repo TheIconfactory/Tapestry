@@ -13,6 +13,12 @@
 			"value": "on"
 		},
 		{
+			"name": "includeCrosspost",
+			"type": "switch",
+			"prompt": "Include Cross Post Annotation",
+			"value": "on"
+		},
+		{
 			"name": "feedType",
 			"type": "choices",
 			"prompt": "Feed Type",
