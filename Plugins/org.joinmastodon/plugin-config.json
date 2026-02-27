@@ -15,6 +15,7 @@
 	"oauth_code_key": "code",
 	"oauth_scope": "read+write+push",
 	"oauth_grant_type": "authorization_code",
+	"needs_verification": true,
 	"provides_attachments": true,
     "hidden_tag_classes": ["quote-inline"],
 	"minimum_app_version": "1.6",
