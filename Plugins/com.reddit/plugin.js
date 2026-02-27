@@ -272,13 +272,13 @@ function itemForData(item, crosspostSubreddit) {
 	
 	let annotations = null;
 	
-	if (crosspostSubreddit != null) {
-		if (annotations == null) {
+	if (includeCrosspost == "on") {
+		if (crosspostSubreddit != null) {
 			annotations = [];
+			const subredditAnnotation = Annotation.createWithText("r/" + crosspostSubreddit);
+			subredditAnnotation.uri = `${site}/r/${crosspostSubreddit}`;
+			annotations.push(subredditAnnotation);
 		}
-		const subredditAnnotation = Annotation.createWithText("r/" + crosspostSubreddit);
-		subredditAnnotation.uri = `${site}/r/${crosspostSubreddit}`;
-		annotations.push(subredditAnnotation);
 	}
 	
 	let shortcodes = null;
