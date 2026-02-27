@@ -1224,6 +1224,7 @@ The file consists of several categories: one rewrites raw user input into URLs, 
 	"input": [],
 	"sites": [],
 	"url": [],
+	"nodeinfo": {},
 	"html": [],
 	"xml": []
 }
@@ -1231,7 +1232,7 @@ The file consists of several categories: one rewrites raw user input into URLs, 
 
 The `input` category is special — it runs before the main discovery flow and rewrites raw user input (like handles) into proper URLs. The rewritten URLs are then processed through the normal discovery pipeline.
 
-For the remaining categories (`sites`, `url`, `html`, `xml`, `json`), all must match in order for the connector to be suggested. If one of these categories is not supplied, it has no constraints, so it is considered a match.
+For the remaining categories, `sites` and `url` are required checks — all must match. The `nodeinfo`, `html`, `xml`, and `json` categories are fallback checks — if any are defined, at least one must pass. If none of these categories are supplied, they have no constraints, so they are considered a match.
 
 The following sections describe each category.
 
@@ -1336,10 +1337,39 @@ This example extracts two capture groups from `https://mastodon.social/tags/Tape
 ```json
 	"url": [
 		{
-			"extract": "/(https://[^:/\\s]+)/tags/([a-zA-Z0-9_]+.*)/",
+			"extract": "/(https://[^:/\\s]+)/tags/([a-zA-Z0-9_]+)/",
 			"variable": "site, tag"
 		}
 	]
+```
+
+#### nodeinfo
+
+The `nodeinfo` category identifies server software using the Fediverse-standard `/.well-known/nodeinfo` endpoint. This is the most reliable way to detect ActivityPub-compatible servers like Mastodon, Pixelfed, Lemmy, etc., since it doesn't depend on HTML content that varies between instances.
+
+Unlike the other rule categories, `nodeinfo` is a single object — not an array. It has two optional properties, both matched case-insensitively:
+
+  * `software` (optional): matches against the `software.name` field from the server's nodeinfo response. Examples: `"mastodon"`, `"pixelfed"`, `"lemmy"`.
+  * `protocol` (optional): checks if the `protocols` array in the nodeinfo response contains this value. Example: `"activitypub"`.
+
+If both properties are specified, both must match. If only one is specified, only that one is checked.
+
+The nodeinfo data is only fetched when at least one connector being tested has a `nodeinfo` rule. If the fetch fails (e.g. the server doesn't support nodeinfo), the check fails silently and other fallback rules (like `html`) can still match.
+
+This example identifies Mastodon instances regardless of their custom site name:
+
+```json
+	"nodeinfo": {
+		"software": "mastodon"
+	}
+```
+
+This example matches any server that supports ActivityPub:
+
+```json
+	"nodeinfo": {
+		"protocol": "activitypub"
+	}
 ```
 
 #### html
