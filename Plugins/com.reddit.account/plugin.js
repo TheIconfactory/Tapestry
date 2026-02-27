@@ -54,7 +54,7 @@ function load() {
 function itemForData(item) {
 	const author = item["author"];
 	var identity = Identity.createWithName("u/" + author);
-	identity.url = "https://www.reddit.com/user/" + author;
+	identity.uri = "https://www.reddit.com/user/" + author;
 	identity.avatar = "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png";
 
 	const date = new Date(item["created_utc"] * 1000);
