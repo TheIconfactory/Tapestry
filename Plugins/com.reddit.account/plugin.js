@@ -253,7 +253,7 @@ function itemForData(item) {
 	}
 	
 	if (item["post_hint"] == "link") {
-		const externalURL = stripQueryParameters(item["url_overridden_by_dest"]);
+		const externalURL = item["url_overridden_by_dest"];
 		if (externalURL != null) {
 			if (attachments == null) {
 				attachments = [];
@@ -262,7 +262,7 @@ function itemForData(item) {
 			attachments.push(attachment);
 		}
 	}
-
+	
 	let annotations = [];
 	let shortcodes = {};
 
