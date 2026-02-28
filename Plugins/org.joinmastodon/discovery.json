@@ -1,11 +1,14 @@
 {
+	"nodeinfo": {
+		"software": "mastodon"
+	},
 	"html": [
 		{
 			"element": "meta",
 			"check": "property",
 			"match": "og:site_name",
 			"use": "content",
-			"extract": "/.*Mastodon.*/" 
+			"extract": "/.*Mastodon.*/"
 		},
 		{
 			"element": "meta",

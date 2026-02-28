@@ -7,11 +7,12 @@
 	"item_style": "post",
 	"site_prompt": "Instance",
 	"site_placeholder": "https://mastodon.social",
+	"site_default": "https://mastodon.social",
 	"site_help": "Enter the Instance where the Mastodon tag is located, then the name of the Tag below.",
 	"needs_verification": true,
 	"verify_variables": true,
 	"provides_attachments": true,
     "hidden_tag_classes": ["quote-inline"],
     "minimum_app_version": "1.6",
-	"version": 14
+	"version": 16
 }
