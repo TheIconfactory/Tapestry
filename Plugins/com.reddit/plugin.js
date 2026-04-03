@@ -239,13 +239,17 @@ function itemForData(item) {
 				attachments = [];
 			}
 		
-			let videoUrl = item["secure_media"].reddit_video.hls_url;
-			let posterUrl = item.thumbnail;
+			let redditVideo = item["secure_media"].reddit_video;
+			let videoUrl = redditVideo.hls_url;
+			let posterUrl = item.thumbnail?.startsWith("http") ? item.thumbnail : null;
 			let aspectSize = null;
+			if (redditVideo.width != null && redditVideo.height != null) {
+				aspectSize = { width: redditVideo.width, height: redditVideo.height };
+			}
 			if (attachments.length > 0) {
 				posterUrl = attachments[0].url ?? attachments[0].media;
 
-				if (attachments[0].aspectSize != null) {
+				if (aspectSize == null && attachments[0].aspectSize != null) {
 					aspectSize = attachments[0].aspectSize;
 				}
 			}

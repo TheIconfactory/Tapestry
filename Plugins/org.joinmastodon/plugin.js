@@ -33,7 +33,7 @@ var userId = getItem("userId");
 
 async function fetchFollowedTags() {
 	try {
-		const text = await sendRequest(`${site}/api/v1/followed_tags?limit=200`, "GET");
+		const text = await sendRequest(`${site}/api/v1/followed_tags?limit=400`, "GET");
 		const jsonArray = JSON.parse(text);
 		return jsonArray.map(tag => tag.name.toLowerCase());
 	}
@@ -50,8 +50,9 @@ async function load() {
 	if (endDateTimestamp != null) {
 		endDate = new Date(parseInt(endDateTimestamp));
 	}
-	
+
 	if (includeHome == "on") {
+		console.log(`==== HOME START`);
 		const followedTagNames = await fetchFollowedTags();
 		const parameters = await queryHomeTimeline(endDate, followedTagNames);
   		const results = parameters[0];
@@ -60,31 +61,39 @@ async function load() {
 		if (newestItemDate) {
 			setItem("endDateTimestamp", String(newestItemDate.getTime()));
 		}
+		console.log(`==== HOME END`);
 	}
-	
+
 	if (includeMentions == "on") {
+		console.log(`==== MENTIONS START`);
 		const results = await queryMentions();
+		console.log(`==== MENTIONS END results = ${results.length}`);
 		processResults(results, false);
 	}
 
 	if (includeStatuses == "on") {
+		console.log(`==== STATUSES START`);
 		if (userId != null) {
 			const results = await queryStatusesForUser(userId);
+			console.log(`==== STATUSES END results = ${results.length}`);
 			processResults(results, false);
 		}
 		else {
 			const text = await sendRequest(site + "/api/v1/accounts/verify_credentials");
 			const jsonObject = JSON.parse(text);
-			
+
 			userId = jsonObject["id"];
 			setItem("userId", userId);
 
 			const results = await queryStatusesForUser(userId);
+			console.log(`==== STATUSES END results = ${results.length}`);
 			processResults(results, false);
 		}
+		console.log(`==== STATUSES DONE`);
 	}
 
 	// All done.
+	console.log(`==== LOAD COMPLETE`);
 	processResults([], true);
 }
 
@@ -192,7 +201,7 @@ function queryHomeTimeline(endDate, followedTagNames) {
 			})
 			.catch((error) => {
 				reject(error);
-			});	
+			});
 		}
 
 		console.log(`>>>> START endDate = ${endDate}`);
