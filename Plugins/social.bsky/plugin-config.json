@@ -5,8 +5,11 @@
 	"default_color": "blue",
 	"icon": "https://bsky.app/static/apple-touch-icon.png",
 	"item_style": "post",
-	"site": "https://bsky.social",
-	"jwt_prompt": "Email Address",
+	"site_prompt": "Server",
+	"site_placeholder": "https://bsky.social",
+	"site_default": "https://bsky.social",
+	"site_help": "Enter the URL for your Bluesky server. Most users should use https://bsky.social — only change this if your account is on a self-hosted PDS.",
+	"jwt_prompt": "Handle or Email",
 	"jwt_authorize": "/xrpc/com.atproto.server.createSession",
 	"jwt_refresh": "/xrpc/com.atproto.server.refreshSession",
     "synchronizable_credentials": false,
@@ -14,5 +17,5 @@
 	"fail_status_code": 400,
 	"provides_attachments": true,
 	"minimum_app_version": "1.5",
-	"version": 21
+	"version": 22
 }
