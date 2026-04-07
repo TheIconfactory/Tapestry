@@ -1,0 +1,26 @@
+{
+	"inputs": [
+		{
+			"name": "mediaType",
+			"type": "choices",
+			"prompt": "Media Type",
+			"value": "All",
+			"choices": "All, Images, Videos, Audio",
+			"placeholder": "Type of media to show"
+		},
+		{
+			"name": "includeDescription",
+			"type": "switch",
+			"prompt": "Include Description",
+			"value": "off",
+			"placeholder": "Show the image description as post text"
+		},
+		{
+			"name": "includeKeywords",
+			"type": "switch",
+			"prompt": "Include Keywords",
+			"value": "off",
+			"placeholder": "Show NASA keywords as annotations"
+		}
+	]
+}
