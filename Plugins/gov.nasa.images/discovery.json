@@ -1,0 +1,11 @@
+{
+	"input": [
+		{
+			"match": "/(?i)nasa/",
+			"url": "https://images.nasa.gov"
+		}
+	],
+	"sites": [
+		"nasa.gov"
+	]
+}

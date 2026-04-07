@@ -1,0 +1,10 @@
+{
+	"id": "gov.nasa.images",
+	"display_name": "NASA Images",
+	"default_color": "blue",
+	"icon": "https://usetapestry.com/icons/nasa.png",
+	"site": "https://images-api.nasa.gov",
+	"provides_attachments": true,
+	"minimum_app_version": "1.3",
+	"version": 1
+}
