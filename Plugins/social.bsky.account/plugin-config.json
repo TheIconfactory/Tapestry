@@ -9,6 +9,6 @@
 	"needs_verification": true,
 	"verify_variables": true,
 	"provides_attachments": true,
-    "minimum_app_version": "1.4",
-	"version": 15
+    "minimum_app_version": "1.9",
+	"version": 17
 }

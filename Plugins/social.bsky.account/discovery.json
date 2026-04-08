@@ -1,18 +1,17 @@
 {
-	"input": [
-		{
-			"match": "/^@([a-zA-Z0-9._-]+\\.[a-zA-Z]{2,})$/",
-			"url": "https://bsky.app/profile/$1"
-		}
+	"sites": [
+		"bsky.app",
+		"bsky.social"
 	],
- 	"sites": [
- 		"bsky.app",
- 		"bsky.social"
- 	],
- 	"url": [
+	"url": [
 		{
 			"extract": "/https://[^/]+/profile/([^/]+)/",
 			"variable": "account"
 		}
-	]
+	],
+	"dns": {
+		"name": "_atproto",
+		"match": "/^did=/",
+		"variable": "account"
+	}
 }
