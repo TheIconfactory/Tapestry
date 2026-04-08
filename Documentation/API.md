@@ -1226,11 +1226,13 @@ The file consists of several categories: one rewrites raw user input into URLs, 
 	"url": [],
 	"nodeinfo": {},
 	"html": [],
-	"xml": []
+	"xml": [],
+	"json": [],
+	"dns": {}
 }
 ```
 
-The `input` category is special — it runs before the main discovery flow and rewrites raw user input (like handles) into proper URLs. The rewritten URLs are then processed through the normal discovery pipeline.
+The `input` and `dns` categories are checked first. `input` rewrites raw user input (like handles) into proper URLs before the main discovery flow. `dns` checks DNS records on the input's host — if it matches, the connector matches immediately without further checks.
 
 For the remaining categories, `sites` and `url` are required checks — all must match. The `nodeinfo`, `html`, `xml`, and `json` categories are fallback checks — if any are defined, at least one must pass. If none of these categories are supplied, they have no constraints, so they are considered a match.
 
@@ -1543,6 +1545,43 @@ If none of the rules above apply, the content can be checked for JSON keys. Ther
 ```
 
 The `key` must be a top-level key in the JSON content. The example ensures that the JSON dictionary has a `version` key with the correct `value`.
+
+#### dns
+
+The `dns` category checks DNS records on the host of the user's input. This is useful for protocols that use DNS records for identity verification, such as the AT Protocol (Bluesky), where custom domain handles are verified via DNS TXT records. Like `input`, `dns` is checked early — if it matches, the connector matches immediately without going through `sites`, `url`, or fallback checks. If it doesn't match (or isn't defined), the normal pipeline continues.
+
+The `dns` rule is a single object (not an array) with the following properties:
+
+  * `name` (required): a prefix prepended to the host to form the DNS query name. For example, `"_atproto"` queries `_atproto.example.com` when the user enters `example.com`.
+  * `match` (optional): a regex pattern (in `/pattern/` syntax) tested against each TXT record value. If any record matches, the check passes. Used for boolean validation only — capture groups are ignored.
+  * `extract` (optional): a regex pattern (in `/pattern/` syntax) with capture groups applied to TXT record values. Capture groups populate comma-separated names in `variable`, just like `url` rules.
+  * `variable` (optional): when `extract` is present, a comma-separated list of variable names populated from capture groups. Otherwise, a single variable name set to the queried host.
+
+If neither `match` nor `extract` is specified, the rule passes if any TXT records exist for the queried name. If the query fails or times out, the check fails silently.
+
+If both `match` and `extract` are specified, both must pass.
+
+This example detects AT Protocol (Bluesky) custom domain handles by checking for a `_atproto` TXT record containing a DID, and sets the `account` variable to the queried host:
+
+```json
+	"dns": {
+		"name": "_atproto",
+		"match": "/^did=/",
+		"variable": "account"
+	}
+```
+
+When a user enters `nbcnews.com`, the system queries `_atproto.nbcnews.com` for TXT records. If a record starting with `did=` is found, the connector matches and the `account` variable is set to `nbcnews.com`.
+
+This example extracts a value from the TXT record content using a capture group:
+
+```json
+	"dns": {
+		"name": "_atproto",
+		"extract": "/^did=(.+)$/",
+		"variable": "did"
+	}
+```
 
 ---
 ### actions.json
