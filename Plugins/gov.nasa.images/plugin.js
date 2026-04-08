@@ -35,6 +35,10 @@ async function load() {
 		const date = hasImported ? new Date() : new Date(new Date(data.date_created).getTime() + (allItems.length - i) * 1000);
 		const title = data.title;
 		const description = data.description;
+		// description_508 is sometimes a raw camera filename (e.g. "017A7339.NEF"), so validate it
+		const desc508 = data.description_508;
+		const goodDesc508 = desc508 && desc508.length > 10 && !/^\S+\.\w{2,4}$/.test(desc508.trim());
+		const altText = (goodDesc508 ? desc508 : null) || (description && description !== title ? description : null);
 
 		const uri = `https://images.nasa.gov/details/${nasaId}`;
 
@@ -52,7 +56,7 @@ async function load() {
 
 			const attachment = MediaAttachment.createWithUrl(videoUrl);
 			attachment.mimeType = "video/mp4";
-			attachment.text = data.description_508 || description;
+			attachment.text = altText;
 
 			if (item.links && item.links.length > 0) {
 				const thumb = item.links.find(l => l.href && l.render === "image");
@@ -69,7 +73,7 @@ async function load() {
 
 			const attachment = MediaAttachment.createWithUrl(audioUrl);
 			attachment.mimeType = "audio/mpeg";
-			attachment.text = data.description_508 || description;
+			attachment.text = altText;
 			resultItem.attachments = [attachment];
 		}
 		else if (item.links && item.links.length > 0) {
@@ -88,7 +92,7 @@ async function load() {
 				if (thumbLink && thumbLink.href) {
 					attachment.thumbnail = thumbLink.href;
 				}
-				attachment.text = data.description_508 || description;
+				attachment.text = altText;
 				resultItem.attachments = [attachment];
 			}
 		}
