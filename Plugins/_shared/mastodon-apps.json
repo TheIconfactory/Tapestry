@@ -19,6 +19,12 @@
 			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
 		},
 		{
+			"id": "app.indigosocial",
+			"name": "Indigo",
+			"template": "indigoapp://open-url?url=__URL_ENCODED__",
+			"pattern": "https://([^:/\\s]+)(/(users/|@)[a-zA-Z0-9_]+.*)"
+		},
+		{
 			"id": "com.tapbots",
 			"name": "Ivory",
 			"template": "ivory:///openURL?url=__URL_ENCODED__",

@@ -1,9 +1,29 @@
 
 // com.reddit
 
+function normalizedSubreddit() {
+	// Accept a bare name ("apple"), a path-style entry ("/r/apple", "r/apple"),
+	// or even a full URL pasted from the address bar. Trim whitespace, strip a
+	// leading "/", then drop any leading "r/" segments, and finally take the
+	// first path component so something like "apple/new" becomes "apple".
+	let value = (subreddit ?? "").trim();
+	while (value.startsWith("/")) {
+		value = value.slice(1);
+	}
+	while (value.toLowerCase().startsWith("r/")) {
+		value = value.slice(2);
+	}
+	const slash = value.indexOf("/");
+	if (slash >= 0) {
+		value = value.slice(0, slash);
+	}
+	return value;
+}
+
 function verify() {
 	const type = feedType.toLowerCase();
-	const url = `${site}/r/${subreddit}/about.json?raw_json=1`;
+	const name = normalizedSubreddit();
+	const url = `${site}/r/${name}/about.json?raw_json=1`;
 	sendRequest(url, "GET", null, null, true)
 	.then((text) => {
 		const response = JSON.parse(text);
@@ -29,9 +49,9 @@ function verify() {
 			icon = jsonObject?.data?.icon_img;
 		}
 		const verification = {
-			displayName: "r/" + subreddit,
+			displayName: "r/" + name,
 			icon: icon
-		};	
+		};
 		processVerification(verification);
 	})
 	.catch((requestError) => {
@@ -41,7 +61,8 @@ function verify() {
 
 function load() {
 	const type = feedType.toLowerCase();
-	sendRequest(`${site}/r/${subreddit}/${type}.json?raw_json=1`, "GET")
+	const name = normalizedSubreddit();
+	sendRequest(`${site}/r/${name}/${type}.json?raw_json=1`, "GET")
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		
@@ -283,7 +304,7 @@ function itemForData(item) {
 					const linkFlairText = item["link_flair_text"];
 					const linkFlairParameter = encodeURIComponent(`flair_name:"${linkFlairText}"`);
 					annotation = Annotation.createWithText(linkFlairText);
-					annotation.uri = `${site}/r/${subreddit}/?f=${linkFlairParameter}`;
+					annotation.uri = `${site}/r/${normalizedSubreddit()}/?f=${linkFlairParameter}`;
 				}
 			}
 			else if (item["link_flair_type"] == "richtext") {
@@ -291,7 +312,7 @@ function itemForData(item) {
 					const linkFlairText = item["link_flair_text"];
 					const linkFlairParameter = encodeURIComponent(`flair_name:"${linkFlairText}"`);
 					annotation = Annotation.createWithText(linkFlairText);
-					annotation.uri = `${site}/r/${subreddit}/?f=${linkFlairParameter}`;
+					annotation.uri = `${site}/r/${normalizedSubreddit()}/?f=${linkFlairParameter}`;
 					
 					const itemLinkFlairRichText = item["link_flair_richtext"];
 					if (itemLinkFlairRichText instanceof Array) {

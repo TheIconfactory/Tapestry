@@ -1,16 +1,40 @@
 
 // com.reddit.account
 
+function normalizedAccount() {
+	// Accept a bare username ("ReallyRickAstley"), a path-style entry
+	// ("/u/ReallyRickAstley", "u/ReallyRickAstley"), or a full URL pasted from
+	// the address bar. Trim, strip a leading "/", drop any "u/" or "user/"
+	// prefixes, then take the first path component.
+	let value = (account ?? "").trim();
+	while (value.startsWith("/")) {
+		value = value.slice(1);
+	}
+	const lower = value.toLowerCase();
+	if (lower.startsWith("user/")) {
+		value = value.slice(5);
+	}
+	else if (lower.startsWith("u/")) {
+		value = value.slice(2);
+	}
+	const slash = value.indexOf("/");
+	if (slash >= 0) {
+		value = value.slice(0, slash);
+	}
+	return value;
+}
+
 function verify() {
-	sendRequest(`${site}/user/${account}/submitted.json?raw_json=1`, "HEAD")
+	const name = normalizedAccount();
+	sendRequest(`${site}/user/${name}/submitted.json?raw_json=1`, "HEAD")
 	.then((dictionary) => {
 		const jsonObject = JSON.parse(dictionary);
 		
 		if (jsonObject.status == 200) {
 			const verification = {
-				displayName: "u/" + account,
+				displayName: "u/" + name,
 				icon: "https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-180x180.png"
-			};	
+			};
 			processVerification(verification);
 		}
 		else {
@@ -23,7 +47,8 @@ function verify() {
 }
 
 function load() {
-	sendRequest(`${site}/user/${account}/submitted.json?raw_json=1`)
+	const name = normalizedAccount();
+	sendRequest(`${site}/user/${name}/submitted.json?raw_json=1`)
 	.then((text) => {
 		const jsonObject = JSON.parse(text);
 		

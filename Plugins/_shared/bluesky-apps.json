@@ -13,6 +13,12 @@
 			"pattern": "https://bsky.app"
 		},
 		{
+			"id": "app.indigosocial",
+			"name": "Indigo",
+			"template": "indigoapp://open-url?url=__URL_ENCODED__",
+			"pattern": "https://bsky.app"
+		},
+		{
 			"id": "com.skeetsapp",
 			"name": "Skeets",
 			"template": "skeets://bskylink?link=__URL__",
