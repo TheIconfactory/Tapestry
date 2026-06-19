@@ -1,0 +1,11 @@
+{
+	"inputs": [
+		{
+			"name": "appPassword",
+			"type": "string",
+			"prompt": "appPassword",
+			"validate_as": "string",
+			"placeholder": "base64 encoded <email:password>"
+		},
+	]
+}
