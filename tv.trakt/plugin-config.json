@@ -1,0 +1,14 @@
+{
+  "id": "tv.trakt",
+  "display_name": "Trakt",
+  "oauth_authorize": "/oauth/authorize",
+  "oauth_token": "/oauth/token",
+  "oauth_type": "code",
+  "oauth_code_key": "code",
+  "oauth_scope": "",
+  "oauth_grant_type": "authorization_code",
+  "oauth_http_redirect": true,
+  "providesAttachments": true,
+  "canPost": false,
+  "check_interval": 86400
+}
