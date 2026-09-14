@@ -75,6 +75,11 @@ function parentPostForItem(item, includeActions, results) {
         parentPostForItem(item.parent, includeActions, results);
     }
 
+    // A thread node is a union: only `#threadViewPost` has a `post`; `#notFoundPost` / `#blockedPost` carry a bare uri.
+    if (item.post == null) {
+        return;
+    }
+
     const post = postForItem(item, includeActions);
     if (post != null) {
         results.push(post);
@@ -101,7 +106,8 @@ function postForItem(item, includeActions = false, dateOverride = null, allowRep
     
     if (item.reply != null) {
         if (! allowRepliesFromOthers) {
-            if (item.reply.parent?.author?.viewer.following == null) {
+            // `reply.parent` is the same post/notFound/blocked union, and a blocked author carries no `viewer`.
+            if (item.reply.parent?.author?.viewer?.following == null) {
                 return null;
             }
         }
@@ -1360,7 +1366,10 @@ async function performAction(actionId, target, actionValue) {
         results.push(rebuiltTarget ?? target);
 
         for (const reply of firstItem.replies ?? []) {
-            results.push(postForItem(reply, true));
+            // Same union as `parent`: a deleted or blocked reply has no `post`.
+            if (reply.post != null) {
+                results.push(postForItem(reply, true));
+            }
         }
         return results;
     }
