@@ -1,27 +1,27 @@
 {
-	"inputs": [
-		{
-			"name": "account",
-			"type": "text",
-			"prompt": "Account",
-			"placeholder": "jay.bsky.team"
-		},
-		{
-			"name": "includeReposts",
-			"type": "switch",
-			"prompt": "Include Reposts",
-			"value": "on"
-		},
-		{
-			"name": "includeQuotes",
-			"type": "switch",
-			"prompt": "Include Quotes",
-			"value": "on"
-		},
-		{
-			"name": "includeReplies",
-			"type": "switch",
-			"prompt": "Include Replies"
-		}
-	]
+    "inputs": [
+        {
+            "name": "account",
+            "type": "text",
+            "prompt": "Account",
+            "placeholder": "jay.bsky.team"
+        },
+        {
+            "name": "includeReposts",
+            "type": "switch",
+            "prompt": "Include Reposts",
+            "value": "on"
+        },
+        {
+            "name": "includeQuotes",
+            "type": "switch",
+            "prompt": "Include Quotes",
+            "value": "on"
+        },
+        {
+            "name": "includeReplies",
+            "type": "switch",
+            "prompt": "Include Replies"
+        }
+    ]
 }

@@ -1,9 +1,9 @@
 {
-	"inputs": [
-		{
-			"name": "includeMentions",
-			"type": "switch",
-			"prompt": "Include Mentions"
-		}
-	]
+    "inputs": [
+        {
+            "name": "includeMentions",
+            "type": "switch",
+            "prompt": "Include Mentions"
+        }
+    ]
 }

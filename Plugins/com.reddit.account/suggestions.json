@@ -1,14 +1,14 @@
 {
-	"variables": [
-		{
-			"name": "account",
-			"value": "ReallyRickAstley",
-			"title": "/u/ReallyRickAstley"
-		},
-		{
-			"name": "account",
-			"value": "Janellemonae",
-			"title": "/u/Janellemonae"
-		}
-	]
+    "variables": [
+        {
+            "name": "account",
+            "value": "ReallyRickAstley",
+            "title": "/u/ReallyRickAstley"
+        },
+        {
+            "name": "account",
+            "value": "Janellemonae",
+            "title": "/u/Janellemonae"
+        }
+    ]
 }

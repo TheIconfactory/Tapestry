@@ -1,36 +1,40 @@
 {
-	"items": [
-		{
-			"id": "reblog",
-			"name": "Reblog",
-			"icon": "tapestry.boost"
-		},
-		{
-			"id": "unreblog",
-			"name": "Reblogged",
-			"icon": "tapestry.boost.fill"
-		},
-		{
-			"id": "like",
-			"name": "Like",
-			"icon": "heart"
-		},
-		{
-			"id": "unlike",
-			"name": "Remove Like",
-			"icon": "heart.fill"
-		},
-		{
-			"id": "notes",
-			"name": "Notes",
-			"icon": "clipboard",
-			"role": "context"
-		},
-		{
-			"id": "trail",
-			"name": "Reblogs & Notes",
-			"icon": "list.bullet.clipboard",
-			"role": "context"
-		}
-	]
+    "items": [
+        {
+            "id": "reblog",
+            "name": "Reblog",
+            "icon": "tapestry.boost",
+            "semantic": "boost"
+        },
+        {
+            "id": "unreblog",
+            "name": "Reblogged",
+            "icon": "tapestry.boost.fill",
+            "semantic": "boost"
+        },
+        {
+            "id": "like",
+            "name": "Like",
+            "icon": "heart",
+            "semantic": "favorite"
+        },
+        {
+            "id": "unlike",
+            "name": "Remove Like",
+            "icon": "heart.fill",
+            "semantic": "favorite"
+        },
+        {
+            "id": "notes",
+            "name": "Notes",
+            "icon": "clipboard",
+            "role": "context"
+        },
+        {
+            "id": "trail",
+            "name": "Reblogs & Notes",
+            "icon": "list.bullet.clipboard",
+            "role": "context"
+        }
+    ]
 }

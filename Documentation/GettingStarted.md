@@ -51,10 +51,13 @@ In the "com.usetapestry.mystic9ball" folder, create the two files that are requi
   
 The `plugin.js` file can be empty for now, but the `plugin-config.json` file requires some basic information: an `id` and `display_name` is [required](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#plugin-configjson).
 
+We'll also set `minimum_app_version` to `"2.0"`. This tells Tapestry that the connector uses the modern API, where the functions you write **return** their results instead of calling separate completion functions. (You can read about how the API has evolved in the [Changes by Version](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#changes-by-version) section of the API documentation.)
+
 ```json
 {
 	"id": "com.usetapestry.mystic9ball",
 	"display_name": "Mystic 9-Ball",
+	"minimum_app_version": "2.0"
 }
 ```
 
@@ -90,7 +93,8 @@ In Tapestry, the `site` specifies a location on the Internet where data can be c
 {
 	"id": "com.usetapestry.mystic9ball",
 	"display_name": "Mystic 9-Ball",
-	"site": "https://usetapestry.com/samples/mystic9ball",
+	"minimum_app_version": "2.0",
+	"site": "https://usetapestry.com/samples/mystic9ball"
 }
 ```
 
@@ -104,8 +108,9 @@ Let’s fill in some of the other configuration values to get a better icon:
 {
 	"id": "com.usetapestry.mystic9ball",
 	"display_name": "Mystic 9-Ball",
+	"minimum_app_version": "2.0",
 	"site": "https://usetapestry.com/samples/mystic9ball",
-	"icon": "https://usetapestry.com/samples/mystic9ball/images/icon.png",
+	"icon": "https://usetapestry.com/samples/mystic9ball/images/icon.png"
 }
 ```
 
@@ -135,9 +140,7 @@ function load() {
 	let item = Item.createWithUriDate(uri, date);
 	item.body = "Hello world!";
 
-	let items = [item];
-		
-	processResults(items);
+	return [item];
 }
 ```
 
@@ -155,7 +158,7 @@ The `new Date()` provides the current date and time and will put the item at the
 
 Together, a JavaScript `Item` object is created using `Item.createWithUriDate(uri, date)`. Once we have that object we add content by setting its `body` property. In this example, the content is plain text, but it can also be HTML. The `Item` has [other properties](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#item), such as a `title`, `contentWarning`, and `attachments`. All of this will be covered in a later section.
 
-Once the item has been created and all its properties set, it is returned as an array via `processResults`. This is the point where all the information that your connector has collected gets processed and stored by Tapestry.
+Once the item has been created and all its properties set, it is returned from `load()` as an array. This is the point where all the information that your connector has collected gets processed and stored by Tapestry. (If something goes wrong while loading, you instead `throw` an `Error` and Tapestry will display it to the user — we'll see that happen automatically in the next section.)
 
 Tapestry Loom uses the same processing pipeline that is used in the app, so that makes it easy for you to test and preview any changes that you make to your connector. Saving in your text editor, followed by a **Cmd-R** reload and **Load** button press is a sequence you’ll repeat frequently.
 
@@ -168,34 +171,30 @@ But let’s be honest: seeing "Hello World!" in your timeline every time you ref
 We know that this site has an API, but we’re not exactly sure what kind of data we get from that app. But it’s easy to send a request and see what we get back:
 
 ```javascript
-function load() {
+async function load() {
 	let uri = site;
 	let date = new Date();
 	
 	let item = Item.createWithUriDate(uri, date);
 	item.body = "Hello world!";
 
-	let items = [item];
-	
 	const endpoint = `${site}/api`;
-	sendRequest(endpoint)
-	.then((text) => {
-		console.log(`text = ${text}`);
-		processResults(items);
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
+	const text = await fetch(endpoint).text();
+	console.log(`text = ${text}`);
+
+	return [item];
 }
 ```
 
-The first thing we do is create an `endpoint` that points to the site’s API. That endpoint is used with the [sendRequest](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#sendrequesturl-method-parameters-extraheaders--promise) function provided by Tapestry.
+The first thing we do is create an `endpoint` that points to the site’s API. That endpoint is used with the [fetch](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#fetch) function provided by Tapestry, and `.text()` says what we want back — the response body as text.
 
-> **Note:** If you’ve used the fetch API in a browser, you’re power user that already has a good idea on how this all works. The main difference with Tapestry handles all authentication on the request if the connector uses OAuth or JWT. Your script doesn’t need to worry about acquiring tokens or managing them securely: Tapestry handles all of that. If none of this makes sense to you, don’t worry - it’s not required to write a basic connector!
+Notice that `load()` is now declared `async` and we `await` the request. `fetch` is asynchronous, and `await` lets us write the code as if it ran top-to-bottom, pausing until the response arrives.
+
+> **Note:** If you’ve used the fetch API in a browser, you’re a power user that already has a good idea on how this all works. Tapestry’s version has some conveniences of its own (like `.text()` and `.json()` directly on the call), and the main difference is that Tapestry handles all authentication on the request if the connector uses OAuth or JWT. Your script doesn’t need to worry about acquiring tokens or managing them securely: Tapestry handles all of that. If none of this makes sense to you, don’t worry - it’s not required to write a basic connector!
 
 After the request completes, you’ll have some `text` to process. At this point we can just output it with `console.log` and return the results like before.
 
-If the request can’t complete, you should catch that `requestError` and send it back to Tapestry so it can be displayed in the user interface.
+If the request can’t complete — or the server answers with an error status — `await fetch(...)` will `throw`, and because we don't catch it, the error propagates out of `load()` and Tapestry displays it in the user interface automatically. (You only need to add your own `try`/`catch` if you want to handle a failure yourself rather than report it.)
 
 After doing **Cmd-R** and **Load**, you’ll see the document icon update because of the log message you just added. When you press that button, you’ll see something like this:
 
@@ -211,35 +210,27 @@ text = {
 Those are the results from the API and we can easily put these JSON results to use:
 
 ```javascript
-function load() {
+async function load() {
 	const endpoint = `${site}/api`;
-	sendRequest(endpoint)
-	.then((text) => {
-		const json = JSON.parse(text);
+	const json = await fetch(endpoint).json();
 
-		let uri = site;
-		let date = new Date(json.timestamp * 1000); // seconds → milliseconds
+	let uri = site;
+	let date = new Date(json.timestamp * 1000); // seconds → milliseconds
+
+	let src = "https://usetapestry.com" + json.image; // relative → absolute url
 	
-		let src = "https://usetapestry.com" + json.image; // relative → absolute url
-		
-		let item = Item.createWithUriDate(uri, date);
-		item.body = `<p>The Mystic 9-Ball says: <b>${json.description}</b><img src="${src}" /></p>`;
+	let item = Item.createWithUriDate(uri, date);
+	item.body = `<p>The Mystic 9-Ball says: <b>${json.description}</b><img src="${src}" /></p>`;
 
-		let items = [item];
-
-		processResults(items);
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
+	return [item];
 }
 ```
 
-The first thing you’ll do with the text is convert it to a JSON object with `json = JSON.parse(text)`. Then `json.timestamp`, `json.description`, and `json.image` can be used to improve the item for our connector.
+The `await fetch(endpoint).json()` call fetches the endpoint and parses the JSON response into an object in a single step. Then `json.timestamp`, `json.description`, and `json.image` can be used to improve the item for our connector.
 
-Also note that the item’s body is now specified using HTML. Even if you’re familiar with this markup, you should check out [how Tapestry uses  HTML](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#html-content). 
+Also note that the item’s body is now specified using HTML. Even if you’re familiar with this markup, you should check out [how Tapestry uses HTML](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#html-content). 
 
-One issue with the script above is that the URI never changes; only the date gets updated. Tapestry will detect this and constantly put the item at the top of the timeline. From a user’s point-of-view, it’s better to make sure that each URI produced is unique and keeps it’s place in the universal timeline.
+One issue with the script above is that the URI never changes; only the date gets updated. Tapestry will detect this and constantly put the item at the top of the timeline. From a user’s point-of-view, it’s better to make sure that each URI produced is unique and keeps its place in the universal timeline.
 
 Luckily, we can easily do this using information in the JSON data:
 
@@ -279,7 +270,7 @@ This new variable is added to the script:
 ```javascript
 var lastUpdate = null;
 
-function load() {
+async function load() {
 	if (lastUpdate != null) {
 		// check the interval provided by the user
 		console.log(`interval = ${interval}`);
@@ -289,33 +280,24 @@ function load() {
 		if (now < future) {
 			// time has not elapsed, return no results
 			console.log(`time until next update = ${(future - now) / 1000} sec.`);
-			processResults(null);
-			return;
+			return [];
 		}
 	}
 	
 	const endpoint = `${site}/api`;
-	sendRequest(endpoint)
-	.then((text) => {
-		const json = JSON.parse(text);
+	const json = await fetch(endpoint).json();
 
-		let uri = site + `?value=${json.value}&timestamp=${json.timestamp}`;
-		let date = new Date(json.timestamp * 1000); // seconds → milliseconds
+	let uri = site + `?value=${json.value}&timestamp=${json.timestamp}`;
+	let date = new Date(json.timestamp * 1000); // seconds → milliseconds
+
+	let src = "https://usetapestry.com" + json.image; // relative → absolute url
 	
-		let src = "https://usetapestry.com" + json.image; // relative → absolute url
-		
-		let item = Item.createWithUriDate(uri, date);
-		item.body = `<p>The Mystic 9-Ball says: ${json.description}<img src="${src}" /></p>`;
+	let item = Item.createWithUriDate(uri, date);
+	item.body = `<p>The Mystic 9-Ball says: ${json.description}<img src="${src}" /></p>`;
 
-		let items = [item];
+	lastUpdate = new Date();
 
-		processResults(items);
-		
-		lastUpdate = new Date();
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
+	return [item];
 }
 ```
 
@@ -343,7 +325,7 @@ You can preview the content using the **Read Me** button in the _Connector_ pane
 
 ![Tapestry Loom displaying a preview of the README for Mystic 9-Ball](images/3-README.png)
 
-Another way to help folks use your connector is by providing suggestions. There isn’t anything to suggest for the Mystic 9-Ball, but you can learn more about the `suggestions.json` file in [the documentation](https://github.com/TheIconfactory/Tapestry/blob/documentation-update/Documentation/API.md#suggestionsjson).
+Another way to help folks use your connector is by providing suggestions. There isn’t anything to suggest for the Mystic 9-Ball, but you can learn more about the `suggestions.json` file in [the documentation](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#suggestionsjson).
 
 ### Finding Yourself
 
@@ -407,9 +389,10 @@ The style is defined in `plugin-config.json` with an `item_style` property and a
 {
 	"id": "com.usetapestry.mystic9ball",
 	"display_name": "Mystic 9-Ball",
+	"minimum_app_version": "2.0",
 	"site": "https://usetapestry.com/samples/mystic9ball",
 	"icon": "https://usetapestry.com/samples/mystic9ball/images/icon.png",
-	"item_style": "post",
+	"item_style": "post"
 }
 
 ```
@@ -446,7 +429,7 @@ Annotations can be used to indicate the source of an item. For example, the acco
 
 Properties of an `Item` are easy to verify. When you click on the document icon at the bottom of the _Preview_ panel, this view is presented:
 
-![A sheet showing all the properties of an Mystic 9-Ball item](images/7-ItemProperties.png)
+![A sheet showing all the properties of a Mystic 9-Ball item](images/7-ItemProperties.png)
 
 
 ### Getting Attached
@@ -459,10 +442,11 @@ When you are working with an API that provides media explicitly, it's easier to 
 {
 	"id": "com.usetapestry.mystic9ball",
 	"display_name": "Mystic 9-Ball",
+	"minimum_app_version": "2.0",
 	"site": "https://usetapestry.com/samples/mystic9ball",
 	"icon": "https://usetapestry.com/samples/mystic9ball/images/icon.png",
 	"item_style": "article",
-	"provides_attachments": true,
+	"provides_attachments": true
 }
 ```
 
@@ -508,9 +492,9 @@ In the sample connector, you created a `load()` function that's called when gene
 
 If a feed that’s using your connector needs a specific name (such as a blog name) or an icon (like an avatar), you’ll want to add `needs_verification` to `plugin-config.json` and implement the `verify()` function in `plugin.js`.
 
-You may also find that the `lookupIcon()` function is useful for [getting the icon](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#lookupiconurl--promise) associated with a URL.
+You may also find that the `lookupIcon()` function is useful for [getting the icon](https://github.com/TheIconfactory/Tapestry/blob/main/Documentation/API.md#lookupicon) associated with a URL.
  
-The [JSON Feed connector](https://github.com/TheIconfactory/Tapestry/blob/main/Plugins/org.jsonfeed/plugin.js) is a good example of how verification can be implemented.
+The [Mastodon connector](https://github.com/TheIconfactory/Tapestry/blob/main/Plugins/org.joinmastodon/plugin.js) is a good example of how verification can be implemented.
 
  
 ### Web Inspector
@@ -545,6 +529,6 @@ If you come across a situation where Tapestry can't authorize with OAuth or JWT,
 
 Hopefully this has been an enjoyable excursion through the Tapestry API and inspires you to make connectors of your own. We truly believe that this approach will help the open web to flourish, and that can’t happen without your help!
 
-If you find errors or omissions in this documentation, please feel free ot open an issue.
+If you find errors or omissions in this documentation, please feel free to open an issue.
 
 

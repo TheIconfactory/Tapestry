@@ -1,34 +1,34 @@
 {
-	"input": [
-		{
-			"match": "/^@([a-zA-Z0-9._-]+)$/",
-			"url": "https://www.youtube.com/@$1"
-		}
-	],
- 	"sites": [
- 		"youtube.",
- 		"youtu.be",
- 		"youtubekids.com"
- 	],
-	"html": [
-		{
-			"element": "link",
-			"check": "type",
-			"match": "application/rss+xml",
-			"use": "href",
-			"variable": "site"
-		},
-		{
-			"element": "script",
-			"match": "/\"channelId\"\\s*:\\s*\"(UC[A-Za-z0-9_-]+)\"/",
-			"transform": "https://www.youtube.com/channel/$1",
-			"variable": "site"
-		}
-	],
-	"xml": [
-		{
-			"root": "feed",
-			"with": "yt:channelId"
-		}
-	]
+    "input": [
+        {
+            "match": "/^@([a-zA-Z0-9._-]+)$/",
+            "url": "https://www.youtube.com/@$1"
+        }
+    ],
+        "sites": [
+            "youtube.",
+            "youtu.be",
+            "youtubekids.com"
+        ],
+    "html": [
+        {
+            "element": "link",
+            "check": "type",
+            "match": "application/rss+xml",
+            "use": "href",
+            "variable": "site"
+        },
+        {
+            "element": "script",
+            "match": "/\"channelId\"\\s*:\\s*\"(UC[A-Za-z0-9_-]+)\"/",
+            "transform": "https://www.youtube.com/channel/$1",
+            "variable": "site"
+        }
+    ],
+    "xml": [
+        {
+            "root": "feed",
+            "with": "yt:channelId"
+        }
+    ]
 }

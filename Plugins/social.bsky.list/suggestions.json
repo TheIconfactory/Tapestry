@@ -1,15 +1,15 @@
 {
-	"variables": [
-		{
-			"title": "Iconfactory Workers",
-			"names": [
-				"account",
-				"listId"
-			],
-			"values": [
-				"iconfactory.com",
-				"3lng6ryhigk2a"
-			]
-		}
-	]
+    "variables": [
+        {
+            "title": "Iconfactory Workers",
+            "names": [
+                "account",
+                "listId"
+            ],
+            "values": [
+                "iconfactory.com",
+                "3lng6ryhigk2a"
+            ]
+        }
+    ]
 }

@@ -1,22 +1,22 @@
 {
-	"inputs": [
-		{
-			"name": "includeReblogs",
-			"type": "switch",
-			"prompt": "Include Reblogs",
-			"value": "on"
-		},
-		{
-			"name": "includeTags",
-			"type": "switch",
-			"prompt": "Include Tags",
-			"value": "on"
-		},
-		{
-			"name": "includeAllNotes",
-			"type": "switch",
-			"prompt": "Include Like/Reblog Notes",
-			"value": "on"
-		}
-	]
+    "inputs": [
+        {
+            "name": "includeReblogs",
+            "type": "switch",
+            "prompt": "Include Reblogs",
+            "value": "on"
+        },
+        {
+            "name": "includeTags",
+            "type": "switch",
+            "prompt": "Include Tags",
+            "value": "on"
+        },
+        {
+            "name": "includeAllNotes",
+            "type": "switch",
+            "prompt": "Include Like/Reblog Notes",
+            "value": "on"
+        }
+    ]
 }

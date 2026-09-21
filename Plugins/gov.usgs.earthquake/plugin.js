@@ -2,31 +2,31 @@
 
 async function load() {
 
-	let summaryName = "4.5_day";
+    let summaryName = "4.5_day";
 	
-	if (typeof magnitude !== 'undefined') {
-		switch (magnitude) {
-			case "Significant":
-				summaryName = "significant_day";
-				break;
-			case "Over 4.5":
-				summaryName = "4.5_day";
-				break;
-			case "Over 2.5":
-				summaryName = "2.5_day";
-				break;
-			case "Over 1.0":
-				summaryName = "1.0_day";
-				break;
-			case "All":
-				summaryName = "all";
-				break;
-		}
-	}
+    if (typeof magnitude !== 'undefined') {
+        switch (magnitude) {
+            case "Significant":
+                summaryName = "significant_day";
+                break;
+            case "Over 4.5":
+                summaryName = "4.5_day";
+                break;
+            case "Over 2.5":
+                summaryName = "2.5_day";
+                break;
+            case "Over 1.0":
+                summaryName = "1.0_day";
+                break;
+            case "All":
+                summaryName = "all";
+                break;
+        }
+    }
 	
-	const endpoint = `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/${summaryName}.geojson`;
+    const endpoint = `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/${summaryName}.geojson`;
 
-	let text = await sendConditionalRequest(endpoint)
+    let text = await sendConditionalRequest(endpoint)
     
     if (!text) {
         return processResults([]);

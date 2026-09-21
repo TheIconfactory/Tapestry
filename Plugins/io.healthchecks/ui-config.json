@@ -1,16 +1,16 @@
 {
-  "inputs": [
-    {
-      "name": "project_api_key",
-      "type": "text",
-      "prompt": "Project API Key",
-      "placeholder": "UUID"
-    },
-    {
-      "name": "uuid",
-      "type": "text",
-      "prompt": "Check Identifier",
-      "placeholder": "UUID"
-    }
-  ]
+    "inputs": [
+        {
+            "name": "project_api_key",
+            "type": "text",
+            "prompt": "Project API Key",
+            "placeholder": "UUID"
+        },
+        {
+            "name": "uuid",
+            "type": "text",
+            "prompt": "Check Identifier",
+            "placeholder": "UUID"
+        }
+    ]
 }

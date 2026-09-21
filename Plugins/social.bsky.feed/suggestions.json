@@ -1,15 +1,15 @@
 {
-	"variables": [
-		{
-			"title": "Science",
-			"names": [
-				"account",
-				"feedId"
-			],
-			"values": [
-				"bossett.social",
-				"for-science"
-			]
-		}
-	]
+    "variables": [
+        {
+            "title": "Science",
+            "names": [
+                "account",
+                "feedId"
+            ],
+            "values": [
+                "bossett.social",
+                "for-science"
+            ]
+        }
+    ]
 }

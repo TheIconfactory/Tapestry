@@ -1,17 +1,17 @@
 {
-	"input": [
-		{
-			"match": "/^\\/?u\\/([a-zA-Z0-9_-]+)$/",
-			"url": "https://www.reddit.com/u/$1"
-		}
-	],
-	"sites": [
-		"reddit.com"
-	],
-	"url": [
-		{
-			"extract": "/reddit.com/(?:u|user)/([^/]+)/",
-			"variable": "account"
-		}
-	]
+    "input": [
+        {
+            "match": "/^\\/?u\\/([a-zA-Z0-9_-]+)$/",
+            "url": "https://www.reddit.com/u/$1"
+        }
+    ],
+    "sites": [
+        "reddit.com"
+    ],
+    "url": [
+        {
+            "extract": "/reddit.com/(?:u|user)/([^/]+)/",
+            "variable": "account"
+        }
+    ]
 }

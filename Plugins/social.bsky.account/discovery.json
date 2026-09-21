@@ -1,17 +1,17 @@
 {
-	"sites": [
-		"bsky.app",
-		"bsky.social"
-	],
-	"url": [
-		{
-			"extract": "/https://[^/]+/profile/([^/]+)/",
-			"variable": "account"
-		}
-	],
-	"dns": {
-		"name": "_atproto",
-		"match": "/^did=/",
-		"variable": "account"
-	}
+    "sites": [
+        "bsky.app",
+        "bsky.social"
+    ],
+    "url": [
+        {
+            "extract": "/https://[^/]+/profile/([^/]+)/",
+            "variable": "account"
+        }
+    ],
+    "dns": {
+        "name": "_atproto",
+        "match": "/^did=/",
+        "variable": "account"
+    }
 }

@@ -14,78 +14,56 @@ if (require('bluesky-shared.js') === false) {
 // API request:
 // https://api.bsky.app/xrpc/app.bsky.feed.getListFeed?list=at%3A%2F%2Fdid%3Aplc%3A7foutw3hvd7nqwwng5gsmuez%2Fapp.bsky.graph.list%2F3lml2frpysk2j
 
-function verify() {
-	sendRequest(`${site}/xrpc/app.bsky.actor.getProfile?actor=${account}`)
-	.then((text) => {
-		const jsonObject = JSON.parse(text);
-		
-		const did = jsonObject.did;
-		setItem("did", did);
-		
-		const profileHandle = "@" + jsonObject.handle;
+async function verify() {
+    const profile = await fetch(`${site}/xrpc/app.bsky.actor.getProfile?actor=${account}`).json();
 
-		sendRequest(`${site}/xrpc/app.bsky.graph.getList?list=at://${did}/app.bsky.graph.list/${listId}`)
-		.then((text) => {
-			const jsonObject = JSON.parse(text);
-		
-			const avatar = jsonObject?.list?.avatar ?? jsonObject?.list?.creator?.avatar;
-			const listName = jsonObject.list.name;
-			const displayName = `${listName} by ${profileHandle}`;
-			if (avatar != null) {
-				const verification = {
-					displayName: displayName,
-					icon: avatar
-				};
-				processVerification(verification);
-			}
-			else {
-				processVerification(displayName);
-			}
-		})
-		.catch((requestError) => {
-			processError(requestError);
-		});
-	})
-	.catch((requestError) => {
-		processError(requestError);
-	});
+    const did = profile.did;
+    setItem("did", did);
+
+    const profileHandle = "@" + shortHandle(profile.handle);
+
+    const listObject = await fetch(`${site}/xrpc/app.bsky.graph.getList?list=at://${did}/app.bsky.graph.list/${listId}`).json();
+
+    const avatar = listObject?.list?.avatar ?? listObject?.list?.creator?.avatar;
+    const listName = listObject.list.name;
+    const displayName = `${listName} by ${profileHandle}`;
+    if (avatar != null) {
+        return {
+            displayName: displayName,
+            icon: avatar
+        };
+    }
+    else {
+        return displayName;
+    }
 }
 
 async function load() {
-	var did = getItem("did");
-	if (did == null) {
-		did = await getAccountDid(account);
-		setItem("did", did);
-	}
+    var did = getItem("did");
+    if (did == null) {
+        did = await getAccountDid(account);
+        setItem("did", did);
+    }
 
-	queryList(did, listId)
-	.then((results) =>  {
-		console.log(`finished did ${did}, list ${listId}`);
-		processResults(results, true);
-	})
-	.catch((requestError) => {
-		console.log(`error did ${did}, list ${listId}`);
-		processError(requestError);
-	});	
+    return await queryList(did, listId);
 }
 
 function queryList(did, listId) {
-	return new Promise((resolve, reject) => {
-		sendRequest(`${site}/xrpc/app.bsky.feed.getListFeed?list=at://${did}/app.bsky.graph.list/${listId}`)
-		.then((text) => {
-			const jsonObject = JSON.parse(text);
+    return new Promise((resolve, reject) => {
+        fetch(`${site}/xrpc/app.bsky.feed.getListFeed?list=at://${did}/app.bsky.graph.list/${listId}`).json()
+        .then((jsonObject) => {
 			
-			let results = [];
-			for (const item of jsonObject.feed) { 
-				let post = postForItem(item, false);
-				if (post != null) {
-					results.push(post);
-				}
-			}
-			resolve(results);
-		})
-		.catch((error) => {
-			reject(error);
-		});
-	});
+            let results = [];
+            for (const item of jsonObject.feed) { 
+                let post = postForItem(item, false);
+                if (post != null) {
+                    results.push(post);
+                }
+            }
+            resolve(results);
+        })
+        .catch((error) => {
+            reject(error);
+        });
+    });
 }

@@ -1,19 +1,19 @@
 {
-	"variables": [
-		{
-			"name": "account",
-			"value": "jay.bsky.team",
-			"title": "Jay Graber"
-		},
-		{
-			"name": "account",
-			"value": "brimleyline.bsky.social",
-			"title": "Brimley/Cocoon Line"
-		},
-		{
-			"name": "account",
-			"value": "iconfactory.com",
-			"title": "The Iconfactory"
-		}
-	]
+    "variables": [
+        {
+            "name": "account",
+            "value": "jay.bsky.team",
+            "title": "Jay Graber"
+        },
+        {
+            "name": "account",
+            "value": "brimleyline.bsky.social",
+            "title": "Brimley/Cocoon Line"
+        },
+        {
+            "name": "account",
+            "value": "iconfactory.com",
+            "title": "The Iconfactory"
+        }
+    ]
 }

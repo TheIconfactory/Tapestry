@@ -1,11 +1,11 @@
 {
-	"url": [
-		{
-			"extract": "/(https://[^:/\\s]+)/lists/([^\\/]+)/",
-			"variable": "site, list"
-		}
-	],
-	"nodeinfo": {
-		"software": "mastodon"
-	}
+    "url": [
+        {
+            "extract": "/(https://[^:/\\s]+)/lists/([^\\/]+)/",
+            "variable": "site, list"
+        }
+    ],
+    "nodeinfo": {
+        "software": "mastodon"
+    }
 }

@@ -4,7 +4,7 @@
 // Apple requirements: https://podcasters.apple.com/support/823-podcast-requirements
 
 async function verify() {
-	let xml = await sendRequest(site);
+    let xml = await sendRequest(site);
     let jsonObject = await xmlParse(xml);
     
     if (jsonObject.feed != null) {
@@ -46,7 +46,7 @@ async function verify() {
 const episodeRegex = /[0-9]+$/;
 
 async function load() {
-	const response = await sendConditionalRequest(site);
+    const response = await sendConditionalRequest(site);
 
     if (!response) {
         // null response means 304 Not Modified

@@ -1,18 +1,18 @@
 {
-	"inputs": [
-		{
-			"name": "includeTitles",
-			"type": "switch",
-			"prompt": "Include Titles",
-			"value": "on",
-			"placeholder": "Turn off for feeds that duplicate the body text in the title"
-		},
-		{
-			"name": "includeCategories",
-			"type": "switch",
-			"prompt": "Include Categories",
-			"value": "off",
-			"placeholder": "When enabled, categories will be appended in the form Category: \"Breaking News\""
-		}
-	]
+    "inputs": [
+        {
+            "name": "includeTitles",
+            "type": "switch",
+            "prompt": "Include Titles",
+            "value": "on",
+            "placeholder": "Turn off for feeds that duplicate the body text in the title"
+        },
+        {
+            "name": "includeCategories",
+            "type": "switch",
+            "prompt": "Include Categories",
+            "value": "off",
+            "placeholder": "When enabled, categories will be appended in the form Category: \"Breaking News\""
+        }
+    ]
 }

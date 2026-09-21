@@ -1,16 +1,16 @@
 {
-	"inputs": [
-		{
-			"name": "tag",
-			"type": "text",
-			"prompt": "Tag",
-			"placeholder": "TapestryApp"
-		},
-		{
-			"name": "includeQuotes",
-			"type": "switch",
-			"prompt": "Include Quotes",
-			"value": "on"
-		}
-	]
+    "inputs": [
+        {
+            "name": "tag",
+            "type": "text",
+            "prompt": "Tag",
+            "placeholder": "TapestryApp"
+        },
+        {
+            "name": "includeQuotes",
+            "type": "switch",
+            "prompt": "Include Quotes",
+            "value": "on"
+        }
+    ]
 }

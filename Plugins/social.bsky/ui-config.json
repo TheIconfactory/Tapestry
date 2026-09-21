@@ -1,32 +1,32 @@
 {
-	"inputs": [
-		{
-			"name": "includeHome",
-			"type": "switch",
-			"prompt": "Include People You Follow",
-			"value": "on"
-		},
-		{
-			"name": "includeReposts",
-			"type": "switch",
-			"prompt": "Include Reposts",
-			"value": "on"
-		},
-		{
-			"name": "includeQuotes",
-			"type": "switch",
-			"prompt": "Include Quotes",
-			"value": "on"
-		},
-		{
-			"name": "includeReplies",
-			"type": "switch",
-			"prompt": "Include Replies"
-		},
-		{
-			"name": "includeMentions",
-			"type": "switch",
-			"prompt": "Include Mentions From Others"
-		}
-	]
+    "inputs": [
+        {
+            "name": "includeHome",
+            "type": "switch",
+            "prompt": "Include People You Follow",
+            "value": "on"
+        },
+        {
+            "name": "includeReposts",
+            "type": "switch",
+            "prompt": "Include Reposts",
+            "value": "on"
+        },
+        {
+            "name": "includeQuotes",
+            "type": "switch",
+            "prompt": "Include Quotes",
+            "value": "on"
+        },
+        {
+            "name": "includeReplies",
+            "type": "switch",
+            "prompt": "Include Replies"
+        },
+        {
+            "name": "includeMentions",
+            "type": "switch",
+            "prompt": "Include Mentions From Others"
+        }
+    ]
 }

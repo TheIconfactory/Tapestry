@@ -1,14 +1,14 @@
 {
-	"id": "com.youtube",
-	"display_name": "YouTube Channel",
-	"service_name": "YouTube",
-	"default_color": "orange",
-	"icon": "https://www.youtube.com/s/desktop/905763c7/img/favicon_144x144.png",
-	"site_prompt": "YouTube URL",
-	"site_placeholder": "youtube.com/@TheIconfactory",
-	"site_help": "Enter any YouTube URL. Examples:\n\n`youtube.com/@TechnologyConnections`\n`youtube.com/channel/UCxxxxxx`\n\nA video URL also works — the channel will be detected automatically.",
-	"needs_verification": true,
-	"provides_attachments": true,
+    "id": "com.youtube",
+    "display_name": "YouTube Channel",
+    "service_name": "YouTube",
+    "default_color": "orange",
+    "icon": "https://www.youtube.com/s/desktop/905763c7/img/favicon_144x144.png",
+    "site_prompt": "YouTube URL",
+    "site_placeholder": "youtube.com/@TheIconfactory",
+    "site_help": "Enter any YouTube URL. Examples:\n\n`youtube.com/@TechnologyConnections`\n`youtube.com/channel/UCxxxxxx`\n\nA video URL also works — the channel will be detected automatically.",
+    "needs_verification": true,
+    "provides_attachments": true,
     "minimum_app_version": "1.3",
-	"version": 10
+    "version": 10
 }

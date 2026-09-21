@@ -1,22 +1,22 @@
 {
-	"html": [
-		{
-			"element": "link",
-			"check": "type",
-			"match": "application/rss+xml",
-			"use": "href",
-			"variable": "site"
-		},
-		{
-			"element": "a",
-			"check": "href",
-			"match": "///(?:podcasts.apple.com|apple.co)//"
-		}
-	],
-	"xml": [
-		{
-			"root": "rss",
-			"with": "itunes:image"
-		}
-	]
+    "html": [
+        {
+            "element": "link",
+            "check": "type",
+            "match": "application/rss+xml",
+            "use": "href",
+            "variable": "site"
+        },
+        {
+            "element": "a",
+            "check": "href",
+            "match": "///(?:podcasts.apple.com|apple.co)//"
+        }
+    ],
+    "xml": [
+        {
+            "root": "rss",
+            "with": "itunes:image"
+        }
+    ]
 }

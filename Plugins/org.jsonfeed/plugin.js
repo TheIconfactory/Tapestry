@@ -1,17 +1,8 @@
 
 // org.jsonfeed
 
-// people who sniff user agents are dumb and their rules are even dumber, because of course we are:
-//   a Macintosh
-//   with an Intel processor
-//   running Mac OS X 10.6.3
-//   in Germany
-//   using WebKit
-//   in an awesome RSS reader
-const userAgent = "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; de-de) AppleWebKit/531.22.7 (KHTML, like Gecko) NetNewsWire/3.2.7 Tapestry/1.3";
-
 async function verify() {
-    let text = await sendRequest(site, "GET", null, {"user-agent": userAgent});
+    let text = await sendRequest(site);
     const jsonObject = JSON.parse(text);
     
     const displayName = jsonObject["title"];
@@ -39,7 +30,7 @@ async function verify() {
 }
 
 async function load() {
-    const response = await sendConditionalRequest(site, "GET", null, {"user-agent": userAgent});
+    const response = await sendConditionalRequest(site);
 
     if (!response) {
         // null response means 304 Not Modified

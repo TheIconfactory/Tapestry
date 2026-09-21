@@ -1,16 +1,16 @@
 {
-  "inputs": [
-    {
-      "name": "creator_username",
-      "type": "text",
-      "prompt": "Creator",
-      "placeholder": "iconfactory"
-    },
-    {
-      "name": "project_slug",
-      "type": "text",
-      "prompt": "Project",
-      "placeholder": "project-tapestry"
-    }
-  ]
+    "inputs": [
+        {
+            "name": "creator_username",
+            "type": "text",
+            "prompt": "Creator",
+            "placeholder": "iconfactory"
+        },
+        {
+            "name": "project_slug",
+            "type": "text",
+            "prompt": "Project",
+            "placeholder": "project-tapestry"
+        }
+    ]
 }

@@ -1,8 +1,8 @@
 {
-	"id": "gov.usgs.earthquake",
-	"display_name": "USGS Earthquakes",
-	"icon": "https://earthquake.usgs.gov/earthquakes/map/assets/pwa/icon-192x192.png",
-	"site": "https://earthquake.usgs.gov",
+    "id": "gov.usgs.earthquake",
+    "display_name": "USGS Earthquakes",
+    "icon": "https://earthquake.usgs.gov/earthquakes/map/assets/pwa/icon-192x192.png",
+    "site": "https://earthquake.usgs.gov",
     "minimum_app_version": "1.3",
-	"version": 3
+    "version": 3
 }

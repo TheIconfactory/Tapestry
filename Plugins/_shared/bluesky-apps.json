@@ -1,34 +1,34 @@
 {
-	"apps": [
-		{
-			"id": "social.bsky",
-			"name": "Bluesky",
-			"template": "bluesky:__PATH__",
-			"pattern": "https://bsky.app"
-		},
-		{
-			"id": "dev.mozzius.graysky",
-			"name": "Graysky",
-			"template": "graysky:/__PATH__",
-			"pattern": "https://bsky.app"
-		},
-		{
-			"id": "app.indigosocial",
-			"name": "Indigo",
-			"template": "indigoapp://open-url?url=__URL_ENCODED__",
-			"pattern": "https://bsky.app"
-		},
-		{
-			"id": "com.skeetsapp",
-			"name": "Skeets",
-			"template": "skeets://bskylink?link=__URL__",
-			"pattern": "https://bsky.app"
-		},
-		{
-			"id": "com.getskyscraper",
-			"name": "Skyscraper",
-			"template": "skyscraper://open?url=__URL_ENCODED__",
-			"pattern": "https://bsky.app"
-		}
-	]
+    "apps": [
+        {
+            "id": "social.bsky",
+            "name": "Bluesky",
+            "template": "bluesky:__PATH__",
+            "pattern": "https://bsky.app"
+        },
+        {
+            "id": "dev.mozzius.graysky",
+            "name": "Graysky",
+            "template": "graysky:/__PATH__",
+            "pattern": "https://bsky.app"
+        },
+        {
+            "id": "app.indigosocial",
+            "name": "Indigo",
+            "template": "indigoapp://open-url?url=__URL_ENCODED__",
+            "pattern": "https://bsky.app"
+        },
+        {
+            "id": "com.skeetsapp",
+            "name": "Skeets",
+            "template": "skeets://bskylink?link=__URL__",
+            "pattern": "https://bsky.app"
+        },
+        {
+            "id": "com.getskyscraper",
+            "name": "Skyscraper",
+            "template": "skyscraper://open?url=__URL_ENCODED__",
+            "pattern": "https://bsky.app"
+        }
+    ]
 }

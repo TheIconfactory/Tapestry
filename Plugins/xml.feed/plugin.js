@@ -1,17 +1,8 @@
 
 // xml.feed
 
-// people who sniff user agents are dumb and their rules are even dumber, because of course we are:
-//   a Macintosh
-//   with an Intel processor
-//   running Mac OS X 10.6.3
-//   in Germany
-//   using WebKit
-//   in an awesome RSS reader
-const userAgent = "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; de-de) AppleWebKit/531.22.7 (KHTML, like Gecko) NetNewsWire/3.2.7 Tapestry/1.3";
-
 async function verify() {
-    let xml = await sendRequest(site, "GET", null, {"user-agent": userAgent})
+    let xml = await sendRequest(site)
     let jsonObject = await xmlParse(xml);
     
     if (jsonObject.feed != null) {
@@ -94,8 +85,8 @@ async function verify() {
 // TODO: Check that XML is good:
 // if (jsonObject.rss instanceof Object	&& jsonObject.rss.channel instanceof Object) { ... }
 
-        const baseUrl = jsonObject.rss.channel?.link;
-        const displayName = jsonObject.rss.channel?.title?.trim();
+    const baseUrl = jsonObject.rss.channel?.link;
+    const displayName = jsonObject.rss.channel?.title?.trim();
 
 // NOTE: In theory, the channel image could be used to get an icon for the feed. But some
 // use non-square images that look bad when squished. For example, the New York Times feed
@@ -109,24 +100,24 @@ async function verify() {
 //				};
 //				processVerification(verification);
 //			}
-        if (baseUrl != null) {
-            let feedUrl = baseUrl.split("/").splice(0,3).join("/");
-            let icon = await lookupIcon(feedUrl);
-            const verification = {
-                displayName: displayName,
-                icon: icon,
-                baseUrl: baseUrl
-            };
-            processVerification(verification);
-        }
-        else {
-            const verification = {
-                displayName: displayName,
-                icon: null,
-                baseUrl: null
-            };
-            processVerification(verification);
-        }
+    if (baseUrl != null) {
+        let feedUrl = baseUrl.split("/").splice(0,3).join("/");
+        let icon = await lookupIcon(feedUrl);
+        const verification = {
+            displayName: displayName,
+            icon: icon,
+            baseUrl: baseUrl
+        };
+        processVerification(verification);
+    }
+    else {
+        const verification = {
+            displayName: displayName,
+            icon: null,
+            baseUrl: null
+        };
+        processVerification(verification);
+    }
     }
     else if (jsonObject["rdf:RDF"] != null) {
         // RSS 1.0
@@ -144,14 +135,14 @@ async function verify() {
 // 				};
 // 				processVerification(verification);
 // 			}
-        let feedUrl = baseUrl.split("/").splice(0,3).join("/");
-        let icon = await lookupIcon(feedUrl);
-        const verification = {
-            displayName: displayName,
-            icon: icon,
-            baseUrl: baseUrl
-        };
-        processVerification(verification);
+    let feedUrl = baseUrl.split("/").splice(0,3).join("/");
+    let icon = await lookupIcon(feedUrl);
+    const verification = {
+        displayName: displayName,
+        icon: icon,
+        baseUrl: baseUrl
+    };
+    processVerification(verification);
     }
     else {
         // Unknown
@@ -161,7 +152,7 @@ async function verify() {
 
 
 async function load() {
-    const response = await sendConditionalRequest(site, "GET", null, {"user-agent": userAgent})
+    const response = await sendConditionalRequest(site)
 
     if (!response) {
         // null response means 304 Not Modified
@@ -569,84 +560,84 @@ async function load() {
 }
 
 function attachmentForAttributes(mediaAttributes) {
-	let attachment = null;
-	if (mediaAttributes != null && mediaAttributes.url != null) {
-		let url = mediaAttributes.url;
-		if (url.includes("&amp;")) { // attempt to make an invalid URL into a valid one: looking at you Daily Beast
-			url = url.replaceAll("&amp;", "&");
-		}
-		attachment = MediaAttachment.createWithUrl(url);
-		if (mediaAttributes.width != null && mediaAttributes.height != null) {
-			let width = mediaAttributes.width;
-			let height = mediaAttributes.height;
-			attachment.aspectSize = { width: width, height: height };
-		}
-	}
-	return attachment;
+    let attachment = null;
+    if (mediaAttributes != null && mediaAttributes.url != null) {
+        let url = mediaAttributes.url;
+        if (url.includes("&amp;")) { // attempt to make an invalid URL into a valid one: looking at you Daily Beast
+            url = url.replaceAll("&amp;", "&");
+        }
+        attachment = MediaAttachment.createWithUrl(url);
+        if (mediaAttributes.width != null && mediaAttributes.height != null) {
+            let width = mediaAttributes.width;
+            let height = mediaAttributes.height;
+            attachment.aspectSize = { width: width, height: height };
+        }
+    }
+    return attachment;
 }
 
 function extractString(node, allowHTML = false) {
-	// people love to put HTML in title & descriptions, where it's not allowed - this is an
-	// imperfect attempt to undo that damage
-	if (node != null) {
-		if (typeof(node) == "string") {
-			return node.trim();
-		}
-		else if (typeof(node) == "object") {
-			// do a traversal of the node graph to generate a string representation of <p> and <a> elements
-			if (node["p"] != null) {
-				if (node["p"] instanceof Array) {
-					let value = "";
-					for (const childNode of node["p"]) {
-						const string = extractString(childNode, allowHTML);
-						if (allowHTML) {
-							value += `<p>${string}</p>\n`;
-						}
-						else {
-							value += string;
-						}
-					}
-					return value;
-				}
-				else {
-					const string = extractString(node["p"], allowHTML);
-					if (allowHTML) {
-						return `<p>${string}</p>\n`;
-					}
-					else {
-						return string;
-					}
-				}
-			}
-			else if (node["a"] != null) {
-				if (node["a"] instanceof Array) {
-					let value = "";
-					for (const childNode of node["a"]) {
-						const string = extractString(childNode, allowHTML);
-						if (allowHTML && node["a$attrs"]?.href != null) {
-							value += `<a href="${node["a$attrs"]?.href}">${string}</a>`;
-						}
-						else {
-							value += string;
-						}
-					}
-					return value;
-				}
-				else {
-					const string = extractString(node["a"], allowHTML);
-					if (allowHTML && node["a$attrs"]?.href != null) {
-						return `<a href="${node["a$attrs"]?.href}">${string}</a>`;
-					}
-					else {
-						return string;
-					}
-				}
-			}
-		}
-		else {
-			console.log(node);
-		}
-	}
+    // people love to put HTML in title & descriptions, where it's not allowed - this is an
+    // imperfect attempt to undo that damage
+    if (node != null) {
+        if (typeof(node) == "string") {
+            return node.trim();
+        }
+        else if (typeof(node) == "object") {
+            // do a traversal of the node graph to generate a string representation of <p> and <a> elements
+            if (node["p"] != null) {
+                if (node["p"] instanceof Array) {
+                    let value = "";
+                    for (const childNode of node["p"]) {
+                        const string = extractString(childNode, allowHTML);
+                        if (allowHTML) {
+                            value += `<p>${string}</p>\n`;
+                        }
+                        else {
+                            value += string;
+                        }
+                    }
+                    return value;
+                }
+                else {
+                    const string = extractString(node["p"], allowHTML);
+                    if (allowHTML) {
+                        return `<p>${string}</p>\n`;
+                    }
+                    else {
+                        return string;
+                    }
+                }
+            }
+            else if (node["a"] != null) {
+                if (node["a"] instanceof Array) {
+                    let value = "";
+                    for (const childNode of node["a"]) {
+                        const string = extractString(childNode, allowHTML);
+                        if (allowHTML && node["a$attrs"]?.href != null) {
+                            value += `<a href="${node["a$attrs"]?.href}">${string}</a>`;
+                        }
+                        else {
+                            value += string;
+                        }
+                    }
+                    return value;
+                }
+                else {
+                    const string = extractString(node["a"], allowHTML);
+                    if (allowHTML && node["a$attrs"]?.href != null) {
+                        return `<a href="${node["a$attrs"]?.href}">${string}</a>`;
+                    }
+                    else {
+                        return string;
+                    }
+                }
+            }
+        }
+        else {
+            console.log(node);
+        }
+    }
 	
-	return null;
+    return null;
 }

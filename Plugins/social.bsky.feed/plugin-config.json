@@ -1,14 +1,14 @@
 {
-	"id": "social.bsky.feed",
-	"display_name": "Bluesky - Follow Feed",
-	"service_name": "Bluesky",
-	"default_color": "blue",
-	"icon": "https://bsky.app/static/apple-touch-icon.png",
-	"item_style": "post",
-	"site": "https://public.api.bsky.app",
-	"needs_verification": true,
-	"verify_variables": true,
-	"provides_attachments": true,
-    "minimum_app_version": "1.4",
-	"version": 15
+    "id": "social.bsky.feed",
+    "display_name": "Bluesky - Follow Feed",
+    "service_name": "Bluesky",
+    "default_color": "blue",
+    "icon": "https://bsky.app/static/apple-touch-icon.png",
+    "item_style": "post",
+    "site": "https://public.api.bsky.app",
+    "needs_verification": true,
+    "verify_variables": true,
+    "provides_attachments": true,
+    "minimum_app_version": "2.0",
+    "version": 53
 }

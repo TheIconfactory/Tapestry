@@ -1,22 +1,22 @@
 {
-	"inputs": [
-		{
-			"name": "account",
-			"type": "text",
-			"prompt": "User",
-			"placeholder": "ReallyRickAstley"
-		},
-		{
-			"name": "includeSubreddit",
-			"type": "switch",
-			"prompt": "Include Subreddit Annotation",
-			"value": "on"
-		},
-		{
-			"name": "includeFlair",
-			"type": "switch",
-			"prompt": "Include Flair Annotation",
-			"value": "off"
-		}
-	]
+    "inputs": [
+        {
+            "name": "account",
+            "type": "text",
+            "prompt": "User",
+            "placeholder": "ReallyRickAstley"
+        },
+        {
+            "name": "includeSubreddit",
+            "type": "switch",
+            "prompt": "Include Subreddit Annotation",
+            "value": "on"
+        },
+        {
+            "name": "includeFlair",
+            "type": "switch",
+            "prompt": "Include Flair Annotation",
+            "value": "off"
+        }
+    ]
 }

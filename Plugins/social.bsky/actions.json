@@ -1,46 +1,101 @@
 {
-	"items": [
-		{
-			"id": "repost",
-			"name": "Repost",
-			"icon": "tapestry.boost"
-		},
-		{
-			"id": "unrepost",
-			"name": "Remove Repost",
-			"icon": "tapestry.boost.fill"
-		},
-		{
-			"id": "like",
-			"name": "Like",
-			"icon": "heart"
-		},
-		{
-			"id": "unlike",
-			"name": "Remove Like",
-			"icon": "heart.fill"
-		},
-		{
-			"id": "save",
-			"name": "Save",
-			"icon": "tapestry.bookmark"
-		},
-		{
-			"id": "unsave",
-			"name": "Remove Save",
-			"icon": "tapestry.bookmark.fill"
-		},
-		{
-			"id": "thread",
-			"name": "Thread",
-			"icon": "bubble.left.and.bubble.right",
-			"role": "context"
-		},
-		{
-			"id": "replies",
-			"name": "Thread",
-			"icon": "bubble.left.and.text.bubble.right",
-			"role": "context"
-		}
-	]
+    "items": [
+        {
+            "id": "reply",
+            "name": "Reply",
+            "icon": "arrow.turn.up.left",
+            "role": "compose",
+            "semantic": "reply"
+        },
+        {
+            "id": "repost",
+            "name": "Repost",
+            "icon": "tapestry.boost",
+            "group": "repost",
+            "semantic": "boost"
+        },
+        {
+            "id": "unrepost",
+            "name": "Remove Repost",
+            "icon": "tapestry.boost.fill",
+            "group": "repost",
+            "semantic": "boost"
+        },
+        {
+            "id": "quote",
+            "name": "Quote",
+            "icon": "quote.bubble",
+            "role": "compose",
+            "group": "repost",
+            "semantic": "quote"
+        },
+        {
+            "id": "like",
+            "name": "Like",
+            "icon": "heart",
+            "semantic": "favorite"
+        },
+        {
+            "id": "unlike",
+            "name": "Remove Like",
+            "icon": "heart.fill",
+            "semantic": "favorite"
+        },
+        {
+            "id": "save",
+            "name": "Save",
+            "icon": "tapestry.bookmark",
+            "semantic": "keep"
+        },
+        {
+            "id": "unsave",
+            "name": "Remove Save",
+            "icon": "tapestry.bookmark.fill",
+            "semantic": "keep"
+        },
+        {
+            "id": "edit",
+            "name": "Edit Post",
+            "icon": "square.and.pencil",
+            "role": "compose",
+            "priority": "secondary"
+        },
+        {
+            "id": "delete",
+            "name": "Delete Post",
+            "icon": "trash",
+            "destructive": true
+        },
+        {
+            "id": "thread",
+            "name": "Thread",
+            "icon": "bubble.left.and.bubble.right",
+            "role": "context"
+        },
+        {
+            "id": "replies",
+            "name": "Thread",
+            "icon": "bubble.left.and.text.bubble.right",
+            "role": "context"
+        }
+    ],
+    "drafts": [
+        {
+            "id": "send",
+            "name": "Post",
+            "icon": "paperplane"
+        },
+        {
+            "id": "saveEdit",
+            "name": "Update"
+        }
+    ],
+    "feeds": [
+        {
+            "id": "newPost",
+            "name": "New Post",
+            "icon": "square.and.pencil",
+            "role": "compose"
+        }
+    ]
 }

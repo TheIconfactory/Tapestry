@@ -1,10 +1,10 @@
 {
-	"id": "gov.noaa.nesdis.star",
-	"display_name": "NOAA Satellite",
-	"icon": "https://usetapestry.com/icons/noaa.png",
-	"site": "https://www.star.nesdis.noaa.gov",
-	"needs_verification": true,
-	"verify_variables": true,
-	"provides_attachments": true,
-	"version": 2
+    "id": "gov.noaa.nesdis.star",
+    "display_name": "NOAA Satellite",
+    "icon": "https://usetapestry.com/icons/noaa.png",
+    "site": "https://www.star.nesdis.noaa.gov",
+    "needs_verification": true,
+    "verify_variables": true,
+    "provides_attachments": true,
+    "version": 2
 }
