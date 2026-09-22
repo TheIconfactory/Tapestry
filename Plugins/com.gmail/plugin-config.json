@@ -1,0 +1,6 @@
+{
+	"id": "com.gmail",
+	"display_name": "Gmail",
+	"needsVerification": true,
+	"check_interval": 300
+}
